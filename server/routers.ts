@@ -17,6 +17,7 @@ import {
 } from "./db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
+import { sendNewTicketNotification } from "./email";
 
 export const appRouter = router({
   system: systemRouter,
@@ -83,13 +84,34 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const jobToken = randomBytes(32).toString('hex');
         
-        await createJob({
+        const job = await createJob({
           ...input,
           jobToken,
           status: "pending_approval",
           coveredByCOI: true,
           createdBy: null,
         });
+        
+        // Send email notification to admin
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail && job) {
+          try {
+            await sendNewTicketNotification({
+              clientName: input.clientName,
+              siteName: input.siteName,
+              siteAddress: input.siteAddress,
+              scheduledDateTime: input.scheduledDateTime,
+              incidentDetails: input.incidentDetails,
+              hoursRequired: input.hoursRequired,
+              adminEmail,
+              ticketId: job.id,
+            });
+            console.log('[Notification] Admin email notification sent for ticket #', job.id);
+          } catch (error) {
+            console.error('[Notification] Failed to send admin email:', error);
+            // Don't fail the request if email fails
+          }
+        }
         
         return { 
           success: true,

@@ -88,3 +88,11 @@
 - [x] Determine mandatory vs optional fields for client form
 - [ ] Add email/notification for new ticket requests (future enhancement)
 
+
+
+## Version 1.3 - Email Notifications
+- [x] Set up email notification system for admin
+- [x] Send email to admin when client submits new ticket
+- [x] Include ticket details in notification email
+- [x] Add admin email configuration via environment variable
+

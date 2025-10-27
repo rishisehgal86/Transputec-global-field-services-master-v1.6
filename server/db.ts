@@ -95,7 +95,11 @@ export async function createJob(job: InsertJob) {
   if (!db) throw new Error("Database not available");
   
   const result = await db.insert(jobs).values(job);
-  return result;
+  const insertId = Number(result[0].insertId);
+  
+  // Fetch and return the created job
+  const createdJob = await getJobById(insertId);
+  return createdJob;
 }
 
 export async function getJobByToken(token: string) {
