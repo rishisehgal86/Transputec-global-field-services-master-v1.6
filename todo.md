@@ -139,3 +139,12 @@
 - [x] Improve layout and information hierarchy
 - [x] Add contact information section
 
+
+
+## Version 1.6 - PDF Export for Client Portal
+- [x] Install PDF generation library (jsPDF and html2canvas)
+- [x] Add "Save to PDF" button to client tracking page header
+- [x] Generate PDF with job details, status, and timeline
+- [x] Include Site Visit Report in PDF when job is completed
+- [x] Multi-page PDF support for long content
+

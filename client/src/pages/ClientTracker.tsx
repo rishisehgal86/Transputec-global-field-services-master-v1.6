@@ -2,13 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History } from "lucide-react";
+import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History, FileDown } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 export default function ClientTracker() {
   const [match, params] = useRoute("/track/:token");
@@ -43,6 +46,58 @@ export default function ClientTracker() {
     { token },
     { enabled: !!token && job?.status === "completed" }
   );
+
+  const handleExportPDF = async () => {
+    try {
+      toast.info("Generating PDF...");
+      
+      // Get the main content element
+      const element = document.getElementById('tracker-content');
+      if (!element) {
+        toast.error("Unable to generate PDF");
+        return;
+      }
+
+      // Capture the content as canvas
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      // Calculate PDF dimensions
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let position = 0;
+
+      // Add image to PDF
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add new pages if content is longer than one page
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save the PDF
+      const filename = `Transputec_Job_${job?.id || 'unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+      
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast.error("Failed to generate PDF");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -187,15 +242,25 @@ export default function ClientTracker() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-900">{APP_TITLE}</h1>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <RefreshCw className="h-4 w-4" />
-              <span>Updated {Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)}s ago</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <RefreshCw className="h-4 w-4" />
+                <span>Updated {Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)}s ago</span>
+              </div>
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <FileDown className="h-4 w-4" />
+                Save to PDF
+              </Button>
             </div>
           </div>
         </div>
       </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 py-6 max-w-6xl" id="tracker-content">
         {/* Status Banner */}
         <Card className={`mb-6 border-2 ${statusInfo.bgColor}`}>
           <CardContent className="py-6">
