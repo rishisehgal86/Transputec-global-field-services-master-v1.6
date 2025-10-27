@@ -40,12 +40,27 @@ export default function JobDetail() {
   useEffect(() => {
     if (!job || !latestLocation) return;
 
-    if (job.status === "en_route" && job.siteAddress) {
-      // Simplified ETA calculation
-      const avgSpeed = 40; // km/h average speed
-      const estimatedDistance = 5; // km - placeholder
-      const estimatedMinutes = Math.round((estimatedDistance / avgSpeed) * 60);
-      setEta(`~${estimatedMinutes} minutes`);
+    if (job.status === "en_route" && job.siteLatitude && job.siteLongitude) {
+      // Calculate distance between engineer and site
+      const engineerLat = parseFloat(latestLocation.latitude);
+      const engineerLng = parseFloat(latestLocation.longitude);
+      const siteLat = parseFloat(job.siteLatitude);
+      const siteLng = parseFloat(job.siteLongitude);
+      
+      // Haversine formula for distance
+      const R = 6371; // Earth radius in km
+      const dLat = (siteLat - engineerLat) * Math.PI / 180;
+      const dLon = (siteLng - engineerLng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(engineerLat * Math.PI / 180) * Math.cos(siteLat * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+      
+      // Calculate ETA (40 km/h average speed)
+      const avgSpeed = 40;
+      const estimatedMinutes = Math.round((distance / avgSpeed) * 60);
+      setEta(`~${estimatedMinutes} min (${distance.toFixed(1)} km)`);
     } else {
       setEta(null);
     }
@@ -155,6 +170,10 @@ export default function JobDetail() {
                   accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
                   engineerName={job.engineerName || "Engineer"}
                   lastUpdate={new Date(latestLocation.timestamp)}
+                  siteLatitude={job.siteLatitude ? parseFloat(job.siteLatitude) : undefined}
+                  siteLongitude={job.siteLongitude ? parseFloat(job.siteLongitude) : undefined}
+                  siteName={job.siteName}
+                  showRecenterButton={true}
                 />
               </div>
               <div className="flex items-center justify-between text-sm text-gray-600">

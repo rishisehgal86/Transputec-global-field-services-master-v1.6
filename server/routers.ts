@@ -16,6 +16,7 @@ import {
   getJobStatusHistory
 } from "./db";
 import { randomBytes } from "crypto";
+import { geocodeAddress, calculateDistance, calculateETA } from "./geocoding";
 
 export const appRouter = router({
   system: systemRouter,
@@ -31,6 +32,18 @@ export const appRouter = router({
     }),
   }),
 
+  geocoding: router({
+    // Geocode an address to coordinates
+    geocode: publicProcedure
+      .input(z.object({
+        address: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await geocodeAddress(input.address);
+        return result;
+      }),
+  }),
+
   jobs: router({
     // Create a new job (admin only)
     create: protectedProcedure
@@ -39,6 +52,8 @@ export const appRouter = router({
         siteId: z.string().optional(),
         siteLocation: z.string().optional(),
         siteAddress: z.string().optional(),
+        siteLatitude: z.string().optional(),
+        siteLongitude: z.string().optional(),
         siteContactName: z.string().optional(),
         siteContactNumber: z.string().optional(),
         changeNumber: z.string().optional(),

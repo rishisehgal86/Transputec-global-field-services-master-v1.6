@@ -57,3 +57,13 @@
 - [x] Fix blank map display - ensure Leaflet map initializes correctly
 - [x] Verify map tiles load properly on both admin and client pages
 
+
+
+## Version 2 Features
+- [x] Add geocoding to job creation form for site address
+- [x] Capture and store site geo-coordinates (latitude/longitude)
+- [x] Display site location pin on tracking maps
+- [x] Calculate accurate ETA using distance and transport speed
+- [x] Add "Return to Pin" button on map displays
+- [x] Show both engineer and site locations on same map
+

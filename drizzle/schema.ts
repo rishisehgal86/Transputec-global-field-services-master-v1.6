@@ -32,6 +32,8 @@ export const jobs = mysqlTable("jobs", {
   siteId: varchar("siteId", { length: 100 }),
   siteLocation: varchar("siteLocation", { length: 255 }),
   siteAddress: text("siteAddress"),
+  siteLatitude: varchar("siteLatitude", { length: 50 }),
+  siteLongitude: varchar("siteLongitude", { length: 50 }),
   
   // Contact Information
   siteContactName: varchar("siteContactName", { length: 255 }),

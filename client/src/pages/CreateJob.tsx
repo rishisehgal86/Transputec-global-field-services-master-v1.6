@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Copy, Check } from "lucide-react";
+import { Loader2, ArrowLeft, Copy, Check, MapPin } from "lucide-react";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -18,6 +18,24 @@ export default function CreateJob() {
   const [copiedEngineer, setCopiedEngineer] = useState(false);
   const [copiedClient, setCopiedClient] = useState(false);
   const [createdLinks, setCreatedLinks] = useState<{ engineer: string; client: string } | null>(null);
+  const [siteCoordinates, setSiteCoordinates] = useState<{ lat: string; lng: string } | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
+
+  const geocodeMutation = trpc.geocoding.geocode.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        setSiteCoordinates({ lat: data.latitude, lng: data.longitude });
+        toast.success(`Address found: ${data.displayName}`);
+      } else {
+        toast.error(data.error || "Address not found");
+      }
+      setGeocoding(false);
+    },
+    onError: (error) => {
+      toast.error(`Geocoding failed: ${error.message}`);
+      setGeocoding(false);
+    },
+  });
 
   const createJobMutation = trpc.jobs.create.useMutation({
     onSuccess: (data) => {
@@ -55,6 +73,8 @@ export default function CreateJob() {
       siteId: formData.get("siteId") as string || undefined,
       siteLocation: formData.get("siteLocation") as string || undefined,
       siteAddress: formData.get("siteAddress") as string || undefined,
+      siteLatitude: siteCoordinates?.lat || undefined,
+      siteLongitude: siteCoordinates?.lng || undefined,
       siteContactName: formData.get("siteContactName") as string || undefined,
       siteContactNumber: formData.get("siteContactNumber") as string || undefined,
       changeNumber: formData.get("changeNumber") as string || undefined,
@@ -71,6 +91,19 @@ export default function CreateJob() {
       notes: formData.get("notes") as string || undefined,
       clientName: formData.get("clientName") as string,
     });
+  };
+
+  const handleGeocodeAddress = () => {
+    const addressField = document.querySelector('textarea[name="siteAddress"]') as HTMLTextAreaElement;
+    const address = addressField?.value;
+    
+    if (!address || address.trim().length === 0) {
+      toast.error("Please enter a site address first");
+      return;
+    }
+    
+    setGeocoding(true);
+    geocodeMutation.mutate({ address });
   };
 
   const copyToClipboard = (text: string, type: "engineer" | "client") => {
@@ -213,14 +246,34 @@ export default function CreateJob() {
                     <Input id="siteId" name="siteId" />
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="siteLocation">Site Location/City</Label>
-                    <Input id="siteLocation" name="siteLocation" />
-                  </div>
-                  <div>
-                    <Label htmlFor="siteAddress">Site Address</Label>
-                    <Textarea id="siteAddress" name="siteAddress" rows={3} />
+                <div>
+                  <Label htmlFor="siteLocation">Site Location/City</Label>
+                  <Input id="siteLocation" name="siteLocation" />
+                </div>
+                <div>
+                  <Label htmlFor="siteAddress">Site Address</Label>
+                  <Textarea id="siteAddress" name="siteAddress" rows={3} />
+                  <div className="mt-2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGeocodeAddress}
+                      disabled={geocoding}
+                    >
+                      {geocoding ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <MapPin className="h-4 w-4 mr-2" />
+                      )}
+                      {geocoding ? "Finding Location..." : "Get GPS Coordinates"}
+                    </Button>
+                    {siteCoordinates && (
+                      <span className="text-sm text-green-600 flex items-center gap-1">
+                        <Check className="h-4 w-4" />
+                        Location captured
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

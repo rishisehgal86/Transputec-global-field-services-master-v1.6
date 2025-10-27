@@ -161,6 +161,10 @@ export default function ClientTracker() {
                       accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
                       engineerName={job.engineerName || "Engineer"}
                       lastUpdate={new Date(latestLocation.timestamp)}
+                      siteLatitude={job.siteLatitude ? parseFloat(job.siteLatitude) : undefined}
+                      siteLongitude={job.siteLongitude ? parseFloat(job.siteLongitude) : undefined}
+                      siteName={job.siteName}
+                      showRecenterButton={true}
                     />
                   </div>
                   <p className="text-sm text-gray-600 mt-2">

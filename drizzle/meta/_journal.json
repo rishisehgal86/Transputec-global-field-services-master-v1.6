@@ -15,6 +15,13 @@
       "when": 1761558579812,
       "tag": "0001_supreme_garia",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761561458932,
+      "tag": "0002_high_magma",
+      "breakpoints": true
     }
   ]
 }
