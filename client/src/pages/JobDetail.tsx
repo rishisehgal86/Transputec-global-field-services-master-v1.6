@@ -8,16 +8,12 @@ import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import "leaflet/dist/leaflet.css";
+import { LiveMap } from "@/components/LiveMap";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [match, params] = useRoute("/admin/job/:id");
   const jobId = params?.id ? parseInt(params.id) : 0;
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-  const [engineerMarker, setEngineerMarker] = useState<any>(null);
-  const [siteMarker, setSiteMarker] = useState<any>(null);
   const [eta, setEta] = useState<string | null>(null);
 
   const { data: job, isLoading, refetch } = trpc.jobs.getById.useQuery(
@@ -40,87 +36,20 @@ export default function JobDetail() {
     },
   });
 
-  // Initialize map
+  // Calculate ETA
   useEffect(() => {
-    if (!mapRef.current || map) return;
+    if (!job || !latestLocation) return;
 
-    const initMap = async () => {
-      const L = (await import("leaflet")).default;
-      
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
-
-      const newMap = L.map(mapRef.current!).setView([51.505, -0.09], 13);
-      
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(newMap);
-
-      setMap(newMap);
-    };
-
-    initMap();
-
-    return () => {
-      if (map) {
-        map.remove();
-      }
-    };
-  }, []);
-
-  // Calculate ETA and update markers
-  useEffect(() => {
-    if (!map || !job) return;
-
-    const L = require("leaflet");
-
-    // Try to geocode site address for site marker
-    if (job.siteAddress && !siteMarker) {
-      // For demo purposes, we'll use a placeholder. In production, you'd geocode the address
-      // For now, we'll just show the engineer location
+    if (job.status === "en_route" && job.siteAddress) {
+      // Simplified ETA calculation
+      const avgSpeed = 40; // km/h average speed
+      const estimatedDistance = 5; // km - placeholder
+      const estimatedMinutes = Math.round((estimatedDistance / avgSpeed) * 60);
+      setEta(`~${estimatedMinutes} minutes`);
+    } else {
+      setEta(null);
     }
-
-    // Update engineer marker
-    if (latestLocation) {
-      const engineerLat = parseFloat(latestLocation.latitude);
-      const engineerLng = parseFloat(latestLocation.longitude);
-
-      if (engineerMarker) {
-        engineerMarker.setLatLng([engineerLat, engineerLng]);
-      } else {
-        const blueIcon = L.icon({
-          iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
-        });
-
-        const marker = L.marker([engineerLat, engineerLng], { icon: blueIcon }).addTo(map);
-        marker.bindPopup(`<b>Engineer Location</b><br/>Updated: ${new Date(latestLocation.timestamp).toLocaleTimeString()}`);
-        setEngineerMarker(marker);
-      }
-
-      map.setView([engineerLat, engineerLng], 15);
-
-      // Calculate ETA if en route (simple estimation based on typical speed)
-      if (job.status === "en_route" && job.siteAddress) {
-        // This is a simplified ETA calculation
-        // In production, you'd use a routing API like Google Maps or OpenRouteService
-        const avgSpeed = 40; // km/h average speed
-        const estimatedDistance = 5; // km - placeholder
-        const estimatedMinutes = Math.round((estimatedDistance / avgSpeed) * 60);
-        setEta(`~${estimatedMinutes} minutes`);
-      } else {
-        setEta(null);
-      }
-    }
-  }, [latestLocation, map, job]);
+  }, [latestLocation, job]);
 
   if (authLoading || isLoading) {
     return (
@@ -219,7 +148,15 @@ export default function JobDetail() {
               </div>
             </CardHeader>
             <CardContent>
-              <div ref={mapRef} className="h-[400px] rounded-lg border mb-2" />
+              <div className="h-[400px] mb-2">
+                <LiveMap
+                  latitude={parseFloat(latestLocation.latitude)}
+                  longitude={parseFloat(latestLocation.longitude)}
+                  accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
+                  engineerName={job.engineerName || "Engineer"}
+                  lastUpdate={new Date(latestLocation.timestamp)}
+                />
+              </div>
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <p>
                   Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}

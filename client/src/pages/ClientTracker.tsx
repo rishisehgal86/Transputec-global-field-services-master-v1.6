@@ -5,17 +5,13 @@ import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle } from
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { useEffect, useRef, useState } from "react";
-
-// Simple map component using Leaflet
-import "leaflet/dist/leaflet.css";
+import { useEffect, useState } from "react";
+import { LiveMap } from "@/components/LiveMap";
 
 export default function ClientTracker() {
   const [match, params] = useRoute("/track/:token");
   const token = params?.token || "";
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-  const [marker, setMarker] = useState<any>(null);
+
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
     { token },
@@ -27,57 +23,7 @@ export default function ClientTracker() {
     { enabled: !!token && (job?.status === "en_route" || job?.status === "on_site"), refetchInterval: 5000 }
   );
 
-  // Initialize map
-  useEffect(() => {
-    if (!mapRef.current || map) return;
 
-    const initMap = async () => {
-      const L = (await import("leaflet")).default;
-      
-      // Fix default marker icon issue with Leaflet
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
-
-      const newMap = L.map(mapRef.current!).setView([51.505, -0.09], 13);
-      
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(newMap);
-
-      setMap(newMap);
-    };
-
-    initMap();
-
-    return () => {
-      if (map) {
-        map.remove();
-      }
-    };
-  }, []);
-
-  // Update marker position
-  useEffect(() => {
-    if (!map || !latestLocation) return;
-
-    const L = require("leaflet");
-    const lat = parseFloat(latestLocation.latitude);
-    const lng = parseFloat(latestLocation.longitude);
-
-    if (marker) {
-      marker.setLatLng([lat, lng]);
-      map.setView([lat, lng], 15);
-    } else {
-      const newMarker = L.marker([lat, lng]).addTo(map);
-      newMarker.bindPopup(`Engineer Location<br/>Updated: ${new Date(latestLocation.timestamp).toLocaleTimeString()}`);
-      setMarker(newMarker);
-      map.setView([lat, lng], 15);
-    }
-  }, [latestLocation, map]);
 
   if (isLoading) {
     return (
@@ -208,7 +154,15 @@ export default function ClientTracker() {
                   <CardDescription>Real-time engineer location</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div ref={mapRef} className="h-[500px] rounded-lg border" />
+                  <div className="h-[500px]">
+                    <LiveMap
+                      latitude={parseFloat(latestLocation.latitude)}
+                      longitude={parseFloat(latestLocation.longitude)}
+                      accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
+                      engineerName={job.engineerName || "Engineer"}
+                      lastUpdate={new Date(latestLocation.timestamp)}
+                    />
+                  </div>
                   <p className="text-sm text-gray-600 mt-2">
                     Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
                   </p>

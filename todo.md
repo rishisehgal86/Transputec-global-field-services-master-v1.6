@@ -51,3 +51,9 @@
 - [x] Calculate and display ETA to site when engineer is en route
 - [x] Add job update/close functionality for admin
 
+
+
+## New Bug Fixes
+- [x] Fix blank map display - ensure Leaflet map initializes correctly
+- [x] Verify map tiles load properly on both admin and client pages
+
