@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LiveMap } from "@/components/LiveMap";
+import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -25,6 +26,20 @@ export default function JobDetail() {
     { token: job?.jobToken || "" },
     { enabled: !!job && (job.status === "en_route" || job.status === "on_site"), refetchInterval: 5000 }
   );
+
+  const { data: svr } = trpc.svr.getByToken.useQuery(
+    { token: job?.jobToken || "" },
+    { enabled: !!job && job.status === "completed" }
+  );
+
+  const emailSVRMutation = trpc.svr.email.useMutation({
+    onSuccess: () => {
+      toast.success("Site Visit Report sent successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to send SVR: ${error.message}`);
+    },
+  });
 
   const updateStatusMutation = trpc.jobs.updateStatus.useMutation({
     onSuccess: () => {
@@ -540,6 +555,22 @@ export default function JobDetail() {
             )}
           </div>
         </div>
+        {/* Site Visit Report */}
+        {job.status === "completed" && svr && (
+          <div className="mb-6">
+            <SiteVisitReportDisplay
+              svr={svr}
+              jobData={job}
+              showEmailOption={true}
+              onEmailSVR={(email) => {
+                emailSVRMutation.mutate({
+                  jobId: job.id,
+                  recipientEmail: email,
+                });
+              }}
+            />
+          </div>
+        )}
       </main>
     </div>
   );

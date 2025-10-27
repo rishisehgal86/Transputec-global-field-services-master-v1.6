@@ -107,14 +107,16 @@
 - [x] Create SVR database helper functions
 - [x] Create email template for SVR delivery
 
-## Version 1.5 - Site Visit Report (SVR) - Planned
-- [ ] Build SVR form for engineers with all required fields
-- [ ] Add digital signature capture for client sign-off
-- [ ] Require SVR completion before ticket can be closed
-- [ ] Display SVR on admin job detail page
-- [ ] Display SVR on client tracking page
-- [ ] Add email SVR functionality for admin
-- [ ] Store SVR permanently with ticket even after closure
+## Version 1.5 - Site Visit Report (SVR) - Complete
+- [x] Build SVR form component with all Transputec SVR fields
+- [x] Add digital signature capture for client sign-off
+- [x] Integrate SVR form into engineer job completion workflow
+- [x] Require SVR completion before ticket can be marked as completed
+- [x] Display completed SVR on admin job detail page
+- [x] Display completed SVR on client tracking page
+- [x] Add email SVR functionality for admin to send to specified address
+- [x] Store SVR permanently with ticket even after closure
+- [x] Add SVR router endpoints for create, get, and email
 
 
 

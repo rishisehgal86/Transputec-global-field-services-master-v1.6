@@ -9,6 +9,7 @@ import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { SiteVisitReportForm, type SiteVisitReportData } from "@/components/SiteVisitReportForm";
 
 export default function EngineerView() {
   const [match, params] = useRoute("/engineer/:token");
@@ -18,6 +19,7 @@ export default function EngineerView() {
   const [engineerPhone, setEngineerPhone] = useState("");
   const [isTracking, setIsTracking] = useState(false);
   const [watchId, setWatchId] = useState<number | null>(null);
+  const [showSVRForm, setShowSVRForm] = useState(false);
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
     { token },
@@ -41,6 +43,17 @@ export default function EngineerView() {
     },
     onError: (error) => {
       toast.error(`Failed to decline job: ${error.message}`);
+    },
+  });
+
+  const createSVRMutation = trpc.svr.create.useMutation({
+    onSuccess: () => {
+      toast.success("Site Visit Report submitted! Job marked as completed.");
+      setShowSVRForm(false);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to submit SVR: ${error.message}`);
     },
   });
 
@@ -261,14 +274,12 @@ export default function EngineerView() {
                   Arrived On Site
                 </Button>
               )}
-              {job.status === "on_site" && (
+              {job.status === "on_site" && !showSVRForm && (
                 <Button
-                  onClick={() => handleStatusChange("completed")}
+                  onClick={() => setShowSVRForm(true)}
                   className="w-full"
-                  disabled={updateStatusMutation.isPending}
                 >
-                  {updateStatusMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Mark as Completed
+                  Complete Job & Submit Report
                 </Button>
               )}
               {isTracking && (
@@ -278,6 +289,24 @@ export default function EngineerView() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* SVR Form */}
+        {showSVRForm && job.status === "on_site" && (
+          <div className="mb-6">
+            <SiteVisitReportForm
+              jobId={job.id}
+              engineerName={engineerName || job.engineerName || "Engineer"}
+              onSubmit={(data: SiteVisitReportData) => {
+                createSVRMutation.mutate({
+                  token,
+                  ...data,
+                });
+              }}
+              onCancel={() => setShowSVRForm(false)}
+              isSubmitting={createSVRMutation.isPending}
+            />
+          </div>
         )}
 
         {/* Completed Status */}

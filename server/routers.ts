@@ -17,7 +17,8 @@ import {
 } from "./db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
-import { sendNewTicketNotification, sendClientConfirmation } from "./email";
+import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail } from "./email";
+import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
 
 export const appRouter = router({
   system: systemRouter,
@@ -345,6 +346,98 @@ export const appRouter = router({
         if (!job) throw new Error("Job not found");
 
         return await getJobStatusHistory(job.id);
+      }),
+  }),
+
+  // Site Visit Reports
+  svr: router({
+    // Create SVR and complete job
+    create: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        visitDate: z.date(),
+        ticketNumbers: z.string(),
+        engineerName: z.string(),
+        onsiteContact: z.string(),
+        timeOnsite: z.string(),
+        timeLeftSite: z.string(),
+        issueFault: z.string(),
+        actionsPerformed: z.string(),
+        issueResolved: z.boolean(),
+        contactAgreed: z.boolean(),
+        clientSignatory: z.string(),
+        clientSignatureData: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+
+        // Create SVR
+        const svr = await createSiteVisitReport({
+          jobId: job.id,
+          visitDate: input.visitDate,
+          ticketNumbers: input.ticketNumbers,
+          engineerName: input.engineerName,
+          onsiteContact: input.onsiteContact,
+          timeOnsite: input.timeOnsite,
+          timeLeftSite: input.timeLeftSite,
+          issueFault: input.issueFault,
+          actionsPerformed: input.actionsPerformed,
+          issueResolved: input.issueResolved,
+          contactAgreed: input.contactAgreed,
+          clientSignatory: input.clientSignatory,
+          clientSignatureData: input.clientSignatureData,
+          signedAt: new Date(),
+        });
+
+        // Mark job as completed
+        await updateJobStatus(job.id, "completed", {
+          completedAt: new Date(),
+        });
+
+        await addJobStatusHistory({
+          jobId: job.id,
+          status: "completed",
+          notes: "Job completed with Site Visit Report",
+        });
+
+        return { success: true, svr };
+      }),
+
+    // Get SVR by job token
+    getByToken: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        return await getSiteVisitReportByJobId(job.id);
+      }),
+
+    // Email SVR to specified address (admin only)
+    email: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+        recipientEmail: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const job = await getJobById(input.jobId);
+        if (!job) throw new Error("Job not found");
+
+        const svr = await getSiteVisitReportByJobId(input.jobId);
+        if (!svr) throw new Error("Site Visit Report not found");
+
+        try {
+          await sendSVREmail({
+            recipientEmail: input.recipientEmail,
+            job,
+            svr,
+          });
+          return { success: true };
+        } catch (error) {
+          console.error("Failed to send SVR email:", error);
+          throw new Error("Failed to send SVR email");
+        }
       }),
   }),
 });

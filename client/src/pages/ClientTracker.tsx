@@ -8,6 +8,7 @@ import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { LiveMap } from "@/components/LiveMap";
+import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 
 export default function ClientTracker() {
   const [match, params] = useRoute("/track/:token");
@@ -36,6 +37,11 @@ export default function ClientTracker() {
   const { data: statusHistory } = trpc.jobs.getStatusHistory.useQuery(
     { token },
     { enabled: !!token }
+  );
+
+  const { data: svr } = trpc.svr.getByToken.useQuery(
+    { token },
+    { enabled: !!token && job?.status === "completed" }
   );
 
   if (isLoading) {
@@ -462,6 +468,17 @@ export default function ClientTracker() {
             </Card>
           </div>
         </div>
+
+        {/* Site Visit Report */}
+        {job.status === "completed" && svr && (
+          <div className="container mx-auto px-4 py-6">
+            <SiteVisitReportDisplay
+              svr={svr}
+              jobData={job}
+              showEmailOption={false}
+            />
+          </div>
+        )}
       </main>
     </div>
   );

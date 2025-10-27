@@ -472,3 +472,165 @@ Generated on ${new Date().toLocaleString()}
   });
 }
 
+
+
+/**
+ * Send Site Visit Report via email
+ */
+export async function sendSVREmail(data: {
+  recipientEmail: string;
+  job: any;
+  svr: any;
+}): Promise<boolean> {
+  const subject = `Site Visit Report - ${data.job.siteName}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #2563eb; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .section { margin: 20px 0; padding: 15px; background-color: white; border-radius: 5px; }
+        .section-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .detail-row { margin: 8px 0; display: flex; }
+        .label { font-weight: bold; color: #4b5563; min-width: 180px; }
+        .value { color: #1f2937; flex: 1; }
+        .signature { margin-top: 20px; padding: 15px; background-color: #f3f4f6; border-radius: 5px; }
+        .signature img { max-width: 300px; border: 1px solid #d1d5db; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin: 0;">Site Visit Report</h1>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Transputec Field Engineer Services</p>
+        </div>
+        <div class="content">
+          
+          <div class="section">
+            <div class="section-title">Visit Information</div>
+            <div class="detail-row">
+              <div class="label">Visit Date:</div>
+              <div class="value">${new Date(data.svr.visitDate).toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' })}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Engineer:</div>
+              <div class="value">${data.svr.engineerName}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Site Name:</div>
+              <div class="value">${data.job.siteName}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Site Address:</div>
+              <div class="value">${data.job.siteAddress || 'N/A'}</div>
+            </div>
+            ${data.svr.ticketNumbers ? `
+            <div class="detail-row">
+              <div class="label">Ticket Numbers:</div>
+              <div class="value">${data.svr.ticketNumbers}</div>
+            </div>
+            ` : ''}
+            ${data.svr.onsiteContact ? `
+            <div class="detail-row">
+              <div class="label">Onsite Contact:</div>
+              <div class="value">${data.svr.onsiteContact}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+              <div class="label">Time Arrived:</div>
+              <div class="value">${data.svr.timeOnsite}</div>
+            </div>
+            ${data.svr.timeLeftSite ? `
+            <div class="detail-row">
+              <div class="label">Time Left Site:</div>
+              <div class="value">${data.svr.timeLeftSite}</div>
+            </div>
+            ` : ''}
+          </div>
+
+          <div class="section">
+            <div class="section-title">Work Details</div>
+            <div class="detail-row">
+              <div class="label">Issue/Fault:</div>
+              <div class="value">${data.svr.issueFault}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Actions Performed:</div>
+              <div class="value">${data.svr.actionsPerformed}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Issue Resolved:</div>
+              <div class="value">${data.svr.issueResolved ? '✅ Yes' : '❌ No'}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Contact Agreed:</div>
+              <div class="value">${data.svr.contactAgreed ? '✅ Yes' : '❌ No'}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Client Sign-off</div>
+            <div class="detail-row">
+              <div class="label">Signed By:</div>
+              <div class="value">${data.svr.clientSignatory}</div>
+            </div>
+            <div class="detail-row">
+              <div class="label">Signed At:</div>
+              <div class="value">${new Date(data.svr.signedAt).toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' })}</div>
+            </div>
+            <div class="signature">
+              <div style="font-weight: bold; margin-bottom: 10px;">Client Signature:</div>
+              <img src="${data.svr.clientSignatureData}" alt="Client Signature" />
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>This Site Visit Report was generated by Transputec Field Engineer Dispatch System.</p>
+            <p>For any questions or concerns, please contact our support team.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+SITE VISIT REPORT
+Transputec Field Engineer Services
+
+VISIT INFORMATION
+Visit Date: ${new Date(data.svr.visitDate).toLocaleString()}
+Engineer: ${data.svr.engineerName}
+Site Name: ${data.job.siteName}
+Site Address: ${data.job.siteAddress || 'N/A'}
+${data.svr.ticketNumbers ? `Ticket Numbers: ${data.svr.ticketNumbers}` : ''}
+${data.svr.onsiteContact ? `Onsite Contact: ${data.svr.onsiteContact}` : ''}
+Time Arrived: ${data.svr.timeOnsite}
+${data.svr.timeLeftSite ? `Time Left Site: ${data.svr.timeLeftSite}` : ''}
+
+WORK DETAILS
+Issue/Fault: ${data.svr.issueFault}
+Actions Performed: ${data.svr.actionsPerformed}
+Issue Resolved: ${data.svr.issueResolved ? 'Yes' : 'No'}
+Contact Agreed: ${data.svr.contactAgreed ? 'Yes' : 'No'}
+
+CLIENT SIGN-OFF
+Signed By: ${data.svr.clientSignatory}
+Signed At: ${new Date(data.svr.signedAt).toLocaleString()}
+
+This Site Visit Report was generated by Transputec Field Engineer Dispatch System.
+  `.trim();
+  
+  return await sendEmail({
+    to: data.recipientEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
