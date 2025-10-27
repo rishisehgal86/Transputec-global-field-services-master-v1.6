@@ -27,6 +27,9 @@ export default function AdminDashboard() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline", label: string }> = {
+      pending_approval: { variant: "secondary", label: "Pending Approval" },
+      approved: { variant: "default", label: "Approved" },
+      rejected: { variant: "destructive", label: "Rejected" },
       created: { variant: "secondary", label: "Created" },
       sent_to_engineer: { variant: "secondary", label: "Sent to Engineer" },
       accepted: { variant: "default", label: "Accepted" },
@@ -98,12 +101,25 @@ export default function AdminDashboard() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/admin/job/${job.id}`}>
-                        <Button variant="outline" size="sm">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          View Details
-                        </Button>
-                      </Link>
+                      {job.status === "pending_approval" && (
+                        <>
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => window.location.href = `/admin/job/${job.id}`}
+                          >
+                            Review Request
+                          </Button>
+                        </>
+                      )}
+                      {job.status !== "pending_approval" && (
+                        <Link href={`/admin/job/${job.id}`}>
+                          <Button variant="outline" size="sm">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            View Details
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

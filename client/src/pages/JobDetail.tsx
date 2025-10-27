@@ -209,6 +209,45 @@ export default function JobDetail() {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 className="font-semibold mb-3">Admin Controls</h4>
                     <div className="flex gap-2 flex-wrap">
+                      {job.status === "pending_approval" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "approved" })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <CheckCircle2 className="h-4 w-4 mr-1" />
+                            Approve Request
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              if (confirm("Are you sure you want to reject this request?")) {
+                                updateStatusMutation.mutate({ token: job.jobToken, status: "rejected" });
+                              }
+                            }}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Reject Request
+                          </Button>
+                        </>
+                      )}
+                      {job.status === "approved" && (
+                        <div className="w-full">
+                          <p className="text-sm text-gray-700 mb-2">This request has been approved. Assign an engineer and create the job.</p>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "created" })}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            Create Job & Send to Engineer
+                          </Button>
+                        </div>
+                      )}
                       {job.status === "accepted" && (
                         <Button
                           size="sm"

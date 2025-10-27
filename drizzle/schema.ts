@@ -59,6 +59,9 @@ export const jobs = mysqlTable("jobs", {
   
   // Job Status
   status: mysqlEnum("status", [
+    "pending_approval",
+    "approved",
+    "rejected",
     "created",
     "sent_to_engineer",
     "accepted",
@@ -67,7 +70,7 @@ export const jobs = mysqlTable("jobs", {
     "on_site",
     "completed",
     "cancelled"
-  ]).default("created").notNull(),
+  ]).default("pending_approval").notNull(),
   
   // Engineer Information
   engineerName: varchar("engineerName", { length: 255 }),

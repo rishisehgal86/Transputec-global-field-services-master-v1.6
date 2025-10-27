@@ -1,0 +1,1 @@
+ALTER TABLE `jobs` MODIFY COLUMN `status` enum('pending_approval','approved','rejected','created','sent_to_engineer','accepted','declined','en_route','on_site','completed','cancelled') NOT NULL DEFAULT 'pending_approval';

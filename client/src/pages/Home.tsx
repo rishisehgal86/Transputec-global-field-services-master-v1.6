@@ -49,13 +49,20 @@ export default function Home() {
             Real-time tracking and management for on-demand IT field service engineers. 
             Streamline dispatch, monitor progress, and ensure timely service delivery.
           </p>
-          {isAuthenticated && (
-            <Link href="/admin">
+          <div className="flex gap-4 justify-center">
+            <Link href="/request">
               <Button size="lg" className="text-lg px-8 py-6">
-                Go to Dashboard
+                Request Service
               </Button>
             </Link>
-          )}
+            {isAuthenticated && (
+              <Link href="/admin">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 

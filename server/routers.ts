@@ -56,6 +56,47 @@ export const appRouter = router({
   }),
 
   jobs: router({
+    // Create a service request (public - no auth required)
+    createRequest: publicProcedure
+      .input(z.object({
+        clientName: z.string(),
+        siteName: z.string(),
+        siteAddress: z.string(),
+        siteLatitude: z.string(),
+        siteLongitude: z.string(),
+        siteContactName: z.string(),
+        siteContactNumber: z.string(),
+        incidentDetails: z.string(),
+        scheduledDateTime: z.date().optional(),
+        hoursRequired: z.string(),
+        downTime: z.boolean().optional(),
+        // Optional fields
+        siteId: z.string().optional(),
+        changeNumber: z.string().optional(),
+        incidentNumber: z.string().optional(),
+        projectName: z.string().optional(),
+        toolsRequired: z.string().optional(),
+        deviceDetails: z.string().optional(),
+        scopeOfWork: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const jobToken = randomBytes(32).toString('hex');
+        
+        await createJob({
+          ...input,
+          jobToken,
+          status: "pending_approval",
+          coveredByCOI: true,
+          createdBy: null,
+        });
+        
+        return { 
+          success: true,
+          message: "Service request submitted for approval",
+        };
+      }),
+
     // Create a new job (admin only)
     create: protectedProcedure
       .input(z.object({
@@ -174,7 +215,7 @@ export const appRouter = router({
     updateStatus: publicProcedure
       .input(z.object({
         token: z.string(),
-        status: z.enum(["en_route", "on_site", "completed"]),
+        status: z.enum(["approved", "rejected", "created", "en_route", "on_site", "completed", "cancelled"]),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         notes: z.string().optional(),

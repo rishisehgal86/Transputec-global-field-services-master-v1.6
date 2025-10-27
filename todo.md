@@ -75,3 +75,16 @@
 - [x] Allow user to select exact address from map database results
 - [x] Auto-populate selected address and coordinates
 
+
+
+## Version 1.2 - Client Self-Service Portal
+- [x] Create public ticket request page (no login required)
+- [x] Add new job statuses: "pending_approval", "approved", "rejected"
+- [x] Update database schema to support pending requests
+- [x] Create client-facing simplified form with mandatory fields
+- [x] Add admin approval/rejection workflow
+- [x] Add engineer assignment step in admin interface
+- [x] Update admin dashboard to show pending requests
+- [x] Determine mandatory vs optional fields for client form
+- [ ] Add email/notification for new ticket requests (future enhancement)
+
