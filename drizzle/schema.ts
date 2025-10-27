@@ -5,14 +5,15 @@ import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean 
  */
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  name: text("name").notNull(),
+  role: mysqlEnum("role", ["super_admin", "admin"]).default("admin").notNull(),
+  isActive: int("isActive").default(1).notNull(), // 1 = active, 0 = inactive
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  lastLogin: timestamp("lastLogin"),
+  createdBy: int("createdBy"), // ID of admin who created this user
 });
 
 export type User = typeof users.$inferSelect;

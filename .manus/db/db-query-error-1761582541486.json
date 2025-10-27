@@ -1,0 +1,8 @@
+{
+  "query": "DROP TABLE IF EXISTS users;\nCREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  email VARCHAR(320) NOT NULL UNIQUE,\n  passwordHash VARCHAR(255) NOT NULL,\n  name TEXT NOT NULL,\n  role ENUM('super_admin', 'admin') NOT NULL DEFAULT 'admin',\n  isActive INT NOT NULL DEFAULT 1,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  lastLogin TIMESTAMP NULL,\n  createdBy INT NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute DROP TABLE IF EXISTS users;\nCREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  email VARCHAR(320) NOT NULL UNIQUE,\n  passwordHash VARCHAR(255) NOT NULL,\n  name TEXT NOT NULL,\n  role ENUM('super_admin', 'admin') NOT NULL DEFAULT 'admin',\n  isActive INT NOT NULL DEFAULT 1,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  lastLogin TIMESTAMP NULL,\n  createdBy INT NULL\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 3730 (HY000) at line 1: Cannot drop table 'users' referenced by a foreign key constraint 'jobs_createdBy_users_id_fk' on table 'jobs'."
+  ]
+}

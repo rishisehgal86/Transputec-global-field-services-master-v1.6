@@ -163,3 +163,19 @@
 - [x] Add client tracking link display with copy button in admin job detail page
 - [x] Show links in a dedicated section for easy access
 
+
+
+## Version 1.7 - Local Authentication System
+- [ ] Update user schema with email, password_hash, and role fields
+- [ ] Add bcrypt for password hashing
+- [ ] Create super admin initialization on first run
+- [ ] Build login page with email/password form
+- [ ] Implement JWT-based session management
+- [ ] Create admin management interface for super admin
+- [ ] Add user creation/edit/deactivation functionality
+- [ ] Implement password reset functionality
+- [ ] Add activity logging for admin actions
+- [ ] Remove Manus OAuth dependency
+- [ ] Update all protected routes to use local auth
+- [ ] Add login rate limiting for security
+
