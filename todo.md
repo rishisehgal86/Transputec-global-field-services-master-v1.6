@@ -123,3 +123,17 @@
 - [x] Display tracking URL on success page with copy button
 - [x] Update createRequest mutation to return tracking token
 
+
+
+## Version 1.4.2 - Enhanced Client Tracking Page
+- [x] Add comprehensive request status display with clear badges
+- [x] Display complete site and service details
+- [x] Show timeline of request submission, approval, and completion
+- [x] Display engineer name when assigned
+- [x] Show ETA when engineer is en route
+- [x] Display time on site duration
+- [x] Add status history timeline with all changes
+- [x] Show last updated timestamp with auto-refresh indicator
+- [x] Improve layout and information hierarchy
+- [x] Add contact information section
+

@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -11,35 +12,51 @@ import { LiveMap } from "@/components/LiveMap";
 export default function ClientTracker() {
   const [match, params] = useRoute("/track/:token");
   const token = params?.token || "";
-
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
     { token },
-    { enabled: !!token, refetchInterval: 5000 }
+    { 
+      enabled: !!token, 
+      refetchInterval: 5000
+    }
   );
+
+  useEffect(() => {
+    if (job) {
+      setLastUpdated(new Date());
+    }
+  }, [job]);
 
   const { data: latestLocation } = trpc.jobs.getLatestLocation.useQuery(
     { token },
     { enabled: !!token && (job?.status === "en_route" || job?.status === "on_site"), refetchInterval: 5000 }
   );
 
-
+  const { data: statusHistory } = trpc.jobs.getStatusHistory.useQuery(
+    { token },
+    { enabled: !!token }
+  );
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-gray-600">Loading your service request...</p>
+        </div>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
           <CardContent className="py-20 text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-600">Job not found or link is invalid</p>
+            <h2 className="text-xl font-semibold mb-2">Request Not Found</h2>
+            <p className="text-gray-600">The tracking link is invalid or the request has been removed.</p>
           </CardContent>
         </Card>
       </div>
@@ -47,94 +64,153 @@ export default function ClientTracker() {
   }
 
   const getStatusInfo = (status: string) => {
-    const statusMap: Record<string, { icon: any; label: string; color: string; description: string }> = {
-      created: {
-        icon: Clock,
-        label: "Created",
-        color: "text-gray-600",
-        description: "Job has been created and is awaiting engineer assignment",
+    const statusMap: Record<string, { icon: any; label: string; color: string; bgColor: string; description: string }> = {
+      pending_approval: { 
+        icon: Clock, 
+        label: "Pending Review", 
+        color: "text-yellow-700", 
+        bgColor: "bg-yellow-100 border-yellow-300",
+        description: "Your request is being reviewed by our team"
       },
-      sent_to_engineer: {
-        icon: Clock,
-        label: "Sent to Engineer",
-        color: "text-blue-600",
-        description: "Job details have been sent to the field engineer",
+      approved: { 
+        icon: CheckCircle2, 
+        label: "Approved", 
+        color: "text-green-700", 
+        bgColor: "bg-green-100 border-green-300",
+        description: "Request approved, engineer will be assigned soon"
       },
-      accepted: {
-        icon: CheckCircle2,
-        label: "Accepted",
-        color: "text-green-600",
-        description: "Engineer has accepted the job and will start soon",
+      assigned: { 
+        icon: User, 
+        label: "Engineer Assigned", 
+        color: "text-blue-700", 
+        bgColor: "bg-blue-100 border-blue-300",
+        description: "An engineer has been assigned to your request"
       },
-      en_route: {
-        icon: Navigation2,
-        label: "En Route",
-        color: "text-blue-600",
-        description: "Engineer is traveling to the site",
+      accepted: { 
+        icon: CheckCircle2, 
+        label: "Accepted", 
+        color: "text-green-700", 
+        bgColor: "bg-green-100 border-green-300",
+        description: "Engineer has accepted the assignment"
       },
-      on_site: {
-        icon: MapPin,
-        label: "On Site",
-        color: "text-purple-600",
-        description: "Engineer has arrived and is working on site",
+      en_route: { 
+        icon: Navigation2, 
+        label: "En Route", 
+        color: "text-purple-700", 
+        bgColor: "bg-purple-100 border-purple-300",
+        description: "Engineer is traveling to your location"
       },
-      completed: {
-        icon: CheckCircle2,
-        label: "Completed",
-        color: "text-green-600",
-        description: "Job has been completed successfully",
+      on_site: { 
+        icon: MapPin, 
+        label: "On Site", 
+        color: "text-indigo-700", 
+        bgColor: "bg-indigo-100 border-indigo-300",
+        description: "Engineer is working at your location"
       },
-      declined: {
-        icon: XCircle,
-        label: "Declined",
-        color: "text-red-600",
-        description: "Engineer has declined this job",
+      completed: { 
+        icon: CheckCircle2, 
+        label: "Completed", 
+        color: "text-green-700", 
+        bgColor: "bg-green-100 border-green-300",
+        description: "Service has been completed successfully"
+      },
+      rejected: { 
+        icon: XCircle, 
+        label: "Rejected", 
+        color: "text-red-700", 
+        bgColor: "bg-red-100 border-red-300",
+        description: "Request was not approved"
       },
     };
-
-    return statusMap[status] || statusMap.created;
+    return statusMap[status] || statusMap.pending_approval;
   };
 
   const statusInfo = getStatusInfo(job.status);
   const StatusIcon = statusInfo.icon;
 
-  const calculateDuration = (start: Date | null, end: Date | null) => {
-    if (!start || !end) return null;
-    const diff = new Date(end).getTime() - new Date(start).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  // Calculate time on site
+  const getTimeOnSite = () => {
+    if (!job.arrivedAt) return null;
+    const arrived = new Date(job.arrivedAt);
+    const now = job.completedAt ? new Date(job.completedAt) : new Date();
+    const diffMs = now.getTime() - arrived.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
   };
 
-  const travelTime = calculateDuration(job.enRouteAt, job.arrivedAt);
-  const onSiteTime = calculateDuration(job.arrivedAt, job.completedAt);
+  // Calculate ETA
+  const getETA = () => {
+    if (!latestLocation || !job.siteLatitude || !job.siteLongitude) return null;
+    
+    const R = 6371; // Earth's radius in km
+    const dLat = (parseFloat(job.siteLatitude) - parseFloat(latestLocation.latitude)) * Math.PI / 180;
+    const dLon = (parseFloat(job.siteLongitude) - parseFloat(latestLocation.longitude)) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(parseFloat(latestLocation.latitude) * Math.PI / 180) * 
+              Math.cos(parseFloat(job.siteLatitude) * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    const avgSpeed = 40; // km/h average speed
+    const etaMinutes = Math.round((distance / avgSpeed) * 60);
+    
+    if (etaMinutes < 5) return "Arriving soon";
+    if (etaMinutes < 60) return `${etaMinutes} minutes`;
+    const hours = Math.floor(etaMinutes / 60);
+    const mins = etaMinutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  const formatDateTime = (date: Date | string | null | undefined) => {
+    if (!date) return "Not set";
+    return new Date(date).toLocaleString('en-GB', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+  };
+
+  const timeOnSite = getTimeOnSite();
+  const eta = job.status === "en_route" ? getETA() : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Header */}
+      <header className="border-b bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">{APP_TITLE}</h1>
-          <p className="text-sm text-gray-600">Job Tracking Portal</p>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">{APP_TITLE}</h1>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <RefreshCw className="h-4 w-4" />
+              <span>Updated {Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)}s ago</span>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Status Banner */}
-        <Card className="mb-6 border-2">
+        <Card className={`mb-6 border-2 ${statusInfo.bgColor}`}>
           <CardContent className="py-6">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-full bg-gray-100 ${statusInfo.color}`}>
+              <div className={`p-3 rounded-full bg-white ${statusInfo.color}`}>
                 <StatusIcon className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-1">{statusInfo.label}</h2>
-                <p className="text-gray-600">{statusInfo.description}</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">{statusInfo.label}</h2>
+                <p className="text-gray-700">{statusInfo.description}</p>
               </div>
-              {(job.status === "en_route" || job.status === "on_site") && (
+              {job.status === "en_route" && eta && (
                 <div className="text-right">
-                  <p className="text-sm text-gray-600">Last Updated</p>
-                  <p className="font-medium">{latestLocation ? new Date(latestLocation.timestamp).toLocaleTimeString() : "N/A"}</p>
+                  <div className="text-sm text-gray-600">ETA</div>
+                  <div className="text-2xl font-bold text-purple-700">{eta}</div>
+                </div>
+              )}
+              {job.status === "on_site" && timeOnSite && (
+                <div className="text-right">
+                  <div className="text-sm text-gray-600">Time on Site</div>
+                  <div className="text-2xl font-bold text-indigo-700">{timeOnSite}</div>
                 </div>
               )}
             </div>
@@ -142,45 +218,120 @@ export default function ClientTracker() {
         </Card>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Map */}
-          <div className="lg:col-span-2">
-            {(job.status === "en_route" || job.status === "on_site") && latestLocation ? (
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Live Tracking Map */}
+            {(job.status === "en_route" || job.status === "on_site") && latestLocation && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
                     Live Location Tracking
                   </CardTitle>
-                  <CardDescription>Real-time engineer location</CardDescription>
+                  <CardDescription>
+                    Real-time engineer location updates every 5 seconds
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[500px]">
-                    <LiveMap
-                      latitude={parseFloat(latestLocation.latitude)}
-                      longitude={parseFloat(latestLocation.longitude)}
-                      accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
-                      engineerName={job.engineerName || "Engineer"}
-                      lastUpdate={new Date(latestLocation.timestamp)}
-                      siteLatitude={job.siteLatitude ? parseFloat(job.siteLatitude) : undefined}
-                      siteLongitude={job.siteLongitude ? parseFloat(job.siteLongitude) : undefined}
-                      siteName={job.siteName}
-                      showRecenterButton={true}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
-                  </p>
+                  <LiveMap
+                    latitude={parseFloat(latestLocation.latitude)}
+                    longitude={parseFloat(latestLocation.longitude)}
+                    accuracy={latestLocation.accuracy ? parseFloat(latestLocation.accuracy) : undefined}
+                    siteLatitude={job.siteLatitude ? parseFloat(job.siteLatitude) : undefined}
+                    siteLongitude={job.siteLongitude ? parseFloat(job.siteLongitude) : undefined}
+                    siteName={job.siteName}
+                    showRecenterButton={true}
+                  />
                 </CardContent>
               </Card>
-            ) : (
+            )}
+
+            {/* Service Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Request Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-500 mb-1">Issue Description</div>
+                  <p className="text-gray-900">{job.incidentDetails || "No description provided"}</p>
+                </div>
+
+                <Separator />
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 mb-1">Estimated Hours</div>
+                    <p className="text-gray-900 font-semibold">{job.hoursRequired || "Not specified"}</p>
+                  </div>
+                  {job.scheduledDateTime && (
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 mb-1">Scheduled Date & Time</div>
+                      <p className="text-gray-900 font-semibold">{formatDateTime(job.scheduledDateTime)}</p>
+                    </div>
+                  )}
+                </div>
+
+                {job.scopeOfWork && (
+                  <>
+                    <Separator />
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 mb-1">Scope of Work</div>
+                      <p className="text-gray-900">{job.scopeOfWork}</p>
+                    </div>
+                  </>
+                )}
+
+                {job.notes && (
+                  <>
+                    <Separator />
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 mb-1">Additional Notes</div>
+                      <p className="text-gray-900">{job.notes}</p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Status History */}
+            {statusHistory && statusHistory.length > 0 && (
               <Card>
-                <CardContent className="py-20 text-center">
-                  <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
-                    {job.status === "completed"
-                      ? "Job completed - tracking ended"
-                      : "Location tracking will begin when engineer starts journey"}
-                  </p>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Status History
+                  </CardTitle>
+                  <CardDescription>
+                    Timeline of all status changes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {statusHistory.map((history, index) => {
+                      const historyStatusInfo = getStatusInfo(history.status);
+                      const HistoryIcon = historyStatusInfo.icon;
+                      return (
+                        <div key={history.id} className="flex gap-4">
+                          <div className="flex flex-col items-center">
+                            <div className={`p-2 rounded-full ${historyStatusInfo.bgColor}`}>
+                              <HistoryIcon className={`h-4 w-4 ${historyStatusInfo.color}`} />
+                            </div>
+                            {index < statusHistory.length - 1 && (
+                              <div className="w-0.5 h-full bg-gray-200 my-1" />
+                            )}
+                          </div>
+                          <div className="flex-1 pb-4">
+                            <div className="font-semibold text-gray-900">{historyStatusInfo.label}</div>
+                            <div className="text-sm text-gray-600">{formatDateTime(history.timestamp)}</div>
+                            {history.notes && (
+                              <div className="text-sm text-gray-700 mt-1">{history.notes}</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -188,7 +339,7 @@ export default function ClientTracker() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Engineer Info */}
+            {/* Engineer Information */}
             {job.engineerName && (
               <Card>
                 <CardHeader>
@@ -197,94 +348,114 @@ export default function ClientTracker() {
                     Engineer
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div>
-                    <p className="text-gray-600">Name</p>
-                    <p className="font-medium">{job.engineerName}</p>
-                  </div>
-                  {job.engineerPhone && (
-                    <div>
-                      <p className="text-gray-600">Phone</p>
-                      <p className="font-medium">
-                        <a href={`tel:${job.engineerPhone}`} className="text-blue-600 hover:underline">
-                          {job.engineerPhone}
-                        </a>
-                      </p>
+                <CardContent>
+                  <div className="text-lg font-semibold text-gray-900">{job.engineerName}</div>
+                  {job.acceptedAt && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      Accepted {formatDateTime(job.acceptedAt)}
                     </div>
                   )}
                 </CardContent>
               </Card>
             )}
 
-            {/* Timeline */}
+            {/* Site Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Timeline
+                  <Building2 className="h-5 w-5" />
+                  Site Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
+              <CardContent className="space-y-3">
                 <div>
-                  <p className="text-gray-600">Job Created</p>
-                  <p className="font-medium">{new Date(job.createdAt).toLocaleString()}</p>
+                  <div className="text-sm font-medium text-gray-500">Site Name</div>
+                  <div className="text-gray-900 font-semibold">{job.siteName}</div>
                 </div>
-                {job.acceptedAt && (
+                {job.siteAddress && (
                   <div>
-                    <p className="text-gray-600">Accepted</p>
-                    <p className="font-medium">{new Date(job.acceptedAt).toLocaleString()}</p>
+                    <div className="text-sm font-medium text-gray-500">Address</div>
+                    <div className="text-gray-900">{job.siteAddress}</div>
                   </div>
                 )}
-                {job.enRouteAt && (
+                {job.siteId && (
                   <div>
-                    <p className="text-gray-600">Started Journey</p>
-                    <p className="font-medium">{new Date(job.enRouteAt).toLocaleString()}</p>
-                  </div>
-                )}
-                {job.arrivedAt && (
-                  <div>
-                    <p className="text-gray-600">Arrived On Site</p>
-                    <p className="font-medium">{new Date(job.arrivedAt).toLocaleString()}</p>
-                    {travelTime && (
-                      <p className="text-xs text-gray-500">Travel time: {travelTime}</p>
-                    )}
-                  </div>
-                )}
-                {job.completedAt && (
-                  <div>
-                    <p className="text-gray-600">Completed</p>
-                    <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
-                    {onSiteTime && (
-                      <p className="text-xs text-gray-500">On-site time: {onSiteTime}</p>
-                    )}
+                    <div className="text-sm font-medium text-gray-500">Site ID</div>
+                    <div className="text-gray-900">{job.siteId}</div>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Site Info */}
+            {/* Contact Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Site Details
+                  <Phone className="h-5 w-5" />
+                  Contact Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div>
-                  <p className="text-gray-600">Site Name</p>
-                  <p className="font-medium">{job.siteName}</p>
-                </div>
-                {job.siteLocation && (
+              <CardContent className="space-y-3">
+                {job.siteContactName && (
                   <div>
-                    <p className="text-gray-600">Location</p>
-                    <p className="font-medium">{job.siteLocation}</p>
+                    <div className="text-sm font-medium text-gray-500">Site Contact</div>
+                    <div className="text-gray-900">{job.siteContactName}</div>
                   </div>
                 )}
-                {job.scheduledDateTime && (
+                {job.siteContactNumber && (
                   <div>
-                    <p className="text-gray-600">Scheduled</p>
-                    <p className="font-medium">{new Date(job.scheduledDateTime).toLocaleString()}</p>
+                    <div className="text-sm font-medium text-gray-500">Phone</div>
+                    <a href={`tel:${job.siteContactNumber}`} className="text-blue-600 hover:underline">
+                      {job.siteContactNumber}
+                    </a>
+                  </div>
+                )}
+                {job.clientEmail && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-500">Email</div>
+                    <a href={`mailto:${job.clientEmail}`} className="text-blue-600 hover:underline">
+                      {job.clientEmail}
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <div className="font-medium text-gray-500">Submitted</div>
+                  <div className="text-gray-900">{formatDateTime(job.createdAt)}</div>
+                </div>
+                {job.acceptedAt && (
+                  <div>
+                    <div className="font-medium text-gray-500">Accepted</div>
+                    <div className="text-gray-900">{formatDateTime(job.acceptedAt)}</div>
+                  </div>
+                )}
+                {job.enRouteAt && (
+                  <div>
+                    <div className="font-medium text-gray-500">En Route</div>
+                    <div className="text-gray-900">{formatDateTime(job.enRouteAt)}</div>
+                  </div>
+                )}
+                {job.arrivedAt && (
+                  <div>
+                    <div className="font-medium text-gray-500">Arrived On Site</div>
+                    <div className="text-gray-900">{formatDateTime(job.arrivedAt)}</div>
+                  </div>
+                )}
+                {job.completedAt && (
+                  <div>
+                    <div className="font-medium text-gray-500">Completed</div>
+                    <div className="text-gray-900">{formatDateTime(job.completedAt)}</div>
                   </div>
                 )}
               </CardContent>
