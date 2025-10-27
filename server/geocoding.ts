@@ -11,6 +11,58 @@ export interface GeocodingResult {
   error?: string;
 }
 
+export interface AddressSuggestion {
+  latitude: string;
+  longitude: string;
+  displayName: string;
+  type: string;
+  importance: number;
+}
+
+/**
+ * Search for address suggestions using Nominatim
+ * @param address - Address search query
+ * @param limit - Maximum number of results (default: 5)
+ * @returns Array of address suggestions
+ */
+export async function searchAddresses(address: string, limit: number = 5): Promise<AddressSuggestion[]> {
+  if (!address || address.trim().length === 0) {
+    return [];
+  }
+
+  try {
+    const encodedAddress = encodeURIComponent(address.trim());
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=${limit}&addressdetails=1`;
+
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Transputec-Dispatch-App/2.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Geocoding API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data.map((result: any) => ({
+      latitude: result.lat,
+      longitude: result.lon,
+      displayName: result.display_name,
+      type: result.type || "unknown",
+      importance: result.importance || 0,
+    }));
+  } catch (error) {
+    console.error("Address search error:", error);
+    return [];
+  }
+}
+
 /**
  * Geocode an address to coordinates using Nominatim
  * @param address - Full address string to geocode

@@ -16,7 +16,7 @@ import {
   getJobStatusHistory
 } from "./db";
 import { randomBytes } from "crypto";
-import { geocodeAddress, calculateDistance, calculateETA } from "./geocoding";
+import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
 
 export const appRouter = router({
   system: systemRouter,
@@ -33,6 +33,17 @@ export const appRouter = router({
   }),
 
   geocoding: router({
+    // Search for address suggestions
+    search: publicProcedure
+      .input(z.object({
+        address: z.string(),
+        limit: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const results = await searchAddresses(input.address, input.limit);
+        return results;
+      }),
+    
     // Geocode an address to coordinates
     geocode: publicProcedure
       .input(z.object({

@@ -67,3 +67,11 @@
 - [x] Add "Return to Pin" button on map displays
 - [x] Show both engineer and site locations on same map
 
+
+
+## Version 2.1 Improvements
+- [x] Update geocoding to return multiple address suggestions
+- [x] Add address selection dropdown UI
+- [x] Allow user to select exact address from map database results
+- [x] Auto-populate selected address and coordinates
+

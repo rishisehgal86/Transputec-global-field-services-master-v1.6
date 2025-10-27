@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ArrowLeft, Copy, Check, MapPin } from "lucide-react";
+import { Loader2, ArrowLeft, Copy, Check, MapPin, Search } from "lucide-react";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -19,21 +19,26 @@ export default function CreateJob() {
   const [copiedClient, setCopiedClient] = useState(false);
   const [createdLinks, setCreatedLinks] = useState<{ engineer: string; client: string } | null>(null);
   const [siteCoordinates, setSiteCoordinates] = useState<{ lat: string; lng: string } | null>(null);
-  const [geocoding, setGeocoding] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const geocodeMutation = trpc.geocoding.geocode.useMutation({
+  const searchMutation = trpc.geocoding.search.useMutation({
     onSuccess: (data) => {
-      if (data.success) {
-        setSiteCoordinates({ lat: data.latitude, lng: data.longitude });
-        toast.success(`Address found: ${data.displayName}`);
+      if (data && data.length > 0) {
+        setAddressSuggestions(data);
+        toast.success(`Found ${data.length} address${data.length > 1 ? 'es' : ''}`);
       } else {
-        toast.error(data.error || "Address not found");
+        setAddressSuggestions([]);
+        toast.error("No addresses found. Try a different search.");
       }
-      setGeocoding(false);
+      setSearching(false);
     },
     onError: (error) => {
-      toast.error(`Geocoding failed: ${error.message}`);
-      setGeocoding(false);
+      toast.error(`Search failed: ${error.message}`);
+      setSearching(false);
+      setAddressSuggestions([]);
     },
   });
 
@@ -72,7 +77,7 @@ export default function CreateJob() {
       siteName: formData.get("siteName") as string,
       siteId: formData.get("siteId") as string || undefined,
       siteLocation: formData.get("siteLocation") as string || undefined,
-      siteAddress: formData.get("siteAddress") as string || undefined,
+      siteAddress: selectedAddress || (formData.get("siteAddress") as string) || undefined,
       siteLatitude: siteCoordinates?.lat || undefined,
       siteLongitude: siteCoordinates?.lng || undefined,
       siteContactName: formData.get("siteContactName") as string || undefined,
@@ -93,17 +98,24 @@ export default function CreateJob() {
     });
   };
 
-  const handleGeocodeAddress = () => {
-    const addressField = document.querySelector('textarea[name="siteAddress"]') as HTMLTextAreaElement;
-    const address = addressField?.value;
-    
-    if (!address || address.trim().length === 0) {
-      toast.error("Please enter a site address first");
+  const handleSearchAddress = () => {
+    if (!searchQuery || searchQuery.trim().length === 0) {
+      toast.error("Please enter an address to search");
       return;
     }
     
-    setGeocoding(true);
-    geocodeMutation.mutate({ address });
+    setSearching(true);
+    setAddressSuggestions([]);
+    setSelectedAddress("");
+    setSiteCoordinates(null);
+    searchMutation.mutate({ address: searchQuery, limit: 5 });
+  };
+
+  const handleSelectAddress = (suggestion: any) => {
+    setSelectedAddress(suggestion.displayName);
+    setSiteCoordinates({ lat: suggestion.latitude, lng: suggestion.longitude });
+    setAddressSuggestions([]);
+    toast.success("Address selected and coordinates captured!");
   };
 
   const copyToClipboard = (text: string, type: "engineer" | "client") => {
@@ -134,58 +146,53 @@ export default function CreateJob() {
         <main className="container mx-auto px-4 py-8 max-w-2xl">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl text-green-600">Job Created Successfully!</CardTitle>
+              <CardTitle className="text-2xl text-green-600 flex items-center gap-2">
+                <Check className="h-6 w-6" />
+                Job Created Successfully!
+              </CardTitle>
               <CardDescription>Share these links with the engineer and client</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
-                <Label className="text-base font-semibold mb-2 block">Engineer Link</Label>
+              <div className="space-y-2">
+                <Label>Engineer Link</Label>
                 <div className="flex gap-2">
                   <Input value={createdLinks.engineer} readOnly className="font-mono text-sm" />
                   <Button
                     variant="outline"
+                    size="icon"
                     onClick={() => copyToClipboard(createdLinks.engineer, "engineer")}
                   >
                     {copiedEngineer ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  Send this link to the field engineer to accept and start the job
+                <p className="text-sm text-gray-600">
+                  Send this link to the field engineer to accept and track the job
                 </p>
               </div>
 
-              <div>
-                <Label className="text-base font-semibold mb-2 block">Client Tracking Link</Label>
+              <div className="space-y-2">
+                <Label>Client Tracking Link</Label>
                 <div className="flex gap-2">
                   <Input value={createdLinks.client} readOnly className="font-mono text-sm" />
                   <Button
                     variant="outline"
+                    size="icon"
                     onClick={() => copyToClipboard(createdLinks.client, "client")}
                   >
                     {copiedClient ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  Share this link with the client to track engineer progress in real-time
+                <p className="text-sm text-gray-600">
+                  Share this link with the client to track real-time progress
                 </p>
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <Link href="/admin" className="flex-1">
-                  <Button variant="outline" className="w-full">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Dashboard
-                  </Button>
-                </Link>
-                <Button
-                  className="flex-1"
-                  onClick={() => {
-                    setCreatedLinks(null);
-                    setCopiedEngineer(false);
-                    setCopiedClient(false);
-                  }}
-                >
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setLocation("/admin/create")} variant="outline" className="flex-1">
                   Create Another Job
+                </Button>
+                <Button onClick={() => setLocation("/admin")} className="flex-1">
+                  Back to Dashboard
                 </Button>
               </div>
             </CardContent>
@@ -250,31 +257,90 @@ export default function CreateJob() {
                   <Label htmlFor="siteLocation">Site Location/City</Label>
                   <Input id="siteLocation" name="siteLocation" />
                 </div>
+                
+                {/* Address Search */}
                 <div>
-                  <Label htmlFor="siteAddress">Site Address</Label>
-                  <Textarea id="siteAddress" name="siteAddress" rows={3} />
-                  <div className="mt-2 flex items-center gap-2">
+                  <Label htmlFor="addressSearch">Site Address Search</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="addressSearch"
+                      placeholder="Enter address to search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleSearchAddress();
+                        }
+                      }}
+                    />
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      onClick={handleGeocodeAddress}
-                      disabled={geocoding}
+                      onClick={handleSearchAddress}
+                      disabled={searching}
                     >
-                      {geocoding ? (
+                      {searching ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       ) : (
-                        <MapPin className="h-4 w-4 mr-2" />
+                        <Search className="h-4 w-4 mr-2" />
                       )}
-                      {geocoding ? "Finding Location..." : "Get GPS Coordinates"}
+                      Search
                     </Button>
-                    {siteCoordinates && (
-                      <span className="text-sm text-green-600 flex items-center gap-1">
-                        <Check className="h-4 w-4" />
-                        Location captured
-                      </span>
-                    )}
                   </div>
+                  
+                  {/* Address Suggestions */}
+                  {addressSuggestions.length > 0 && (
+                    <div className="mt-2 border rounded-lg bg-white shadow-lg max-h-64 overflow-y-auto">
+                      <div className="p-2 bg-gray-50 border-b text-sm font-medium text-gray-700">
+                        Select an address:
+                      </div>
+                      {addressSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleSelectAddress(suggestion)}
+                          className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b last:border-b-0 transition-colors"
+                        >
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 mt-1 text-blue-600 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {suggestion.displayName}
+                              </p>
+                              <p className="text-xs text-gray-500 capitalize">
+                                {suggestion.type}
+                              </p>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Selected Address Display */}
+                  {selectedAddress && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-green-900">Selected Address:</p>
+                          <p className="text-sm text-green-700 mt-1">{selectedAddress}</p>
+                          {siteCoordinates && (
+                            <p className="text-xs text-green-600 mt-1">
+                              Coordinates: {parseFloat(siteCoordinates.lat).toFixed(6)}, {parseFloat(siteCoordinates.lng).toFixed(6)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Input
+                    type="hidden"
+                    name="siteAddress"
+                    value={selectedAddress}
+                  />
                 </div>
               </div>
 
@@ -313,7 +379,7 @@ export default function CreateJob() {
                   </div>
                   <div>
                     <Label htmlFor="hoursRequired">Hours Required</Label>
-                    <Input id="hoursRequired" name="hoursRequired" placeholder="e.g., 4 hours (Half Day)" />
+                    <Input id="hoursRequired" name="hoursRequired" />
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -323,7 +389,7 @@ export default function CreateJob() {
                   </div>
                   <div className="flex items-center space-x-2 pt-8">
                     <Checkbox id="downTime" name="downTime" />
-                    <Label htmlFor="downTime" className="cursor-pointer">Down Time Required</Label>
+                    <Label htmlFor="downTime" className="cursor-pointer">Down Time</Label>
                   </div>
                 </div>
               </div>
@@ -345,7 +411,7 @@ export default function CreateJob() {
                 </div>
                 <div>
                   <Label htmlFor="scopeOfWork">Scope of Work / Activities</Label>
-                  <Textarea id="scopeOfWork" name="scopeOfWork" rows={4} />
+                  <Textarea id="scopeOfWork" name="scopeOfWork" rows={3} />
                 </div>
               </div>
 
@@ -355,24 +421,25 @@ export default function CreateJob() {
                 <div className="flex items-center space-x-2">
                   <Checkbox id="coveredByCOI" name="coveredByCOI" defaultChecked />
                   <Label htmlFor="coveredByCOI" className="cursor-pointer">
-                    Dispatch Engineer Covered by Transputec COI
+                    Despatch Engineer Covered by Transputec COI
                   </Label>
                 </div>
                 <div>
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea id="notes" name="notes" rows={4} placeholder="Delivery tracking, special instructions, etc." />
+                  <Label htmlFor="notes">Notes (Delivery Tracking, Special Instructions)</Label>
+                  <Textarea id="notes" name="notes" rows={3} />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <Link href="/admin" className="flex-1">
-                  <Button type="button" variant="outline" className="w-full">
-                    Cancel
-                  </Button>
-                </Link>
-                <Button type="submit" className="flex-1" disabled={createJobMutation.isPending}>
-                  {createJobMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create Job
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={createJobMutation.isPending} className="flex-1">
+                  {createJobMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating Job...
+                    </>
+                  ) : (
+                    "Create Job"
+                  )}
                 </Button>
               </div>
             </form>
