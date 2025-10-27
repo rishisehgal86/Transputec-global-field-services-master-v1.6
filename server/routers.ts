@@ -17,7 +17,7 @@ import {
 } from "./db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
-import { sendNewTicketNotification } from "./email";
+import { sendNewTicketNotification, sendClientConfirmation } from "./email";
 
 export const appRouter = router({
   system: systemRouter,
@@ -61,6 +61,7 @@ export const appRouter = router({
     createRequest: publicProcedure
       .input(z.object({
         clientName: z.string(),
+        clientEmail: z.string().email(),
         siteName: z.string(),
         siteAddress: z.string(),
         siteLatitude: z.string(),
@@ -109,6 +110,27 @@ export const appRouter = router({
             console.log('[Notification] Admin email notification sent for ticket #', job.id);
           } catch (error) {
             console.error('[Notification] Failed to send admin email:', error);
+            // Don't fail the request if email fails
+          }
+        }
+        
+        // Send confirmation email to client
+        if (input.clientEmail && job) {
+          try {
+            await sendClientConfirmation({
+              clientName: input.clientName,
+              clientEmail: input.clientEmail,
+              siteName: input.siteName,
+              siteAddress: input.siteAddress,
+              scheduledDateTime: input.scheduledDateTime,
+              incidentDetails: input.incidentDetails,
+              hoursRequired: input.hoursRequired,
+              ticketId: job.id,
+              trackingToken: jobToken,
+            });
+            console.log('[Notification] Client confirmation email sent for ticket #', job.id);
+          } catch (error) {
+            console.error('[Notification] Failed to send client confirmation:', error);
             // Don't fail the request if email fails
           }
         }

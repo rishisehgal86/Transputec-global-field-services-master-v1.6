@@ -83,8 +83,9 @@ export const jobs = mysqlTable("jobs", {
   arrivedAt: timestamp("arrivedAt"),
   completedAt: timestamp("completedAt"),
   
-  // Client Name for tracking
+  // Client Information
   clientName: varchar("clientName", { length: 255 }).notNull(),
+  clientEmail: varchar("clientEmail", { length: 320 }),
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -134,4 +135,37 @@ export const jobStatusHistory = mysqlTable("jobStatusHistory", {
 
 export type JobStatusHistory = typeof jobStatusHistory.$inferSelect;
 export type InsertJobStatusHistory = typeof jobStatusHistory.$inferInsert;
+
+/**
+ * Site Visit Reports - stores engineer completion reports
+ */
+export const siteVisitReports = mysqlTable("siteVisitReports", {
+  id: int("id").autoincrement().primaryKey(),
+  jobId: int("jobId").notNull().unique().references(() => jobs.id),
+  
+  // Visit Details
+  visitDate: timestamp("visitDate").notNull(),
+  ticketNumbers: text("ticketNumbers"),
+  engineerName: varchar("engineerName", { length: 255 }).notNull(),
+  onsiteContact: varchar("onsiteContact", { length: 255 }),
+  timeOnsite: varchar("timeOnsite", { length: 50 }),
+  timeLeftSite: varchar("timeLeftSite", { length: 50 }),
+  
+  // Work Details
+  issueFault: text("issueFault"),
+  actionsPerformed: text("actionsPerformed"),
+  issueResolved: boolean("issueResolved").default(false),
+  contactAgreed: boolean("contactAgreed").default(false),
+  
+  // Client Sign-off
+  clientSignatory: varchar("clientSignatory", { length: 255 }),
+  clientSignatureData: text("clientSignatureData"), // Base64 signature image
+  signedAt: timestamp("signedAt"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SiteVisitReport = typeof siteVisitReports.$inferSelect;
+export type InsertSiteVisitReport = typeof siteVisitReports.$inferInsert;
 

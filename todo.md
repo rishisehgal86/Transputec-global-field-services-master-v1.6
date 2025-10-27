@@ -96,3 +96,23 @@
 - [x] Include ticket details in notification email
 - [x] Add admin email configuration via environment variable
 
+
+
+## Version 1.4 - Client Email Confirmation
+- [x] Add client email field to ticket request form (mandatory)
+- [x] Send email confirmation to client when ticket is submitted
+- [x] Include tracking link in client confirmation email
+- [x] Create Site Visit Report (SVR) database schema
+- [x] Install signature pad library for digital signatures
+- [x] Create SVR database helper functions
+- [x] Create email template for SVR delivery
+
+## Version 1.5 - Site Visit Report (SVR) - Planned
+- [ ] Build SVR form for engineers with all required fields
+- [ ] Add digital signature capture for client sign-off
+- [ ] Require SVR completion before ticket can be closed
+- [ ] Display SVR on admin job detail page
+- [ ] Display SVR on client tracking page
+- [ ] Add email SVR functionality for admin
+- [ ] Store SVR permanently with ticket even after closure
+

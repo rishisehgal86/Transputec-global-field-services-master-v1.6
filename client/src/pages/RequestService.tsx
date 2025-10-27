@@ -80,6 +80,7 @@ export default function RequestService() {
     
     createRequestMutation.mutate({
       clientName: formData.get("clientName") as string,
+      clientEmail: formData.get("clientEmail") as string,
       siteName: formData.get("siteName") as string,
       siteAddress: selectedAddress,
       siteLatitude: siteCoordinates.lat,
@@ -193,9 +194,21 @@ export default function RequestService() {
               {/* Client Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold border-b pb-2">Client Information</h3>
-                <div>
-                  <Label htmlFor="clientName">Your Company/Organization Name *</Label>
-                  <Input id="clientName" name="clientName" required placeholder="e.g., Acme Corporation" />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="clientName">Your Company/Organization Name *</Label>
+                    <Input id="clientName" name="clientName" required placeholder="e.g., Acme Corporation" />
+                  </div>
+                  <div>
+                    <Label htmlFor="clientEmail">Your Email Address *</Label>
+                    <Input 
+                      id="clientEmail" 
+                      name="clientEmail" 
+                      type="email" 
+                      required 
+                      placeholder="your.email@company.com" 
+                    />
+                  </div>
                 </div>
               </div>
 
