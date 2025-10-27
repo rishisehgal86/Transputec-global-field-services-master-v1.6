@@ -116,3 +116,10 @@
 - [ ] Add email SVR functionality for admin
 - [ ] Store SVR permanently with ticket even after closure
 
+
+
+## Version 1.4.1 - Immediate Tracking Link Display
+- [x] Show tracking link immediately after successful request submission
+- [x] Display tracking URL on success page with copy button
+- [x] Update createRequest mutation to return tracking token
+

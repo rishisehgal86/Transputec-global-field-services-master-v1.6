@@ -18,6 +18,7 @@ export default function RequestService() {
   const [siteCoordinates, setSiteCoordinates] = useState<{ lat: string; lng: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
 
   const searchMutation = trpc.geocoding.search.useMutation({
     onSuccess: (data) => {
@@ -38,8 +39,9 @@ export default function RequestService() {
   });
 
   const createRequestMutation = trpc.jobs.createRequest.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setRequestSubmitted(true);
+      setTrackingToken(data.trackingToken);
       toast.success("Service request submitted successfully!");
     },
     onError: (error) => {
@@ -130,13 +132,48 @@ export default function RequestService() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {trackingToken && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Track Your Request
+                  </h3>
+                  <p className="text-sm text-green-800 mb-3">
+                    Use this link to track your service request in real-time:
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={`${window.location.origin}/track/${trackingToken}`}
+                      className="font-mono text-sm bg-white"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/track/${trackingToken}`);
+                        toast.success("Tracking link copied to clipboard!");
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                  <div className="mt-3">
+                    <Link href={`/track/${trackingToken}`}>
+                      <Button className="w-full" variant="default">
+                        Open Tracking Page
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2">What happens next?</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
                   <li>Transputec admin will review your request</li>
                   <li>Once approved, an engineer will be assigned</li>
                   <li>You'll receive updates on the engineer's progress</li>
-                  <li>Track the service in real-time via the tracking link</li>
+                  <li>A confirmation email with tracking link has been sent to you</li>
                 </ol>
               </div>
 

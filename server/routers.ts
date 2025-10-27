@@ -138,6 +138,8 @@ export const appRouter = router({
         return { 
           success: true,
           message: "Service request submitted for approval",
+          trackingToken: jobToken,
+          ticketId: job?.id,
         };
       }),
 
