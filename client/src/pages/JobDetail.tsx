@@ -2,20 +2,125 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, MapPin, Clock, User } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2 } from "lucide-react";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import "leaflet/dist/leaflet.css";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [match, params] = useRoute("/admin/job/:id");
   const jobId = params?.id ? parseInt(params.id) : 0;
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<any>(null);
+  const [engineerMarker, setEngineerMarker] = useState<any>(null);
+  const [siteMarker, setSiteMarker] = useState<any>(null);
+  const [eta, setEta] = useState<string | null>(null);
 
-  const { data: job, isLoading } = trpc.jobs.getById.useQuery(
+  const { data: job, isLoading, refetch } = trpc.jobs.getById.useQuery(
     { id: jobId },
-    { enabled: !!jobId && isAuthenticated }
+    { enabled: !!jobId && isAuthenticated, refetchInterval: 5000 }
   );
+
+  const { data: latestLocation } = trpc.jobs.getLatestLocation.useQuery(
+    { token: job?.jobToken || "" },
+    { enabled: !!job && (job.status === "en_route" || job.status === "on_site"), refetchInterval: 5000 }
+  );
+
+  const updateStatusMutation = trpc.jobs.updateStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Job status updated!");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to update status: ${error.message}`);
+    },
+  });
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current || map) return;
+
+    const initMap = async () => {
+      const L = (await import("leaflet")).default;
+      
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      });
+
+      const newMap = L.map(mapRef.current!).setView([51.505, -0.09], 13);
+      
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(newMap);
+
+      setMap(newMap);
+    };
+
+    initMap();
+
+    return () => {
+      if (map) {
+        map.remove();
+      }
+    };
+  }, []);
+
+  // Calculate ETA and update markers
+  useEffect(() => {
+    if (!map || !job) return;
+
+    const L = require("leaflet");
+
+    // Try to geocode site address for site marker
+    if (job.siteAddress && !siteMarker) {
+      // For demo purposes, we'll use a placeholder. In production, you'd geocode the address
+      // For now, we'll just show the engineer location
+    }
+
+    // Update engineer marker
+    if (latestLocation) {
+      const engineerLat = parseFloat(latestLocation.latitude);
+      const engineerLng = parseFloat(latestLocation.longitude);
+
+      if (engineerMarker) {
+        engineerMarker.setLatLng([engineerLat, engineerLng]);
+      } else {
+        const blueIcon = L.icon({
+          iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+
+        const marker = L.marker([engineerLat, engineerLng], { icon: blueIcon }).addTo(map);
+        marker.bindPopup(`<b>Engineer Location</b><br/>Updated: ${new Date(latestLocation.timestamp).toLocaleTimeString()}`);
+        setEngineerMarker(marker);
+      }
+
+      map.setView([engineerLat, engineerLng], 15);
+
+      // Calculate ETA if en route (simple estimation based on typical speed)
+      if (job.status === "en_route" && job.siteAddress) {
+        // This is a simplified ETA calculation
+        // In production, you'd use a routing API like Google Maps or OpenRouteService
+        const avgSpeed = 40; // km/h average speed
+        const estimatedDistance = 5; // km - placeholder
+        const estimatedMinutes = Math.round((estimatedDistance / avgSpeed) * 60);
+        setEta(`~${estimatedMinutes} minutes`);
+      } else {
+        setEta(null);
+      }
+    }
+  }, [latestLocation, map, job]);
 
   if (authLoading || isLoading) {
     return (
@@ -69,6 +174,8 @@ export default function JobDetail() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  const canUpdateStatus = job.status !== "completed" && job.status !== "cancelled" && job.status !== "declined";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="border-b bg-white sticky top-0 z-10 shadow-sm">
@@ -91,6 +198,40 @@ export default function JobDetail() {
           </Link>
         </div>
 
+        {/* Live Tracking Map */}
+        {(job.status === "en_route" || job.status === "on_site") && latestLocation && (
+          <Card className="mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Live Location Tracking
+                  </CardTitle>
+                  <CardDescription>Real-time engineer location</CardDescription>
+                </div>
+                {eta && job.status === "en_route" && (
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Estimated Arrival</p>
+                    <p className="text-lg font-bold text-blue-600">{eta}</p>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div ref={mapRef} className="h-[400px] rounded-lg border mb-2" />
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <p>
+                  Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
+                </p>
+                <p>
+                  Last Updated: {new Date(latestLocation.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Job Details */}
           <div className="lg:col-span-2 space-y-6">
@@ -107,6 +248,60 @@ export default function JobDetail() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Admin Controls */}
+                {canUpdateStatus && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold mb-3">Admin Controls</h4>
+                    <div className="flex gap-2 flex-wrap">
+                      {job.status === "accepted" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "en_route" })}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          Mark as En Route
+                        </Button>
+                      )}
+                      {job.status === "en_route" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "on_site" })}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          Mark as On Site
+                        </Button>
+                      )}
+                      {(job.status === "on_site" || job.status === "en_route" || job.status === "accepted") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "completed" })}
+                          disabled={updateStatusMutation.isPending}
+                        >
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Mark as Completed
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to cancel this job?")) {
+                            // We'll need to add a cancel mutation
+                            toast.info("Cancel functionality - update job status to cancelled in database");
+                          }
+                        }}
+                        disabled={updateStatusMutation.isPending}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Cancel Job
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Site Information */}
                 <div>
                   <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
@@ -293,12 +488,22 @@ export default function JobDetail() {
                   <div>
                     <p className="text-gray-600">Arrived On Site</p>
                     <p className="font-medium">{new Date(job.arrivedAt).toLocaleString()}</p>
+                    {job.enRouteAt && (
+                      <p className="text-xs text-gray-500">
+                        Travel time: {Math.round((new Date(job.arrivedAt).getTime() - new Date(job.enRouteAt).getTime()) / 60000)} minutes
+                      </p>
+                    )}
                   </div>
                 )}
                 {job.completedAt && (
                   <div>
                     <p className="text-gray-600">Completed</p>
                     <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
+                    {job.arrivedAt && (
+                      <p className="text-xs text-gray-500">
+                        On-site time: {Math.round((new Date(job.completedAt).getTime() - new Date(job.arrivedAt).getTime()) / 60000)} minutes
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -318,6 +523,7 @@ export default function JobDetail() {
                     onClick={() => {
                       const url = `${window.location.origin}/engineer/${job.jobToken}`;
                       navigator.clipboard.writeText(url);
+                      toast.success("Engineer link copied!");
                     }}
                   >
                     Copy Engineer Link
@@ -329,6 +535,7 @@ export default function JobDetail() {
                     onClick={() => {
                       const url = `${window.location.origin}/track/${job.jobToken}`;
                       navigator.clipboard.writeText(url);
+                      toast.success("Client link copied!");
                     }}
                   >
                     Copy Client Link

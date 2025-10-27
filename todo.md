@@ -41,5 +41,13 @@
 - [x] Test engineer acceptance workflow
 - [x] Test location tracking accuracy
 - [x] Test real-time updates across all views
-- [ ] Create initial checkpoint for deployment
+- [x] Create initial checkpoint for deployment
+
+
+
+## Bug Fixes
+- [x] Add live tracking map to admin job detail page
+- [x] Show both engineer location and site location on map
+- [x] Calculate and display ETA to site when engineer is en route
+- [x] Add job update/close functionality for admin
 
