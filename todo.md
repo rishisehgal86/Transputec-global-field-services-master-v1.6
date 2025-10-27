@@ -148,3 +148,11 @@
 - [x] Include Site Visit Report in PDF when job is completed
 - [x] Multi-page PDF support for long content
 
+
+
+## Version 1.6.1 - Replace PDF with Print Feature
+- [x] Remove jsPDF and html2canvas from component
+- [x] Replace "Save to PDF" button with "Print" button
+- [x] Implement browser print functionality
+- [x] Add print-specific CSS for clean output
+
