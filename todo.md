@@ -156,3 +156,10 @@
 - [x] Implement browser print functionality
 - [x] Add print-specific CSS for clean output
 
+
+
+## Version 1.6.2 - Display Links in Admin Portal
+- [x] Add engineer link display with copy button in admin job detail page
+- [x] Add client tracking link display with copy button in admin job detail page
+- [x] Show links in a dedicated section for easy access
+

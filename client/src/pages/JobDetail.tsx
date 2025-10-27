@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2, Copy, Link as LinkIcon } from "lucide-react";
 import { APP_TITLE, getLoginUrl } from "@/const";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -219,6 +219,66 @@ export default function JobDetail() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Shareable Links */}
+                {job.jobToken && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4" />
+                      Shareable Links
+                    </h4>
+                    <div className="space-y-3">
+                      {/* Engineer Link */}
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-1">
+                          Engineer Job Link
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={`${window.location.origin}/engineer/${job.jobToken}`}
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-white font-mono"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/engineer/${job.jobToken}`);
+                              toast.success("Engineer link copied!");
+                            }}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {/* Client Tracking Link */}
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 block mb-1">
+                          Client Tracking Link
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={`${window.location.origin}/track/${job.jobToken}`}
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-white font-mono"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/track/${job.jobToken}`);
+                              toast.success("Client link copied!");
+                            }}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Admin Controls */}
                 {canUpdateStatus && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
