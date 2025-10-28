@@ -2,13 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History, Printer } from "lucide-react";
+import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History, Printer, Video, Edit2, Save, X as XIcon } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import "../print.css";
 
 
@@ -16,6 +18,8 @@ export default function ClientTracker() {
   const [match, params] = useRoute("/track/:token");
   const token = params?.token || "";
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [isEditingVideoLink, setIsEditingVideoLink] = useState(false);
+  const [videoLinkValue, setVideoLinkValue] = useState("");
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
     { token },
@@ -46,8 +50,36 @@ export default function ClientTracker() {
     { enabled: !!token && job?.status === "completed" }
   );
 
+  const updateVideoLinkMutation = trpc.jobs.updateVideoLink.useMutation({
+    onSuccess: () => {
+      refetch();
+      setIsEditingVideoLink(false);
+      toast.success("Video conference link updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update video link: ${error.message}`);
+    },
+  });
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleEditVideoLink = () => {
+    setVideoLinkValue(job?.videoConferenceLink || "");
+    setIsEditingVideoLink(true);
+  };
+
+  const handleSaveVideoLink = () => {
+    updateVideoLinkMutation.mutate({
+      token,
+      videoConferenceLink: videoLinkValue || undefined,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingVideoLink(false);
+    setVideoLinkValue("");
   };
 
   if (isLoading) {
@@ -313,6 +345,68 @@ export default function ClientTracker() {
                     </div>
                   </>
                 )}
+
+                <Separator />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      Video Conference Link
+                    </div>
+                    {job.status !== "completed" && job.status !== "cancelled" && !isEditingVideoLink && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEditVideoLink}
+                        className="h-8 px-2"
+                      >
+                        <Edit2 className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                  {isEditingVideoLink ? (
+                    <div className="space-y-2">
+                      <Input
+                        type="url"
+                        value={videoLinkValue}
+                        onChange={(e) => setVideoLinkValue(e.target.value)}
+                        placeholder="https://meet.google.com/xxx-xxxx-xxx or https://zoom.us/j/..."
+                        className="w-full"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleSaveVideoLink}
+                          disabled={updateVideoLinkMutation.isPending}
+                        >
+                          <Save className="h-3 w-3 mr-1" />
+                          {updateVideoLinkMutation.isPending ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelEdit}
+                          disabled={updateVideoLinkMutation.isPending}
+                        >
+                          <XIcon className="h-3 w-3 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : job.videoConferenceLink ? (
+                    <a 
+                      href={job.videoConferenceLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline break-all inline-block"
+                    >
+                      {job.videoConferenceLink}
+                    </a>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No video conference link provided</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

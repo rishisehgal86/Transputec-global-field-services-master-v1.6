@@ -102,6 +102,7 @@ export default function RequestService() {
       deviceDetails: formData.get("deviceDetails") as string || undefined,
       scopeOfWork: formData.get("scopeOfWork") as string || undefined,
       notes: formData.get("notes") as string || undefined,
+      videoConferenceLink: formData.get("videoConferenceLink") as string || undefined,
     });
   };
 
@@ -421,6 +422,19 @@ export default function RequestService() {
                 <div>
                   <Label htmlFor="projectName">Project Name</Label>
                   <Input id="projectName" name="projectName" placeholder="Network Upgrade Project" />
+                </div>
+
+                <div>
+                  <Label htmlFor="videoConferenceLink">Video Conference Link</Label>
+                  <Input 
+                    id="videoConferenceLink" 
+                    name="videoConferenceLink" 
+                    type="url"
+                    placeholder="https://meet.google.com/xxx-xxxx-xxx or https://zoom.us/j/..."
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Provide a video conference link for the engineer to join when on-site (optional)
+                  </p>
                 </div>
 
                 <div>

@@ -19,12 +19,48 @@ import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
 import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail } from "./email";
 import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
+import { authenticateUser } from "./auth";
+import { sdk } from "./_core/sdk";
 
 export const appRouter = router({
   system: systemRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const user = await authenticateUser(input.email, input.password);
+        
+        if (!user) {
+          throw new Error("Invalid email or password");
+        }
+        
+        // Create session token using user ID as openId
+        const sessionToken = await sdk.createSessionToken(
+          String(user.id),
+          { name: user.name }
+        );
+        
+        // Set session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
+        
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        };
+      }),
+    
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -82,6 +118,7 @@ export const appRouter = router({
         deviceDetails: z.string().optional(),
         scopeOfWork: z.string().optional(),
         notes: z.string().optional(),
+        videoConferenceLink: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const jobToken = randomBytes(32).toString('hex');
@@ -336,6 +373,28 @@ export const appRouter = router({
         if (!job) throw new Error("Job not found");
 
         return await getLatestJobLocation(job.id);
+      }),
+
+    // Update video conference link (public - for client editing)
+    updateVideoLink: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        videoConferenceLink: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        // Don't allow editing if job is completed or cancelled
+        if (job.status === "completed" || job.status === "cancelled") {
+          throw new Error("Cannot update video link for completed or cancelled jobs");
+        }
+        
+        await updateJobStatus(job.id, job.status, {
+          videoConferenceLink: input.videoConferenceLink || null,
+        });
+        
+        return { success: true };
       }),
 
     // Get status history

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle } from "lucide-react";
+import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle, Video } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -430,6 +430,39 @@ export default function EngineerView() {
                       <p className="whitespace-pre-line">{job.scopeOfWork}</p>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Video Conference Link */}
+            {job.videoConferenceLink && (
+              <div className="border-t pt-4">
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <Video className="h-5 w-5 text-blue-600" />
+                  Video Conference Link
+                </h3>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800 mb-2">
+                    Join this video conference when you arrive on-site:
+                  </p>
+                  <a 
+                    href={job.videoConferenceLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline font-medium break-all inline-block"
+                  >
+                    {job.videoConferenceLink}
+                  </a>
+                  <div className="mt-3">
+                    <Button
+                      onClick={() => window.open(job.videoConferenceLink, '_blank')}
+                      className="w-full sm:w-auto"
+                      variant="default"
+                    >
+                      <Video className="h-4 w-4 mr-2" />
+                      Join Video Conference
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

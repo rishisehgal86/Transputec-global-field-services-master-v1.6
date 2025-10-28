@@ -263,41 +263,29 @@ class SDKServer {
     const session = await this.verifySession(sessionCookie);
 
     if (!session) {
+      console.log("[Auth] Missing session cookie");
       throw ForbiddenError("Invalid session cookie");
     }
 
+    // For local auth, openId is the user ID as a string
     const sessionUserId = session.openId;
-    const signedInAt = new Date();
-    let user = await db.getUserByOpenId(sessionUserId);
-
-    // If user not in DB, sync from OAuth server automatically
-    if (!user) {
-      try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
-        await db.upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: signedInAt,
-        });
-        user = await db.getUserByOpenId(userInfo.openId);
-      } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
+    
+    // Try to parse as user ID for local authentication
+    const userId = parseInt(sessionUserId, 10);
+    if (!isNaN(userId)) {
+      // Local authentication - get user by ID
+      const { getUserById } = await import("../auth");
+      const user = await getUserById(userId);
+      
+      if (!user) {
+        throw ForbiddenError("User not found");
       }
+      
+      return user;
     }
-
-    if (!user) {
-      throw ForbiddenError("User not found");
-    }
-
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
-
-    return user;
+    
+    // OAuth authentication (not implemented for local-auth branch)
+    throw ForbiddenError("OAuth authentication not supported in local-auth mode");
   }
 }
 
