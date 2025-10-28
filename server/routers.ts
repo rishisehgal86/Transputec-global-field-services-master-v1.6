@@ -68,6 +68,99 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    
+    changePassword: protectedProcedure
+      .input(z.object({
+        currentPassword: z.string(),
+        newPassword: z.string().min(8),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { authenticateUser, updateUser } = await import("./auth");
+        
+        if (!ctx.user) {
+          throw new Error("Not authenticated");
+        }
+        
+        // Verify current password
+        const user = await authenticateUser(ctx.user.email, input.currentPassword);
+        if (!user) {
+          throw new Error("Current password is incorrect");
+        }
+        
+        // Update password
+        await updateUser(ctx.user.id, { password: input.newPassword });
+        
+        return { success: true };
+      }),
+    
+    listUsers: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.user || ctx.user.role !== "super_admin") {
+          throw new Error("Only superusers can list users");
+        }
+        
+        const { getAllUsers } = await import("./auth");
+        const users = await getAllUsers();
+        
+        return users.map(u => ({
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          role: u.role,
+          isActive: u.isActive,
+          lastLogin: u.lastLogin,
+        }));
+      }),
+    
+    createUser: protectedProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string(),
+        password: z.string().min(8),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user || ctx.user.role !== "super_admin") {
+          throw new Error("Only superusers can create users");
+        }
+        
+        const { createUser, getUserByEmail } = await import("./auth");
+        
+        // Check if user already exists
+        const existingUser = await getUserByEmail(input.email);
+        if (existingUser) {
+          throw new Error("User with this email already exists");
+        }
+        
+        // Create new admin user
+        await createUser({
+          email: input.email,
+          name: input.name,
+          password: input.password,
+          role: "admin",
+          createdBy: ctx.user.id,
+        });
+        
+        return { success: true };
+      }),
+    
+    deactivateUser: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user || ctx.user.role !== "super_admin") {
+          throw new Error("Only superusers can deactivate users");
+        }
+        
+        if (input.userId === ctx.user.id) {
+          throw new Error("You cannot deactivate your own account");
+        }
+        
+        const { deactivateUser } = await import("./auth");
+        await deactivateUser(input.userId);
+        
+        return { success: true };
+      }),
   }),
 
   geocoding: router({

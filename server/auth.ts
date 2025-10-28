@@ -144,7 +144,7 @@ export async function initializeSuperAdmin() {
     }
 
     // Create default super admin
-    const defaultEmail = process.env.SUPER_ADMIN_EMAIL || "admin@transputec.com";
+    const defaultEmail = process.env.SUPER_ADMIN_EMAIL || "rishis@transputec.com";
     const defaultPassword = process.env.SUPER_ADMIN_PASSWORD || "Admin@123";
     const defaultName = process.env.SUPER_ADMIN_NAME || "Super Admin";
 

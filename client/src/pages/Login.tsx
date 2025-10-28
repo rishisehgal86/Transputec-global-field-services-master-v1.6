@@ -52,7 +52,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@transputec.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -79,10 +79,13 @@ export default function Login() {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-center text-gray-600">
-            <p>Default credentials:</p>
-            <p className="font-mono text-xs mt-1">
-              admin@transputec.com / Admin@123
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">
+              Forgot your password?{" "}
+              <span className="text-blue-600 font-medium">Contact Transputec SuperUser</span>
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Email: rishis@transputec.com
             </p>
           </div>
         </CardContent>

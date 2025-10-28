@@ -57,12 +57,24 @@ export default function AdminDashboard() {
               </Link>
               <p className="text-sm text-gray-600">Admin Dashboard</p>
             </div>
-            <Link href="/admin/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Job
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/admin/users">
+                <Button variant="outline">
+                  User Management
+                </Button>
+              </Link>
+              <Link href="/admin/settings">
+                <Button variant="outline">
+                  Settings
+                </Button>
+              </Link>
+              <Link href="/admin/create">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Job
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
