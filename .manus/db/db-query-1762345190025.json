@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  email VARCHAR(320) NOT NULL UNIQUE,\n  passwordHash VARCHAR(255) NOT NULL,\n  name TEXT NOT NULL,\n  role ENUM('super_admin', 'admin') NOT NULL DEFAULT 'admin',\n  isActive BOOLEAN NOT NULL DEFAULT TRUE,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  lastLogin TIMESTAMP NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute CREATE TABLE users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  email VARCHAR(320) NOT NULL UNIQUE,\n  passwordHash VARCHAR(255) NOT NULL,\n  name TEXT NOT NULL,\n  role ENUM('super_admin', 'admin') NOT NULL DEFAULT 'admin',\n  isActive BOOLEAN NOT NULL DEFAULT TRUE,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  lastLogin TIMESTAMP NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 238
+}

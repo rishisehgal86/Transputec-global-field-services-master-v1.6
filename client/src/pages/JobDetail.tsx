@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2, Copy, Link as LinkIcon } from "lucide-react";
-import { APP_TITLE, getLoginUrl } from "@/const";
+import { APP_TITLE } from "@/const";
+import { useLocation } from "wouter";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +14,7 @@ import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const [, setLocation] = useLocation();
   const [match, params] = useRoute("/admin/job/:id");
   const jobId = params?.id ? parseInt(params.id) : 0;
   const [eta, setEta] = useState<string | null>(null);
@@ -90,7 +92,7 @@ export default function JobDetail() {
   }
 
   if (!isAuthenticated) {
-    window.location.href = getLoginUrl();
+    setLocation("/login");
     return null;
   }
 

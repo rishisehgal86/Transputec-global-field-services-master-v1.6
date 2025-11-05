@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, ExternalLink, MapPin } from "lucide-react";
-import { APP_TITLE, getLoginUrl } from "@/const";
+import { APP_TITLE } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   }
 
   if (!isAuthenticated) {
-    window.location.href = getLoginUrl();
+    setLocation("/login");
     return null;
   }
 

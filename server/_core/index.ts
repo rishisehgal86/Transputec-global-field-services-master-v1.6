@@ -28,6 +28,10 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // Initialize super admin if no users exist
+  const { initializeSuperAdmin } = await import('../auth');
+  await initializeSuperAdmin();
+  
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads

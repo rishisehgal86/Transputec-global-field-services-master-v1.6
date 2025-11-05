@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MapPin, Clock, CheckCircle2, Users } from "lucide-react";
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
+import { APP_LOGO, APP_TITLE } from "@/const";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -31,9 +31,9 @@ export default function Home() {
                 <Button>Admin Dashboard</Button>
               </Link>
             ) : (
-              <Button asChild>
-                <a href={getLoginUrl()}>Sign In</a>
-              </Button>
+              <Link href="/login">
+                <Button>Admin Login</Button>
+              </Link>
             )}
           </div>
         </div>

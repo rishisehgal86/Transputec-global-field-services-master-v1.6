@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, ArrowLeft, Copy, Check, MapPin, Search } from "lucide-react";
-import { APP_TITLE, getLoginUrl } from "@/const";
+import { APP_TITLE } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -63,7 +63,7 @@ export default function CreateJob() {
   }
 
   if (!isAuthenticated) {
-    window.location.href = getLoginUrl();
+    setLocation("/login");
     return null;
   }
 
