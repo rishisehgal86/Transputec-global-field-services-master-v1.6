@@ -17,8 +17,8 @@ export default function Login() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: () => {
-      // Redirect to admin dashboard
-      window.location.href = "/admin";
+      // Force a full page reload to ensure auth state is properly loaded
+      window.location.replace("/admin");
     },
     onError: (err) => {
       setError(err.message || "Invalid email or password");
