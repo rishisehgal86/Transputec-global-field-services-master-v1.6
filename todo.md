@@ -248,3 +248,13 @@
 - [x] Show location update history on admin job detail page (already exists in LiveMap)
 - [x] Add location update notifications/indicators
 
+
+
+
+## Version 2.0.1 - Fix Live Map & ETA Display
+- [x] Investigate why live map is not showing (cache issue)
+- [x] Restore live map display on admin job detail page
+- [x] Restore live map display on client tracker page
+- [x] Verify ETA calculations are working
+- [x] Ensure milestone tracking works alongside live tracking
+
