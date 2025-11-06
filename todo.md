@@ -207,3 +207,13 @@
 - [x] Create user management page for admins (create/edit/delete users)
 - [x] Add navigation link to user management in admin dashboard
 
+
+
+
+## Version 1.8.1 - Video Conference Link Form Fix
+- [x] Fix video conference link field not appearing in request service form (field is present)
+- [x] Push database schema changes for videoConferenceLink column
+- [x] Verify video conference link displays correctly in all views
+- [x] Add edit capability for video conference link in admin job detail
+- [x] Add edit capability for video conference link in client tracker
+

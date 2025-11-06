@@ -331,6 +331,21 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Update video conference link
+    updateVideoConferenceLink: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        videoConferenceLink: z.string().nullable(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updateJobVideoConferenceLink } = await import('./db');
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+
+        await updateJobVideoConferenceLink(job.id, input.videoConferenceLink);
+        return { success: true };
+      }),
+
     // Add location update
     addLocation: publicProcedure
       .input(z.object({

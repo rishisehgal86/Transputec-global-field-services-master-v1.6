@@ -101,3 +101,20 @@ export async function getJobStatusHistory(jobId: number) {
   return await db.select().from(jobStatusHistory).where(eq(jobStatusHistory.jobId, jobId)).orderBy(desc(jobStatusHistory.timestamp));
 }
 
+export async function updateJobVideoConferenceLink(jobId: number, videoConferenceLink: string | null): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn('[Database] Cannot update video conference link: database not available');
+    return;
+  }
+
+  try {
+    await db.update(jobs)
+      .set({ videoConferenceLink })
+      .where(eq(jobs.id, jobId));
+  } catch (error) {
+    console.error('[Database] Failed to update video conference link:', error);
+    throw error;
+  }
+}
+

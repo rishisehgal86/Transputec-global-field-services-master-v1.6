@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
+import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
 import "../print.css";
 
 
@@ -304,22 +305,17 @@ export default function ClientTracker() {
                   </>
                 )}
 
-                {job.videoConferenceLink && (
-                  <>
-                    <Separator />
-                    <div>
-                      <div className="text-sm font-medium text-gray-500 mb-1">Video Conference Link</div>
-                      <a 
-                        href={job.videoConferenceLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline break-all"
-                      >
-                        {job.videoConferenceLink}
-                      </a>
-                    </div>
-                  </>
-                )}
+                <>
+                  <Separator />
+                  <div>
+                    <div className="text-sm font-medium text-gray-500 mb-2">Video Conference Link</div>
+                    <EditVideoConferenceLink 
+                      token={job.jobToken}
+                      currentLink={job.videoConferenceLink}
+                      onUpdate={refetch}
+                    />
+                  </div>
+                </>
 
                 {job.notes && (
                   <>

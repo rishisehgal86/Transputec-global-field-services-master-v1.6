@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
+import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -455,21 +456,14 @@ export default function JobDetail() {
                       <p className="text-gray-600">Down Time</p>
                       <p className="font-medium">{job.downTime ? "Yes" : "No"}</p>
                     </div>
-                    {job.videoConferenceLink && (
-                      <div className="md:col-span-2">
-                        <p className="text-gray-600">Video Conference Link</p>
-                        <p className="font-medium">
-                          <a 
-                            href={job.videoConferenceLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline break-all"
-                          >
-                            {job.videoConferenceLink}
-                          </a>
-                        </p>
-                      </div>
-                    )}
+                    <div className="md:col-span-2">
+                      <p className="text-gray-600 mb-2">Video Conference Link</p>
+                      <EditVideoConferenceLink 
+                        token={job.jobToken}
+                        currentLink={job.videoConferenceLink}
+                        onUpdate={refetch}
+                      />
+                    </div>
                   </div>
                 </div>
 
