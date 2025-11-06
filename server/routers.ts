@@ -331,6 +331,42 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Add comment (from engineer, client, or admin)
+    addComment: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        authorName: z.string(),
+        authorType: z.enum(["engineer", "client", "admin"]),
+        comment: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { addJobComment } = await import('./db');
+        
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        await addJobComment({
+          jobId: job.id,
+          authorName: input.authorName,
+          authorType: input.authorType,
+          comment: input.comment,
+        });
+        
+        return { success: true };
+      }),
+    
+    // Get all comments for a job
+    getComments: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const { getJobComments } = await import('./db');
+        
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        return await getJobComments(job.id);
+      }),
+
     // Update video conference link
     updateVideoConferenceLink: publicProcedure
       .input(z.object({
@@ -464,6 +500,73 @@ export const appRouter = router({
         if (!job) throw new Error("Job not found");
         
         return await getSiteVisitReportByJobId(job.id);
+      }),
+
+    // Upload media file to SVR
+    uploadMedia: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        fileName: z.string(),
+        fileType: z.enum(["image", "video"]),
+        mimeType: z.string(),
+        fileData: z.string(), // Base64 encoded file
+      }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import('./storage');
+        const { addSvrMediaFile } = await import('./db');
+        
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        const svr = await getSiteVisitReportByJobId(job.id);
+        if (!svr) throw new Error("Site Visit Report not found");
+        
+        // Decode base64 file data
+        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        const fileSize = fileBuffer.length;
+        
+        // Validate file size (max 50MB)
+        const maxSize = 50 * 1024 * 1024;
+        if (fileSize > maxSize) {
+          throw new Error("File size exceeds 50MB limit");
+        }
+        
+        // Generate unique file key
+        const timestamp = Date.now();
+        const randomSuffix = randomBytes(8).toString('hex');
+        const fileExtension = input.fileName.split('.').pop();
+        const fileKey = `svr-media/${svr.id}/${timestamp}-${randomSuffix}.${fileExtension}`;
+        
+        // Upload to S3
+        const { url } = await storagePut(fileKey, fileBuffer, input.mimeType);
+        
+        // Save to database
+        await addSvrMediaFile({
+          svrId: svr.id,
+          fileKey,
+          fileUrl: url,
+          fileName: input.fileName,
+          fileType: input.fileType,
+          mimeType: input.mimeType,
+          fileSize,
+        });
+        
+        return { success: true, url };
+      }),
+    
+    // Get media files for SVR
+    getMedia: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const { getSvrMediaFiles } = await import('./db');
+        
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+        
+        const svr = await getSiteVisitReportByJobId(job.id);
+        if (!svr) return [];
+        
+        return await getSvrMediaFiles(svr.id);
       }),
 
     // Email SVR to specified address (admin only)

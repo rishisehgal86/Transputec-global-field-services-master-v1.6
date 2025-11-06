@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
+import { JobComments } from "@/components/JobComments";
 import "../print.css";
 
 
@@ -496,6 +497,16 @@ export default function ClientTracker() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="container mx-auto px-4 py-6">
+          <JobComments
+            token={token}
+            authorName={job.clientName}
+            authorType="client"
+            canComment={job.status !== "completed" && job.status !== "cancelled"}
+          />
         </div>
 
         {/* Site Visit Report */}

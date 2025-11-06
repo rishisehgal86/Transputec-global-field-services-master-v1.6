@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
+import { JobComments } from "@/components/JobComments";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -626,6 +627,16 @@ export default function JobDetail() {
             )}
           </div>
         </div>
+        {/* Comments Section */}
+        <div className="mb-6">
+          <JobComments
+            token={job.jobToken}
+            authorName="Admin"
+            authorType="admin"
+            canComment={job.status !== "completed" && job.status !== "cancelled"}
+          />
+        </div>
+
         {/* Site Visit Report */}
         {job.status === "completed" && svr && (
           <div className="mb-6">

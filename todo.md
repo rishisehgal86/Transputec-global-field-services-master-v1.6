@@ -217,3 +217,21 @@
 - [x] Add edit capability for video conference link in admin job detail
 - [x] Add edit capability for video conference link in client tracker
 
+
+
+
+## Version 1.9 - SVR Photo & Video Upload
+- [x] Add media files table to database schema for SVR attachments
+- [x] Push database schema changes for media files
+- [x] Add file upload endpoint for photos and videos
+- [x] Update engineer SVR form to support photo/video uploads
+- [x] Upload media files after SVR submission
+- [x] Display uploaded media in admin SVR view
+- [x] Display uploaded media in client SVR view
+- [x] Add file size and type validation
+- [x] Add job comments table to database (supports engineer, client, admin)
+- [x] Create comment posting functionality for all user types
+- [x] Display comments on engineer view page
+- [x] Display comments on admin job detail page
+- [x] Display comments on client tracker page
+

@@ -171,3 +171,42 @@ export const siteVisitReports = mysqlTable("siteVisitReports", {
 export type SiteVisitReport = typeof siteVisitReports.$inferSelect;
 export type InsertSiteVisitReport = typeof siteVisitReports.$inferInsert;
 
+/**
+ * SVR Media Files - stores photos and videos attached to site visit reports
+ */
+export const svrMediaFiles = mysqlTable("svrMediaFiles", {
+  id: int("id").autoincrement().primaryKey(),
+  svrId: int("svrId").notNull().references(() => siteVisitReports.id),
+  
+  // File Information
+  fileKey: varchar("fileKey", { length: 500 }).notNull(), // S3 key
+  fileUrl: varchar("fileUrl", { length: 1000 }).notNull(), // S3 URL
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileType: mysqlEnum("fileType", ["image", "video"]).notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  fileSize: int("fileSize").notNull(), // in bytes
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SvrMediaFile = typeof svrMediaFiles.$inferSelect;
+export type InsertSvrMediaFile = typeof svrMediaFiles.$inferInsert;
+
+/**
+ * Job Comments - stores comments/notes from engineers and clients visible to all parties
+ */
+export const jobComments = mysqlTable("jobComments", {
+  id: int("id").autoincrement().primaryKey(),
+  jobId: int("jobId").notNull().references(() => jobs.id),
+  
+  // Comment Information
+  authorName: varchar("authorName", { length: 255 }).notNull(),
+  authorType: mysqlEnum("authorType", ["engineer", "client", "admin"]).notNull(),
+  comment: text("comment").notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type JobComment = typeof jobComments.$inferSelect;
+export type InsertJobComment = typeof jobComments.$inferInsert;
+

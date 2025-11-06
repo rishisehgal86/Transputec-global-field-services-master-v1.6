@@ -7,7 +7,7 @@ import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Separator } from "./ui/separator";
 import SignatureCanvas from "react-signature-canvas";
-import { FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2, Upload, Image, Video, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface SiteVisitReportFormProps {
@@ -32,6 +32,7 @@ export interface SiteVisitReportData {
   contactAgreed: boolean;
   clientSignatory: string;
   clientSignatureData: string;
+  uploadedFiles?: Array<{file: File, preview: string, type: 'image' | 'video'}>;
 }
 
 export function SiteVisitReportForm({
@@ -42,6 +43,7 @@ export function SiteVisitReportForm({
   isSubmitting = false
 }: SiteVisitReportFormProps) {
   const signatureRef = useRef<SignatureCanvas>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{file: File, preview: string, type: 'image' | 'video'}>>([]);
   const [formData, setFormData] = useState({
     visitDate: new Date().toISOString().slice(0, 16),
     ticketNumbers: "",
@@ -91,6 +93,7 @@ export function SiteVisitReportForm({
       contactAgreed: formData.contactAgreed,
       clientSignatory: formData.clientSignatory,
       clientSignatureData: signatureData,
+      uploadedFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
     };
 
     onSubmit(svrData);
@@ -228,6 +231,75 @@ export function SiteVisitReportForm({
                   On-site contact agreed with work performed
                 </Label>
               </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Photos & Videos */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Photos & Videos (Optional)</h3>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="mediaUpload">Upload Photos or Videos</Label>
+                <Input
+                  id="mediaUpload"
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    files.forEach(file => {
+                      // Validate file size (max 50MB)
+                      if (file.size > 50 * 1024 * 1024) {
+                        toast.error(`${file.name} exceeds 50MB limit`);
+                        return;
+                      }
+                      
+                      const fileType = file.type.startsWith('image/') ? 'image' : 'video';
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        setUploadedFiles(prev => [...prev, {
+                          file,
+                          preview: e.target?.result as string,
+                          type: fileType
+                        }]);
+                      };
+                      reader.readAsDataURL(file);
+                    });
+                    e.target.value = ''; // Reset input
+                  }}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Accepted formats: Images (JPG, PNG, etc.) and Videos (MP4, MOV, etc.). Max 50MB per file.
+                </p>
+              </div>
+              
+              {uploadedFiles.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {uploadedFiles.map((item, index) => (
+                    <div key={index} className="relative border rounded-lg p-2">
+                      {item.type === 'image' ? (
+                        <img src={item.preview} alt={item.file.name} className="w-full h-32 object-cover rounded" />
+                      ) : (
+                        <div className="w-full h-32 bg-gray-100 rounded flex items-center justify-center">
+                          <Video className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      <p className="text-xs text-gray-600 mt-1 truncate">{item.file.name}</p>
+                      <p className="text-xs text-gray-500">{(item.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

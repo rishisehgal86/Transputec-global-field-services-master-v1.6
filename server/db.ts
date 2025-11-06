@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory } from "../drizzle/schema";
+import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory, svrMediaFiles, InsertSvrMediaFile, jobComments, InsertJobComment } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -116,5 +116,52 @@ export async function updateJobVideoConferenceLink(jobId: number, videoConferenc
     console.error('[Database] Failed to update video conference link:', error);
     throw error;
   }
+}
+
+
+
+// SVR Media File Functions
+
+export async function addSvrMediaFile(mediaFile: InsertSvrMediaFile) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(svrMediaFiles).values(mediaFile);
+}
+
+export async function getSvrMediaFiles(svrId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db.select().from(svrMediaFiles).where(eq(svrMediaFiles.svrId, svrId)).orderBy(desc(svrMediaFiles.createdAt));
+}
+
+export async function deleteSvrMediaFile(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(svrMediaFiles).where(eq(svrMediaFiles.id, id)).limit(1);
+  if (result.length === 0) return null;
+  
+  await db.delete(svrMediaFiles).where(eq(svrMediaFiles.id, id));
+  return result[0];
+}
+
+
+
+// Job Comments Functions
+
+export async function addJobComment(comment: InsertJobComment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(jobComments).values(comment);
+}
+
+export async function getJobComments(jobId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return await db.select().from(jobComments).where(eq(jobComments.jobId, jobId)).orderBy(jobComments.createdAt);
 }
 

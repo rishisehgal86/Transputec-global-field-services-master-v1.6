@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { FileText, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { FileText, CheckCircle2, XCircle, Mail, Image as ImageIcon, Video } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -23,6 +24,12 @@ export function SiteVisitReportDisplay({
 }: SiteVisitReportDisplayProps) {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [emailAddress, setEmailAddress] = useState("");
+  
+  // Fetch media files for this SVR
+  const { data: mediaFiles = [] } = trpc.svr.getMedia.useQuery(
+    { token: jobData?.jobToken || "" },
+    { enabled: !!jobData?.jobToken }
+  );
 
   const formatDateTime = (date: Date | string | null | undefined) => {
     if (!date) return "N/A";
@@ -210,6 +217,52 @@ export function SiteVisitReportDisplay({
             This Site Visit Report was completed on {formatDateTime(svr.createdAt)} and is permanently stored with this job record.
           </p>
         </div>
+
+        {/* Photos & Videos */}
+        {mediaFiles.length > 0 && (
+          <>
+            <Separator className="my-6" />
+            <div>
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Photos & Videos
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {mediaFiles.map((media) => (
+                  <div key={media.id} className="border rounded-lg p-2 hover:shadow-md transition-shadow">
+                    {media.fileType === 'image' ? (
+                      <a href={media.fileUrl} target="_blank" rel="noopener noreferrer">
+                        <img 
+                          src={media.fileUrl} 
+                          alt={media.fileName} 
+                          className="w-full h-40 object-cover rounded cursor-pointer hover:opacity-90"
+                        />
+                      </a>
+                    ) : (
+                      <div className="relative">
+                        <video 
+                          src={media.fileUrl} 
+                          controls 
+                          className="w-full h-40 object-cover rounded"
+                        />
+                        <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                          <Video className="h-3 w-3" />
+                          Video
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-600 mt-2 truncate" title={media.fileName}>
+                      {media.fileName}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {(media.fileSize / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

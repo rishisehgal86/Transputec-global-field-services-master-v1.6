@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { SiteVisitReportForm, type SiteVisitReportData } from "@/components/SiteVisitReportForm";
+import { JobComments } from "@/components/JobComments";
 
 export default function EngineerView() {
   const [match, params] = useRoute("/engineer/:token");
@@ -46,8 +47,44 @@ export default function EngineerView() {
     },
   });
 
+  const uploadMediaMutation = trpc.svr.uploadMedia.useMutation();
+
   const createSVRMutation = trpc.svr.create.useMutation({
-    onSuccess: () => {
+    onSuccess: async (result, variables: any) => {
+      // Upload media files if any
+      if (variables.uploadedFiles && variables.uploadedFiles.length > 0) {
+        toast.info(`Uploading ${variables.uploadedFiles.length} file(s)...`);
+        
+        for (const item of variables.uploadedFiles) {
+          try {
+            // Convert file to base64
+            const reader = new FileReader();
+            const base64Data = await new Promise<string>((resolve, reject) => {
+              reader.onload = () => {
+                const result = reader.result as string;
+                // Remove data URL prefix
+                const base64 = result.split(',')[1];
+                resolve(base64);
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(item.file);
+            });
+            
+            await uploadMediaMutation.mutateAsync({
+              token,
+              fileName: item.file.name,
+              fileType: item.type,
+              mimeType: item.file.type,
+              fileData: base64Data,
+            });
+          } catch (error) {
+            console.error('Failed to upload file:', item.file.name, error);
+            toast.error(`Failed to upload ${item.file.name}`);
+          }
+        }
+        toast.success("All files uploaded successfully!");
+      }
+      
       toast.success("Site Visit Report submitted! Job marked as completed.");
       setShowSVRForm(false);
       refetch();
@@ -460,6 +497,18 @@ export default function EngineerView() {
             )}
           </CardContent>
         </Card>
+
+        {/* Comments Section */}
+        {isAccepted && (
+          <div className="mb-6">
+            <JobComments
+              token={token}
+              authorName={engineerName || job.engineerName || "Engineer"}
+              authorType="engineer"
+              canComment={!isCompleted}
+            />
+          </div>
+        )}
       </main>
     </div>
   );
