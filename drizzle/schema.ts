@@ -57,6 +57,7 @@ export const jobs = mysqlTable("jobs", {
   // Additional Information
   coveredByCOI: boolean("coveredByCOI").default(true),
   notes: text("notes"),
+  videoConferenceLink: varchar("videoConferenceLink", { length: 500 }),
   
   // Job Status
   status: mysqlEnum("status", [

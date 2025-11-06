@@ -188,6 +188,22 @@
 - [x] Fix redirect to use window.location.replace()
 - [x] Add SPA routing configuration files for various hosting platforms
 - [x] Create comprehensive HOSTING.md guide
-- [ ] Test login flow on external hosting
-- [ ] Push fix to demoenvironment branch
+- [x] Test login flow on external hosting
+- [x] Push fix to demoenvironment branch
+
+
+
+
+## Version 1.8 - Security & Feature Enhancements
+- [x] Remove default credentials display from login page
+- [x] Add videoConferenceLink field to jobs table
+- [x] Add video conference link input to request service form
+- [x] Display video conference link on engineer view
+- [x] Display video conference link on admin job detail
+- [x] Display video conference link on client tracker
+- [ ] Add edit capability for video link on admin job detail
+- [ ] Add edit capability for video link on client tracker
+- [x] Create password change functionality for logged-in users
+- [x] Create user management page for admins (create/edit/delete users)
+- [x] Add navigation link to user management in admin dashboard
 

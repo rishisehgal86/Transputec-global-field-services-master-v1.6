@@ -12,6 +12,7 @@ import CreateJob from "./pages/CreateJob";
 import JobDetail from "./pages/JobDetail";
 import EngineerView from "./pages/EngineerView";
 import ClientTracker from "./pages/ClientTracker";
+import UserManagement from "./pages/UserManagement";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/request" component={RequestService} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/create" component={CreateJob} />
+      <Route path="/admin/users" component={UserManagement} />
       <Route path="/admin/job/:id" component={JobDetail} />
       <Route path="/engineer/:token" component={EngineerView} />
       <Route path="/track/:token" component={ClientTracker} />

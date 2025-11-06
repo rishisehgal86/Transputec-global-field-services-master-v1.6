@@ -66,7 +66,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@transputec.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loginMutation.isPending}
@@ -103,15 +103,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Default credentials:</p>
-            <p className="font-mono text-xs mt-1">
-              admin@transputec.com / Admin@123
-            </p>
-            <p className="text-xs mt-2 text-amber-600">
-              Please change the default password after first login
-            </p>
-          </div>
+
         </CardContent>
       </Card>
     </div>

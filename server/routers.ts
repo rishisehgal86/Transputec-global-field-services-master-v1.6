@@ -116,6 +116,7 @@ export const appRouter = router({
         toolsRequired: z.string().optional(),
         deviceDetails: z.string().optional(),
         scopeOfWork: z.string().optional(),
+        videoConferenceLink: z.string().optional(),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -201,6 +202,7 @@ export const appRouter = router({
         incidentDetails: z.string().optional(),
         scopeOfWork: z.string().optional(),
         coveredByCOI: z.boolean().optional(),
+        videoConferenceLink: z.string().optional(),
         notes: z.string().optional(),
         clientName: z.string(),
       }))
@@ -473,6 +475,97 @@ export const appRouter = router({
           console.error("Failed to send SVR email:", error);
           throw new Error("Failed to send SVR email");
         }
+      }),
+  }),
+
+  users: router({
+    // List all users (admin only)
+    list: protectedProcedure.query(async () => {
+      const { getAllUsers } = await import('./auth');
+      return await getAllUsers();
+    }),
+
+    // Create a new user (admin only)
+    create: protectedProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string(),
+        password: z.string().min(8),
+        role: z.enum(['super_admin', 'admin']).default('admin'),
+      }))
+      .mutation(async ({ input }) => {
+        const { createUser, getUserByEmail } = await import('./auth');
+        
+        // Check if user already exists
+        const existingUser = await getUserByEmail(input.email);
+        if (existingUser) {
+          throw new Error('User with this email already exists');
+        }
+        
+        const user = await createUser(input.email, input.password, input.name, input.role);
+        if (!user) {
+          throw new Error('Failed to create user');
+        }
+        
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        };
+      }),
+
+    // Change password (authenticated user)
+    changePassword: protectedProcedure
+      .input(z.object({
+        currentPassword: z.string(),
+        newPassword: z.string().min(8),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { authenticateUser, updateUserPassword } = await import('./auth');
+        
+        if (!ctx.user) {
+          throw new Error('Not authenticated');
+        }
+        
+        // Verify current password
+        const user = await authenticateUser(ctx.user.email, input.currentPassword);
+        if (!user) {
+          throw new Error('Current password is incorrect');
+        }
+        
+        // Update password
+        const success = await updateUserPassword(ctx.user.id, input.newPassword);
+        if (!success) {
+          throw new Error('Failed to update password');
+        }
+        
+        return { success: true };
+      }),
+
+    // Toggle user active status (admin only)
+    toggleStatus: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { updateUserStatus } = await import('./auth');
+        
+        // Prevent users from deactivating themselves
+        if (ctx.user && input.userId === ctx.user.id) {
+          throw new Error('Cannot deactivate your own account');
+        }
+        
+        const success = await updateUserStatus(input.userId, input.isActive);
+        if (!success) {
+          throw new Error('Failed to update user status');
+        }
+        
+        return { success: true, isActive: input.isActive };
       }),
   }),
 });

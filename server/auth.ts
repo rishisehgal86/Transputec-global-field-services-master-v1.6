@@ -193,3 +193,66 @@ export async function initializeSuperAdmin(): Promise<void> {
   }
 }
 
+
+
+/**
+ * Get all users
+ */
+export async function getAllUsers(): Promise<User[]> {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  try {
+    const result = await db.select().from(users);
+    return result;
+  } catch (error) {
+    console.error('[Auth] Get all users error:', error);
+    return [];
+  }
+}
+
+/**
+ * Update user password
+ */
+export async function updateUserPassword(userId: number, newPassword: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    return false;
+  }
+
+  try {
+    const passwordHash = await hashPassword(newPassword);
+    await db.update(users)
+      .set({ passwordHash })
+      .where(eq(users.id, userId));
+    
+    return true;
+  } catch (error) {
+    console.error('[Auth] Update password error:', error);
+    return false;
+  }
+}
+
+/**
+ * Update user active status
+ */
+export async function updateUserStatus(userId: number, isActive: boolean): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    return false;
+  }
+
+  try {
+    await db.update(users)
+      .set({ isActive })
+      .where(eq(users.id, userId));
+    
+    return true;
+  } catch (error) {
+    console.error('[Auth] Update user status error:', error);
+    return false;
+  }
+}
+

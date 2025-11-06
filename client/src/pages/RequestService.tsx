@@ -101,6 +101,7 @@ export default function RequestService() {
       toolsRequired: formData.get("toolsRequired") as string || undefined,
       deviceDetails: formData.get("deviceDetails") as string || undefined,
       scopeOfWork: formData.get("scopeOfWork") as string || undefined,
+      videoConferenceLink: formData.get("videoConferenceLink") as string || undefined,
       notes: formData.get("notes") as string || undefined,
     });
   };
@@ -451,6 +452,19 @@ export default function RequestService() {
                     rows={3}
                     placeholder="Detailed breakdown of activities to be performed..."
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="videoConferenceLink">Video Conference Link (Optional)</Label>
+                  <Input 
+                    id="videoConferenceLink" 
+                    name="videoConferenceLink" 
+                    type="url"
+                    placeholder="https://zoom.us/j/123456789 or https://teams.microsoft.com/..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    If remote support is needed, provide a video conference link (Zoom, Teams, etc.)
+                  </p>
                 </div>
 
                 <div>

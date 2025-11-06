@@ -455,6 +455,21 @@ export default function JobDetail() {
                       <p className="text-gray-600">Down Time</p>
                       <p className="font-medium">{job.downTime ? "Yes" : "No"}</p>
                     </div>
+                    {job.videoConferenceLink && (
+                      <div className="md:col-span-2">
+                        <p className="text-gray-600">Video Conference Link</p>
+                        <p className="font-medium">
+                          <a 
+                            href={job.videoConferenceLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline break-all"
+                          >
+                            {job.videoConferenceLink}
+                          </a>
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, ExternalLink, MapPin } from "lucide-react";
+import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -57,12 +57,20 @@ export default function AdminDashboard() {
               </Link>
               <p className="text-sm text-gray-600">Admin Dashboard</p>
             </div>
-            <Link href="/admin/create">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Job
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/admin/users">
+                <Button variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  User Management
+                </Button>
+              </Link>
+              <Link href="/admin/create">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Job
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>

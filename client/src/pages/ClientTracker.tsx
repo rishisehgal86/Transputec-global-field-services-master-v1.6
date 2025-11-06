@@ -304,6 +304,23 @@ export default function ClientTracker() {
                   </>
                 )}
 
+                {job.videoConferenceLink && (
+                  <>
+                    <Separator />
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 mb-1">Video Conference Link</div>
+                      <a 
+                        href={job.videoConferenceLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline break-all"
+                      >
+                        {job.videoConferenceLink}
+                      </a>
+                    </div>
+                  </>
+                )}
+
                 {job.notes && (
                   <>
                     <Separator />
