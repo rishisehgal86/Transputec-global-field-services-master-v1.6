@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle } from "lucide-react";
+import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle, RefreshCw } from "lucide-react";
 import { APP_TITLE } from "@/const";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -27,9 +27,16 @@ export default function EngineerView() {
     { enabled: !!token, refetchInterval: 10000 }
   );
 
+  const { data: latestLocation } = trpc.jobs.getLatestLocation.useQuery(
+    { token },
+    { enabled: !!token && !!job && (job.status === "accepted" || job.status === "en_route" || job.status === "on_site"), refetchInterval: 10000 }
+  );
+
   const acceptMutation = trpc.jobs.accept.useMutation({
     onSuccess: () => {
       toast.success("Job accepted successfully!");
+      // Capture location automatically on accept
+      captureCurrentLocation('Job accepted');
       refetch();
     },
     onError: (error) => {
@@ -106,6 +113,35 @@ export default function EngineerView() {
 
   const addLocationMutation = trpc.jobs.addLocation.useMutation();
 
+  // Capture current location once (for milestones)
+  const captureCurrentLocation = (milestone: string) => {
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        addLocationMutation.mutate({
+          token,
+          latitude: position.coords.latitude.toString(),
+          longitude: position.coords.longitude.toString(),
+          accuracy: position.coords.accuracy.toString(),
+          trackingType: "milestone",
+        });
+        console.log(`Location captured for: ${milestone}`);
+      },
+      (error) => {
+        console.error("Failed to capture location:", error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
   const startTracking = (trackingType: "en_route" | "on_site") => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
@@ -146,6 +182,14 @@ export default function EngineerView() {
   };
 
   const handleStatusChange = (status: "en_route" | "on_site" | "completed") => {
+    // Capture location at milestone
+    if (status === "en_route") {
+      captureCurrentLocation('En route to site');
+    } else if (status === "on_site") {
+      captureCurrentLocation('Arrived on site');
+    } else if (status === "completed") {
+      captureCurrentLocation('Job completed');
+    }
     if (status === "en_route") {
       updateStatusMutation.mutate({ token, status });
       startTracking("en_route");
@@ -319,10 +363,31 @@ export default function EngineerView() {
                   Complete Job & Submit Report
                 </Button>
               )}
+              {/* Manual Location Update Button */}
+              {isAccepted && !isCompleted && (
+                <Button
+                  onClick={() => {
+                    captureCurrentLocation('Manual update');
+                    toast.success('Location updated!');
+                  }}
+                  variant="outline"
+                  className="w-full"
+                  disabled={addLocationMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Update My Location
+                </Button>
+              )}
               {isTracking && (
                 <p className="text-sm text-green-700 text-center">
                   📍 Location tracking active
                 </p>
+              )}
+              {/* Last Location Update */}
+              {latestLocation && (
+                <div className="text-xs text-gray-600 text-center pt-2 border-t">
+                  Last location update: {new Date(latestLocation.timestamp).toLocaleString()}
+                </div>
               )}
             </CardContent>
           </Card>

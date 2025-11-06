@@ -389,7 +389,7 @@ export const appRouter = router({
         latitude: z.string(),
         longitude: z.string(),
         accuracy: z.string().optional(),
-        trackingType: z.enum(["en_route", "on_site"]),
+        trackingType: z.enum(["en_route", "on_site", "milestone"]),
       }))
       .mutation(async ({ input }) => {
         const job = await getJobByToken(input.token);

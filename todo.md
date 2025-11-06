@@ -235,3 +235,16 @@
 - [x] Display comments on admin job detail page
 - [x] Display comments on client tracker page
 
+
+
+
+## Version 2.0 - Smart Milestone Tracking (iOS Compatible)
+- [x] Add automatic location capture when engineer accepts job
+- [x] Add automatic location capture when engineer clicks "En Route"
+- [x] Add automatic location capture when engineer clicks "Arrived"
+- [x] Add automatic location capture when engineer completes job
+- [x] Create "Update My Location" manual button on engineer page
+- [x] Display last location update timestamp on engineer page
+- [x] Show location update history on admin job detail page (already exists in LiveMap)
+- [x] Add location update notifications/indicators
+

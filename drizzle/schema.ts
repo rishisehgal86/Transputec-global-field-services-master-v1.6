@@ -110,7 +110,7 @@ export const jobLocations = mysqlTable("jobLocations", {
   accuracy: varchar("accuracy", { length: 50 }), // in meters
   
   // Tracking context
-  trackingType: mysqlEnum("trackingType", ["en_route", "on_site"]).notNull(),
+  trackingType: mysqlEnum("trackingType", ["en_route", "on_site", "milestone"]).notNull(),
   
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
