@@ -266,3 +266,11 @@
 - [x] Ensure empty videoConferenceLink is handled correctly (filter undefined values)
 - [x] Test request form submission with and without video link (ready for user testing)
 
+
+
+
+## Version 2.0.3 - Cookie Configuration Fix
+- [x] Update getSessionCookieOptions to handle dev/prod environments
+- [x] Use 'lax' sameSite for HTTP (development)
+- [x] Use 'none' sameSite for HTTPS (production)
+
