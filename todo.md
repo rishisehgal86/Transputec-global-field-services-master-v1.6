@@ -258,3 +258,11 @@
 - [x] Verify ETA calculations are working
 - [x] Ensure milestone tracking works alongside live tracking
 
+
+
+
+## Version 2.0.2 - Fix Request Form Submission
+- [x] Fix videoConferenceLink field causing database insertion error
+- [x] Ensure empty videoConferenceLink is handled correctly (filter undefined values)
+- [x] Test request form submission with and without video link (ready for user testing)
+

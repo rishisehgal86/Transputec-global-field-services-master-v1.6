@@ -25,7 +25,12 @@ export async function createJob(job: InsertJob) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(jobs).values(job);
+  // Filter out undefined values to prevent "default" string insertion
+  const cleanedJob = Object.fromEntries(
+    Object.entries(job).filter(([_, value]) => value !== undefined)
+  ) as InsertJob;
+  
+  const result = await db.insert(jobs).values(cleanedJob);
   const insertId = Number(result[0].insertId);
   
   // Fetch and return the created job
