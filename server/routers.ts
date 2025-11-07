@@ -243,6 +243,40 @@ export const appRouter = router({
         return await getJobById(input.id);
       }),
 
+    // Send job assignment email to engineer (admin only)
+    sendToEngineer: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+        engineerEmail: z.string().email(),
+        engineerName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const job = await getJobById(input.jobId);
+        if (!job) throw new Error("Job not found");
+
+        // Update job status to sent_to_engineer
+        await updateJobStatus(job.id, "sent_to_engineer");
+
+        // Send email notification to engineer
+        try {
+          const { sendJobAssignmentNotification } = await import('./email');
+          await sendJobAssignmentNotification({
+            engineerEmail: input.engineerEmail,
+            engineerName: input.engineerName,
+            siteName: job.siteName,
+            siteAddress: job.siteAddress || 'N/A',
+            scheduledDateTime: job.scheduledDateTime || undefined,
+            incidentDetails: job.incidentDetails || 'N/A',
+            jobToken: job.jobToken,
+          });
+          console.log('[Email] Job assignment sent to engineer:', input.engineerEmail);
+          return { success: true, message: 'Job assignment email sent successfully' };
+        } catch (error) {
+          console.error('[Email] Failed to send job assignment:', error);
+          throw new Error('Failed to send job assignment email');
+        }
+      }),
+
     // Accept job (engineer via link)
     accept: publicProcedure
       .input(z.object({
@@ -270,6 +304,22 @@ export const appRouter = router({
           status: "accepted",
           notes: `Accepted by ${input.engineerName}`,
         });
+
+        // Send email notification to client
+        if (job.clientEmail) {
+          try {
+            const { sendStatusUpdateNotification } = await import('./email');
+            await sendStatusUpdateNotification(job.clientEmail, {
+              siteName: job.siteName,
+              status: 'accepted',
+              engineerName: input.engineerName,
+              jobToken: job.jobToken,
+            });
+            console.log('[Email] Status update sent to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send status update:', error);
+          }
+        }
 
         return { success: true };
       }),
@@ -328,6 +378,22 @@ export const appRouter = router({
           notes: input.notes,
         });
 
+        // Send email notification to client for status changes
+        if (job.clientEmail && ['en_route', 'on_site', 'completed'].includes(input.status)) {
+          try {
+            const { sendStatusUpdateNotification } = await import('./email');
+            await sendStatusUpdateNotification(job.clientEmail, {
+              siteName: job.siteName,
+              status: input.status,
+              engineerName: job.engineerName || 'Engineer',
+              jobToken: job.jobToken,
+            });
+            console.log('[Email] Status update sent to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send status update:', error);
+          }
+        }
+
         return { success: true };
       }),
 
@@ -351,6 +417,44 @@ export const appRouter = router({
           authorType: input.authorType,
           comment: input.comment,
         });
+        
+        // Send email notifications to all relevant parties
+        const { sendCommentNotification } = await import('./email');
+        const recipients: string[] = [];
+        
+        // Add client email if available and not the author
+        if (job.clientEmail && input.authorType !== 'client') {
+          recipients.push(job.clientEmail);
+        }
+        
+        // Add engineer email if available and not the author
+        if (job.engineerEmail && input.authorType !== 'engineer') {
+          recipients.push(job.engineerEmail);
+        }
+        
+        // Add admin email if not the author
+        if (input.authorType !== 'admin') {
+          const adminEmail = process.env.ADMIN_EMAIL;
+          if (adminEmail) {
+            recipients.push(adminEmail);
+          }
+        }
+        
+        // Send notifications to all recipients
+        for (const email of recipients) {
+          try {
+            await sendCommentNotification(email, {
+              siteName: job.siteName,
+              authorName: input.authorName,
+              authorType: input.authorType,
+              comment: input.comment,
+              jobToken: job.jobToken,
+            });
+            console.log('[Email] Comment notification sent to:', email);
+          } catch (error) {
+            console.error('[Email] Failed to send comment notification to', email, ':', error);
+          }
+        }
         
         return { success: true };
       }),
@@ -488,6 +592,38 @@ export const appRouter = router({
           status: "completed",
           notes: "Job completed with Site Visit Report",
         });
+
+        // Send completion notifications to client and admin
+        const { sendJobCompletionNotification } = await import('./email');
+        
+        // Send to client
+        if (job.clientEmail) {
+          try {
+            await sendJobCompletionNotification(job.clientEmail, {
+              siteName: job.siteName,
+              engineerName: input.engineerName,
+              jobToken: job.jobToken,
+            });
+            console.log('[Email] Completion notification sent to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send completion notification to client:', error);
+          }
+        }
+        
+        // Send to admin
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+          try {
+            await sendJobCompletionNotification(adminEmail, {
+              siteName: job.siteName,
+              engineerName: input.engineerName,
+              jobToken: job.jobToken,
+            });
+            console.log('[Email] Completion notification sent to admin:', adminEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send completion notification to admin:', error);
+          }
+        }
 
         return { success: true, svr };
       }),
