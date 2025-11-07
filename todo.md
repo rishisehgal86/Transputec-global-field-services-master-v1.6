@@ -274,3 +274,11 @@
 - [x] Use 'lax' sameSite for HTTP (development)
 - [x] Use 'none' sameSite for HTTPS (production)
 
+
+
+
+## Version 2.0.4 - Fix Comment Posting
+- [x] Fix jobComments database insertion error (applied undefined filter)
+- [x] Ensure comment text is properly passed to database
+- [x] Test comment posting from all user types (admin, engineer, client)
+

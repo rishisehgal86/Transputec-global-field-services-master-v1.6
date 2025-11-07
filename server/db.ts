@@ -160,7 +160,12 @@ export async function addJobComment(comment: InsertJobComment) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  await db.insert(jobComments).values(comment);
+  // Filter out undefined values to prevent "default" string insertion
+  const cleanedComment = Object.fromEntries(
+    Object.entries(comment).filter(([_, value]) => value !== undefined)
+  ) as InsertJobComment;
+  
+  await db.insert(jobComments).values(cleanedComment);
 }
 
 export async function getJobComments(jobId: number) {
