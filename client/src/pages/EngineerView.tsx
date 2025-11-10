@@ -221,11 +221,11 @@ export default function EngineerView() {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="py-20 text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-600">Job not found or link is invalid</p>
+            <p className="text-muted-foreground">Job not found or link is invalid</p>
           </CardContent>
         </Card>
       </div>
@@ -239,10 +239,10 @@ export default function EngineerView() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">{APP_TITLE}</h1>
-          <p className="text-sm text-gray-600">Field Engineer Portal</p>
+          <h1 className="text-2xl font-bold text-foreground">{APP_TITLE}</h1>
+          <p className="text-sm text-muted-foreground">Field Engineer Portal</p>
         </div>
       </header>
 
@@ -385,7 +385,7 @@ export default function EngineerView() {
               )}
               {/* Last Location Update */}
               {latestLocation && (
-                <div className="text-xs text-gray-600 text-center pt-2 border-t">
+                <div className="text-xs text-muted-foreground text-center pt-2 border-t">
                   Last location update: {new Date(latestLocation.timestamp).toLocaleString()}
                 </div>
               )}
@@ -458,25 +458,25 @@ export default function EngineerView() {
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 {job.siteLocation && (
                   <div>
-                    <p className="text-gray-600">Location</p>
+                    <p className="text-muted-foreground">Location</p>
                     <p className="font-medium">{job.siteLocation}</p>
                   </div>
                 )}
                 {job.siteAddress && (
                   <div className="md:col-span-2">
-                    <p className="text-gray-600">Address</p>
+                    <p className="text-muted-foreground">Address</p>
                     <p className="font-medium whitespace-pre-line">{job.siteAddress}</p>
                   </div>
                 )}
                 {job.siteContactName && (
                   <div>
-                    <p className="text-gray-600">Contact Name</p>
+                    <p className="text-muted-foreground">Contact Name</p>
                     <p className="font-medium">{job.siteContactName}</p>
                   </div>
                 )}
                 {job.siteContactNumber && (
                   <div>
-                    <p className="text-gray-600">Contact Number</p>
+                    <p className="text-muted-foreground">Contact Number</p>
                     <p className="font-medium">
                       <a href={`tel:${job.siteContactNumber}`} className="text-blue-600 hover:underline">
                         {job.siteContactNumber}
@@ -496,25 +496,25 @@ export default function EngineerView() {
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 {job.scheduledDateTime && (
                   <div>
-                    <p className="text-gray-600">Scheduled Date & Time</p>
+                    <p className="text-muted-foreground">Scheduled Date & Time</p>
                     <p className="font-medium">{new Date(job.scheduledDateTime).toLocaleString()}</p>
                   </div>
                 )}
                 {job.hoursRequired && (
                   <div>
-                    <p className="text-gray-600">Hours Required</p>
+                    <p className="text-muted-foreground">Hours Required</p>
                     <p className="font-medium">{job.hoursRequired}</p>
                   </div>
                 )}
                 {job.projectName && (
                   <div>
-                    <p className="text-gray-600">Project</p>
+                    <p className="text-muted-foreground">Project</p>
                     <p className="font-medium">{job.projectName}</p>
                   </div>
                 )}
                 {job.videoConferenceLink && (
                   <div className="md:col-span-2">
-                    <p className="text-gray-600">Video Conference Link</p>
+                    <p className="text-muted-foreground">Video Conference Link</p>
                     <p className="font-medium">
                       <a 
                         href={job.videoConferenceLink} 
@@ -537,13 +537,13 @@ export default function EngineerView() {
                 <div className="space-y-3 text-sm">
                   {job.toolsRequired && (
                     <div>
-                      <p className="text-gray-600 font-medium">Tools Required</p>
+                      <p className="text-muted-foreground font-medium">Tools Required</p>
                       <p className="whitespace-pre-line">{job.toolsRequired}</p>
                     </div>
                   )}
                   {job.scopeOfWork && (
                     <div>
-                      <p className="text-gray-600 font-medium">Scope of Work</p>
+                      <p className="text-muted-foreground font-medium">Scope of Work</p>
                       <p className="whitespace-pre-line">{job.scopeOfWork}</p>
                     </div>
                   )}

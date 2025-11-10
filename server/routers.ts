@@ -13,7 +13,9 @@ import {
   getJobLocations,
   getLatestJobLocation,
   addJobStatusHistory,
-  getJobStatusHistory
+  getJobStatusHistory,
+  getFilteredJobs,
+  getJobFilterCounts
 } from "./db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
@@ -240,9 +242,73 @@ export const appRouter = router({
         };
       }),
 
+    // Duplicate an existing job (admin only)
+    duplicate: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const originalJob = await getJobById(input.jobId);
+        if (!originalJob) {
+          throw new Error('Job not found');
+        }
+        
+        const jobToken = randomBytes(32).toString('hex');
+        
+        // Create new job with same details but new token and status
+        await createJob({
+          siteName: originalJob.siteName,
+          siteId: originalJob.siteId || undefined,
+          siteLocation: originalJob.siteLocation || undefined,
+          siteAddress: originalJob.siteAddress || undefined,
+          siteLatitude: originalJob.siteLatitude || undefined,
+          siteLongitude: originalJob.siteLongitude || undefined,
+          siteContactName: originalJob.siteContactName || undefined,
+          siteContactNumber: originalJob.siteContactNumber || undefined,
+          changeNumber: originalJob.changeNumber || undefined,
+          incidentNumber: originalJob.incidentNumber || undefined,
+          projectName: originalJob.projectName || undefined,
+          downTime: originalJob.downTime || false,
+          scheduledDateTime: originalJob.scheduledDateTime || undefined,
+          hoursRequired: originalJob.hoursRequired || undefined,
+          toolsRequired: originalJob.toolsRequired || undefined,
+          deviceDetails: originalJob.deviceDetails || undefined,
+          incidentDetails: originalJob.incidentDetails || undefined,
+          scopeOfWork: originalJob.scopeOfWork || undefined,
+          coveredByCOI: originalJob.coveredByCOI || false,
+          videoConferenceLink: originalJob.videoConferenceLink || undefined,
+          notes: `Duplicated from job #${originalJob.id}`,
+          clientName: originalJob.clientName,
+          jobToken,
+          status: "created",
+          createdBy: ctx.user.id,
+        });
+        
+        return { 
+          success: true, 
+          jobToken,
+          engineerLink: `/engineer/${jobToken}`,
+          clientLink: `/track/${jobToken}`,
+        };
+      }),
+
     // Get all jobs (admin only)
     list: protectedProcedure.query(async () => {
       return await getAllJobs();
+    }),
+
+    // Get filtered jobs (admin only)
+    getFiltered: protectedProcedure
+      .input(z.object({
+        filter: z.enum(["today", "urgent", "overdue", "pending", "in_progress"])
+      }))
+      .query(async ({ input }) => {
+        return await getFilteredJobs(input.filter);
+      }),
+
+    // Get filter counts (admin only)
+    getFilterCounts: protectedProcedure.query(async () => {
+      return await getJobFilterCounts();
     }),
 
     // Get job by token (public - for engineer and client access)

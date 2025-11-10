@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, MapPin, Clock, CheckCircle2, Users } from "lucide-react";
 import { APP_LOGO, APP_TITLE } from "@/const";
 import { Link } from "wouter";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -17,15 +18,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {APP_LOGO && <img src={APP_LOGO} alt="Logo" className="h-8" />}
-            <h1 className="text-xl font-bold text-gray-900">{APP_TITLE}</h1>
+            <h1 className="text-xl font-bold text-foreground">{APP_TITLE}</h1>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             {isAuthenticated ? (
               <Link href="/admin">
                 <Button>Admin Dashboard</Button>
@@ -42,10 +44,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-5xl font-bold text-foreground mb-6">
             Field Engineer Dispatch & Tracking
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-muted-foreground mb-8">
             Real-time tracking and management for on-demand IT field service engineers. 
             Streamline dispatch, monitor progress, and ensure timely service delivery.
           </p>
@@ -120,8 +122,8 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-white mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-gray-600">
+      <footer className="border-t bg-background mt-20">
+        <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
           <p>&copy; 2025 Transputec. Global IT Service Provider.</p>
         </div>
       </footer>

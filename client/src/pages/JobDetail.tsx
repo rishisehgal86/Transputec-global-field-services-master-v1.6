@@ -55,6 +55,17 @@ export default function JobDetail() {
     },
   });
 
+  const duplicateJobMutation = trpc.jobs.duplicate.useMutation({
+    onSuccess: (data) => {
+      toast.success("Job duplicated successfully!");
+      // Navigate to the new job's detail page
+      setLocation(`/admin/create`);
+    },
+    onError: (error) => {
+      toast.error(`Failed to duplicate job: ${error.message}`);
+    },
+  });
+
   // Calculate ETA
   useEffect(() => {
     if (!job || !latestLocation) return;
@@ -100,18 +111,18 @@ export default function JobDetail() {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="border-b bg-white">
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-background">
           <div className="container mx-auto px-4 py-4">
             <Link href="/admin">
-              <h1 className="text-2xl font-bold text-gray-900 cursor-pointer">{APP_TITLE}</h1>
+              <h1 className="text-2xl font-bold text-foreground cursor-pointer">{APP_TITLE}</h1>
             </Link>
           </div>
         </header>
         <main className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="py-20 text-center">
-              <p className="text-gray-600">Job not found</p>
+              <p className="text-muted-foreground">Job not found</p>
               <Link href="/admin">
                 <Button className="mt-4">Back to Dashboard</Button>
               </Link>
@@ -140,11 +151,11 @@ export default function JobDetail() {
   const canUpdateStatus = job.status !== "completed" && job.status !== "cancelled" && job.status !== "declined";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white sticky top-0 z-10 shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/admin">
-            <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+            <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
               {APP_TITLE}
             </h1>
           </Link>
@@ -175,7 +186,7 @@ export default function JobDetail() {
                 </div>
                 {eta && job.status === "en_route" && (
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Estimated Arrival</p>
+                    <p className="text-sm text-muted-foreground">Estimated Arrival</p>
                     <p className="text-lg font-bold text-blue-600">{eta}</p>
                   </div>
                 )}
@@ -195,7 +206,7 @@ export default function JobDetail() {
                   showRecenterButton={true}
                 />
               </div>
-              <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <p>
                   Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
                 </p>
@@ -225,7 +236,7 @@ export default function JobDetail() {
               <CardContent className="space-y-6">
                 {/* Shareable Links */}
                 {job.jobToken && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="bg-background border border-gray-200 rounded-lg p-4">
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <LinkIcon className="h-4 w-4" />
                       Shareable Links
@@ -233,7 +244,7 @@ export default function JobDetail() {
                     <div className="space-y-3">
                       {/* Engineer Link */}
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1">
+                        <label className="text-sm font-medium text-foreground block mb-1">
                           Engineer Job Link
                         </label>
                         <div className="flex gap-2">
@@ -241,7 +252,7 @@ export default function JobDetail() {
                             type="text"
                             readOnly
                             value={`${window.location.origin}/engineer/${job.jobToken}`}
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-white font-mono"
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-background font-mono"
                           />
                           <Button
                             variant="outline"
@@ -257,7 +268,7 @@ export default function JobDetail() {
                       </div>
                       {/* Client Tracking Link */}
                       <div>
-                        <label className="text-sm font-medium text-gray-700 block mb-1">
+                        <label className="text-sm font-medium text-foreground block mb-1">
                           Client Tracking Link
                         </label>
                         <div className="flex gap-2">
@@ -265,7 +276,7 @@ export default function JobDetail() {
                             type="text"
                             readOnly
                             value={`${window.location.origin}/track/${job.jobToken}`}
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-white font-mono"
+                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded bg-background font-mono"
                           />
                           <Button
                             variant="outline"
@@ -285,7 +296,7 @@ export default function JobDetail() {
 
                 {/* Admin Controls */}
                 {canUpdateStatus && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-card border rounded-lg p-4">
                     <h4 className="font-semibold mb-3">Admin Controls</h4>
                     <div className="flex gap-2 flex-wrap">
                       {job.status === "pending_approval" && (
@@ -316,7 +327,7 @@ export default function JobDetail() {
                       )}
                       {job.status === "approved" && (
                         <div className="w-full">
-                          <p className="text-sm text-gray-700 mb-2">This request has been approved. Assign an engineer and create the job.</p>
+                          <p className="text-sm text-foreground mb-2">This request has been approved. Assign an engineer and create the job.</p>
                           <Button
                             size="sm"
                             variant="default"
@@ -360,6 +371,15 @@ export default function JobDetail() {
                       )}
                       <Button
                         size="sm"
+                        variant="outline"
+                        onClick={() => duplicateJobMutation.mutate({ jobId: job.id })}
+                        disabled={duplicateJobMutation.isPending}
+                      >
+                        <Copy className="h-4 w-4 mr-1" />
+                        Duplicate Job
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         onClick={() => {
                           if (confirm("Are you sure you want to cancel this job?")) {
@@ -385,31 +405,31 @@ export default function JobDetail() {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     {job.siteId && (
                       <div>
-                        <p className="text-gray-600">Site ID</p>
+                        <p className="text-muted-foreground">Site ID</p>
                         <p className="font-medium">{job.siteId}</p>
                       </div>
                     )}
                     {job.siteLocation && (
                       <div>
-                        <p className="text-gray-600">Location</p>
+                        <p className="text-muted-foreground">Location</p>
                         <p className="font-medium">{job.siteLocation}</p>
                       </div>
                     )}
                     {job.siteAddress && (
                       <div className="md:col-span-2">
-                        <p className="text-gray-600">Address</p>
+                        <p className="text-muted-foreground">Address</p>
                         <p className="font-medium whitespace-pre-line">{job.siteAddress}</p>
                       </div>
                     )}
                     {job.siteContactName && (
                       <div>
-                        <p className="text-gray-600">Contact Name</p>
+                        <p className="text-muted-foreground">Contact Name</p>
                         <p className="font-medium">{job.siteContactName}</p>
                       </div>
                     )}
                     {job.siteContactNumber && (
                       <div>
-                        <p className="text-gray-600">Contact Number</p>
+                        <p className="text-muted-foreground">Contact Number</p>
                         <p className="font-medium">{job.siteContactNumber}</p>
                       </div>
                     )}
@@ -425,40 +445,40 @@ export default function JobDetail() {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     {job.changeNumber && (
                       <div>
-                        <p className="text-gray-600">Change Number</p>
+                        <p className="text-muted-foreground">Change Number</p>
                         <p className="font-medium">{job.changeNumber}</p>
                       </div>
                     )}
                     {job.incidentNumber && (
                       <div>
-                        <p className="text-gray-600">Incident Number</p>
+                        <p className="text-muted-foreground">Incident Number</p>
                         <p className="font-medium">{job.incidentNumber}</p>
                       </div>
                     )}
                     {job.projectName && (
                       <div>
-                        <p className="text-gray-600">Project</p>
+                        <p className="text-muted-foreground">Project</p>
                         <p className="font-medium">{job.projectName}</p>
                       </div>
                     )}
                     {job.hoursRequired && (
                       <div>
-                        <p className="text-gray-600">Hours Required</p>
+                        <p className="text-muted-foreground">Hours Required</p>
                         <p className="font-medium">{job.hoursRequired}</p>
                       </div>
                     )}
                     {job.scheduledDateTime && (
                       <div>
-                        <p className="text-gray-600">Scheduled Date & Time</p>
+                        <p className="text-muted-foreground">Scheduled Date & Time</p>
                         <p className="font-medium">{new Date(job.scheduledDateTime).toLocaleString()}</p>
                       </div>
                     )}
                     <div>
-                      <p className="text-gray-600">Down Time</p>
+                      <p className="text-muted-foreground">Down Time</p>
                       <p className="font-medium">{job.downTime ? "Yes" : "No"}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <p className="text-gray-600 mb-2">Video Conference Link</p>
+                      <p className="text-muted-foreground mb-2">Video Conference Link</p>
                       <EditVideoConferenceLink 
                         token={job.jobToken}
                         currentLink={job.videoConferenceLink}
@@ -475,25 +495,25 @@ export default function JobDetail() {
                     <div className="space-y-3 text-sm">
                       {job.toolsRequired && (
                         <div>
-                          <p className="text-gray-600 font-medium">Tools Required</p>
+                          <p className="text-muted-foreground font-medium">Tools Required</p>
                           <p className="whitespace-pre-line">{job.toolsRequired}</p>
                         </div>
                       )}
                       {job.deviceDetails && (
                         <div>
-                          <p className="text-gray-600 font-medium">Device Details</p>
+                          <p className="text-muted-foreground font-medium">Device Details</p>
                           <p className="whitespace-pre-line">{job.deviceDetails}</p>
                         </div>
                       )}
                       {job.incidentDetails && (
                         <div>
-                          <p className="text-gray-600 font-medium">Incident/Change Details</p>
+                          <p className="text-muted-foreground font-medium">Incident/Change Details</p>
                           <p className="whitespace-pre-line">{job.incidentDetails}</p>
                         </div>
                       )}
                       {job.scopeOfWork && (
                         <div>
-                          <p className="text-gray-600 font-medium">Scope of Work</p>
+                          <p className="text-muted-foreground font-medium">Scope of Work</p>
                           <p className="whitespace-pre-line">{job.scopeOfWork}</p>
                         </div>
                       )}
@@ -525,18 +545,18 @@ export default function JobDetail() {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <div>
-                    <p className="text-gray-600">Name</p>
+                    <p className="text-muted-foreground">Name</p>
                     <p className="font-medium">{job.engineerName}</p>
                   </div>
                   {job.engineerEmail && (
                     <div>
-                      <p className="text-gray-600">Email</p>
+                      <p className="text-muted-foreground">Email</p>
                       <p className="font-medium">{job.engineerEmail}</p>
                     </div>
                   )}
                   {job.engineerPhone && (
                     <div>
-                      <p className="text-gray-600">Phone</p>
+                      <p className="text-muted-foreground">Phone</p>
                       <p className="font-medium">{job.engineerPhone}</p>
                     </div>
                   )}
@@ -551,24 +571,24 @@ export default function JobDetail() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div>
-                  <p className="text-gray-600">Created</p>
+                  <p className="text-muted-foreground">Created</p>
                   <p className="font-medium">{new Date(job.createdAt).toLocaleString()}</p>
                 </div>
                 {job.acceptedAt && (
                   <div>
-                    <p className="text-gray-600">Accepted</p>
+                    <p className="text-muted-foreground">Accepted</p>
                     <p className="font-medium">{new Date(job.acceptedAt).toLocaleString()}</p>
                   </div>
                 )}
                 {job.enRouteAt && (
                   <div>
-                    <p className="text-gray-600">En Route</p>
+                    <p className="text-muted-foreground">En Route</p>
                     <p className="font-medium">{new Date(job.enRouteAt).toLocaleString()}</p>
                   </div>
                 )}
                 {job.arrivedAt && (
                   <div>
-                    <p className="text-gray-600">Arrived On Site</p>
+                    <p className="text-muted-foreground">Arrived On Site</p>
                     <p className="font-medium">{new Date(job.arrivedAt).toLocaleString()}</p>
                     {job.enRouteAt && (
                       <p className="text-xs text-gray-500">
@@ -579,7 +599,7 @@ export default function JobDetail() {
                 )}
                 {job.completedAt && (
                   <div>
-                    <p className="text-gray-600">Completed</p>
+                    <p className="text-muted-foreground">Completed</p>
                     <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
                     {job.arrivedAt && (
                       <p className="text-xs text-gray-500">

@@ -54,10 +54,10 @@ export default function ClientTracker() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-600">Loading your service request...</p>
+          <p className="text-muted-foreground">Loading your service request...</p>
         </div>
       </div>
     );
@@ -65,12 +65,12 @@ export default function ClientTracker() {
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardContent className="py-20 text-center">
             <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Request Not Found</h2>
-            <p className="text-gray-600">The tracking link is invalid or the request has been removed.</p>
+            <p className="text-muted-foreground">The tracking link is invalid or the request has been removed.</p>
           </CardContent>
         </Card>
       </div>
@@ -191,12 +191,12 @@ export default function ClientTracker() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
-      <header className="border-b bg-white shadow-sm sticky top-0 z-10">
+      <header className="border-b bg-background shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">{APP_TITLE}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{APP_TITLE}</h1>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <RefreshCw className="h-4 w-4" />
                 <span>Updated {Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)}s ago</span>
               </div>
@@ -218,22 +218,22 @@ export default function ClientTracker() {
         <Card className={`mb-6 border-2 ${statusInfo.bgColor}`}>
           <CardContent className="py-6">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-full bg-white ${statusInfo.color}`}>
+              <div className={`p-3 rounded-full bg-background ${statusInfo.color}`}>
                 <StatusIcon className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1">{statusInfo.label}</h2>
-                <p className="text-gray-700">{statusInfo.description}</p>
+                <h2 className="text-2xl font-bold text-foreground mb-1">{statusInfo.label}</h2>
+                <p className="text-foreground">{statusInfo.description}</p>
               </div>
               {job.status === "en_route" && eta && (
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">ETA</div>
+                  <div className="text-sm text-muted-foreground">ETA</div>
                   <div className="text-2xl font-bold text-purple-700">{eta}</div>
                 </div>
               )}
               {job.status === "on_site" && timeOnSite && (
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">Time on Site</div>
+                  <div className="text-sm text-muted-foreground">Time on Site</div>
                   <div className="text-2xl font-bold text-indigo-700">{timeOnSite}</div>
                 </div>
               )}
@@ -278,7 +278,7 @@ export default function ClientTracker() {
               <CardContent className="space-y-4">
                 <div>
                   <div className="text-sm font-medium text-gray-500 mb-1">Issue Description</div>
-                  <p className="text-gray-900">{job.incidentDetails || "No description provided"}</p>
+                  <p className="text-foreground">{job.incidentDetails || "No description provided"}</p>
                 </div>
 
                 <Separator />
@@ -286,12 +286,12 @@ export default function ClientTracker() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <div className="text-sm font-medium text-gray-500 mb-1">Estimated Hours</div>
-                    <p className="text-gray-900 font-semibold">{job.hoursRequired || "Not specified"}</p>
+                    <p className="text-foreground font-semibold">{job.hoursRequired || "Not specified"}</p>
                   </div>
                   {job.scheduledDateTime && (
                     <div>
                       <div className="text-sm font-medium text-gray-500 mb-1">Scheduled Date & Time</div>
-                      <p className="text-gray-900 font-semibold">{formatDateTime(job.scheduledDateTime)}</p>
+                      <p className="text-foreground font-semibold">{formatDateTime(job.scheduledDateTime)}</p>
                     </div>
                   )}
                 </div>
@@ -301,7 +301,7 @@ export default function ClientTracker() {
                     <Separator />
                     <div>
                       <div className="text-sm font-medium text-gray-500 mb-1">Scope of Work</div>
-                      <p className="text-gray-900">{job.scopeOfWork}</p>
+                      <p className="text-foreground">{job.scopeOfWork}</p>
                     </div>
                   </>
                 )}
@@ -323,7 +323,7 @@ export default function ClientTracker() {
                     <Separator />
                     <div>
                       <div className="text-sm font-medium text-gray-500 mb-1">Additional Notes</div>
-                      <p className="text-gray-900">{job.notes}</p>
+                      <p className="text-foreground">{job.notes}</p>
                     </div>
                   </>
                 )}
@@ -358,10 +358,10 @@ export default function ClientTracker() {
                             )}
                           </div>
                           <div className="flex-1 pb-4">
-                            <div className="font-semibold text-gray-900">{historyStatusInfo.label}</div>
-                            <div className="text-sm text-gray-600">{formatDateTime(history.timestamp)}</div>
+                            <div className="font-semibold text-foreground">{historyStatusInfo.label}</div>
+                            <div className="text-sm text-muted-foreground">{formatDateTime(history.timestamp)}</div>
                             {history.notes && (
-                              <div className="text-sm text-gray-700 mt-1">{history.notes}</div>
+                              <div className="text-sm text-foreground mt-1">{history.notes}</div>
                             )}
                           </div>
                         </div>
@@ -385,9 +385,9 @@ export default function ClientTracker() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-semibold text-gray-900">{job.engineerName}</div>
+                  <div className="text-lg font-semibold text-foreground">{job.engineerName}</div>
                   {job.acceptedAt && (
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-muted-foreground mt-1">
                       Accepted {formatDateTime(job.acceptedAt)}
                     </div>
                   )}
@@ -406,18 +406,18 @@ export default function ClientTracker() {
               <CardContent className="space-y-3">
                 <div>
                   <div className="text-sm font-medium text-gray-500">Site Name</div>
-                  <div className="text-gray-900 font-semibold">{job.siteName}</div>
+                  <div className="text-foreground font-semibold">{job.siteName}</div>
                 </div>
                 {job.siteAddress && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Address</div>
-                    <div className="text-gray-900">{job.siteAddress}</div>
+                    <div className="text-foreground">{job.siteAddress}</div>
                   </div>
                 )}
                 {job.siteId && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Site ID</div>
-                    <div className="text-gray-900">{job.siteId}</div>
+                    <div className="text-foreground">{job.siteId}</div>
                   </div>
                 )}
               </CardContent>
@@ -435,7 +435,7 @@ export default function ClientTracker() {
                 {job.siteContactName && (
                   <div>
                     <div className="text-sm font-medium text-gray-500">Site Contact</div>
-                    <div className="text-gray-900">{job.siteContactName}</div>
+                    <div className="text-foreground">{job.siteContactName}</div>
                   </div>
                 )}
                 {job.siteContactNumber && (
@@ -468,30 +468,30 @@ export default function ClientTracker() {
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <div className="font-medium text-gray-500">Submitted</div>
-                  <div className="text-gray-900">{formatDateTime(job.createdAt)}</div>
+                  <div className="text-foreground">{formatDateTime(job.createdAt)}</div>
                 </div>
                 {job.acceptedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Accepted</div>
-                    <div className="text-gray-900">{formatDateTime(job.acceptedAt)}</div>
+                    <div className="text-foreground">{formatDateTime(job.acceptedAt)}</div>
                   </div>
                 )}
                 {job.enRouteAt && (
                   <div>
                     <div className="font-medium text-gray-500">En Route</div>
-                    <div className="text-gray-900">{formatDateTime(job.enRouteAt)}</div>
+                    <div className="text-foreground">{formatDateTime(job.enRouteAt)}</div>
                   </div>
                 )}
                 {job.arrivedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Arrived On Site</div>
-                    <div className="text-gray-900">{formatDateTime(job.arrivedAt)}</div>
+                    <div className="text-foreground">{formatDateTime(job.arrivedAt)}</div>
                   </div>
                 )}
                 {job.completedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Completed</div>
-                    <div className="text-gray-900">{formatDateTime(job.completedAt)}</div>
+                    <div className="text-foreground">{formatDateTime(job.completedAt)}</div>
                   </div>
                 )}
               </CardContent>

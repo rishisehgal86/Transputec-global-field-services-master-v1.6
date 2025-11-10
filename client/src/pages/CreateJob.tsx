@@ -132,11 +132,11 @@ export default function CreateJob() {
 
   if (createdLinks) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <header className="border-b bg-white sticky top-0 z-10 shadow-sm">
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <Link href="/admin">
-              <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+              <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
                 {APP_TITLE}
               </h1>
             </Link>
@@ -203,11 +203,11 @@ export default function CreateJob() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white sticky top-0 z-10 shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/admin">
-            <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+            <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
               {APP_TITLE}
             </h1>
           </Link>

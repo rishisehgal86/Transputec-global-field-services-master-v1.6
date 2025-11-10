@@ -305,3 +305,50 @@ ns
 
 - [x] Fix client tracking link not working in email notifications
 
+
+
+
+## Phase 1: Quick Wins & UX Improvements
+
+### 1.1 Dark Mode Toggle
+- [x] Extend ThemeProvider to support switchable themes
+- [x] Add theme toggle button in header
+- [x] Store preference in localStorage
+- [x] Update CSS variables for dark theme colors
+
+### 1.2 Quick Filters on Dashboard
+- [ ] Add filter state management to dashboard
+- [ ] Create filter chip components
+- [ ] Implement backend query filters (today, urgent, overdue, pending, in_progress)
+- [ ] Add URL query params for shareable filters
+
+### 1.3 Job Duplication Feature
+- [ ] Add "Duplicate" button to job detail page
+- [ ] Create duplicate endpoint in backend
+- [ ] Generate new job token for duplicated job
+- [ ] Pre-fill form with duplicated data
+
+### 1.4 Email Delivery Status Logging
+- [ ] Create email_logs table in database
+- [ ] Add logging to sendEmail function
+- [ ] Create email log viewer in admin panel
+- [ ] Track recipient, subject, status, timestamp, error message
+
+### 1.5 Automated Thank You Emails
+- [ ] Create sendThankYouEmail function
+- [ ] Design thank you email template
+- [ ] Trigger on job completion
+- [ ] Include satisfaction survey link (optional)
+
+
+
+- [x] Fix dark mode to affect entire page background (not just components)
+
+
+
+- [x] Apply dark mode theme-aware colors to all pages (Login, RequestService, AdminDashboard, CreateJob, JobDetail, EngineerView, ClientTracker, UserManagement)
+
+
+
+- [x] Fix Admin Controls section white background in JobDetail page dark mode
+

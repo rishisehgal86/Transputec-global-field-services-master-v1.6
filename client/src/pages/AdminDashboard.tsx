@@ -6,11 +6,28 @@ import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut } from "lucide-react
 import { APP_TITLE } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { JobFilters } from "@/components/JobFilters";
+import { useState } from "react";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: jobs, isLoading } = trpc.jobs.list.useQuery();
+  const [activeFilter, setActiveFilter] = useState<"all" | "today" | "urgent" | "overdue" | "pending" | "in_progress">("all");
+  
+  // Fetch all jobs or filtered jobs based on active filter
+  const { data: allJobs, isLoading: isLoadingAll } = trpc.jobs.list.useQuery(undefined, {
+    enabled: activeFilter === "all",
+  });
+  
+  const { data: filteredJobs, isLoading: isLoadingFiltered } = trpc.jobs.getFiltered.useQuery(
+    { filter: activeFilter as any },
+    { enabled: activeFilter !== "all" }
+  );
+  
+  const { data: filterCounts } = trpc.jobs.getFilterCounts.useQuery();
+  
+  const jobs = activeFilter === "all" ? allJobs : filteredJobs;
+  const isLoading = activeFilter === "all" ? isLoadingAll : isLoadingFiltered;
 
   if (authLoading) {
     return (
@@ -44,18 +61,18 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-10 shadow-sm">
+      <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <Link href="/">
-                <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+                <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
                   {APP_TITLE}
                 </h1>
               </Link>
-              <p className="text-sm text-gray-600">Admin Dashboard</p>
+              <p className="text-sm text-muted-foreground">Admin Dashboard</p>
             </div>
             <div className="flex gap-2">
               <Link href="/admin/users">
@@ -78,8 +95,17 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Field Service Jobs</h2>
-          <p className="text-gray-600">Manage and track all dispatch requests</p>
+          <h2 className="text-3xl font-bold text-foreground mb-2">Field Service Jobs</h2>
+          <p className="text-muted-foreground">Manage and track all dispatch requests</p>
+        </div>
+
+        {/* Quick Filters */}
+        <div className="mb-6">
+          <JobFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            counts={filterCounts}
+          />
         </div>
 
         {isLoading ? (
@@ -135,19 +161,19 @@ export default function AdminDashboard() {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     {job.engineerName && (
                       <div>
-                        <p className="text-gray-600">Engineer</p>
+                        <p className="text-muted-foreground">Engineer</p>
                         <p className="font-medium">{job.engineerName}</p>
                       </div>
                     )}
                     {job.acceptedAt && (
                       <div>
-                        <p className="text-gray-600">Accepted At</p>
+                        <p className="text-muted-foreground">Accepted At</p>
                         <p className="font-medium">{new Date(job.acceptedAt).toLocaleString()}</p>
                       </div>
                     )}
                     {job.completedAt && (
                       <div>
-                        <p className="text-gray-600">Completed At</p>
+                        <p className="text-muted-foreground">Completed At</p>
                         <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
                       </div>
                     )}
@@ -155,7 +181,7 @@ export default function AdminDashboard() {
                   
                   {job.status === "accepted" || job.status === "created" || job.status === "sent_to_engineer" ? (
                     <div className="mt-4 pt-4 border-t space-y-2">
-                      <p className="text-sm font-medium text-gray-700">Share Links:</p>
+                      <p className="text-sm font-medium text-foreground">Share Links:</p>
                       <div className="flex gap-2 flex-wrap">
                         <Button 
                           variant="outline" 
@@ -189,7 +215,7 @@ export default function AdminDashboard() {
         ) : (
           <Card>
             <CardContent className="py-20 text-center">
-              <p className="text-gray-600 mb-4">No jobs created yet</p>
+              <p className="text-muted-foreground mb-4">No jobs created yet</p>
               <Link href="/admin/create">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />

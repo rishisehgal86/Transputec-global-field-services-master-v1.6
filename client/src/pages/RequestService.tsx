@@ -108,11 +108,11 @@ export default function RequestService() {
 
   if (requestSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <header className="border-b bg-white shadow-sm">
+      <div className="min-h-screen bg-background">
+        <header className="border-b bg-background shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <Link href="/">
-              <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+              <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
                 {APP_TITLE}
               </h1>
             </Link>
@@ -198,11 +198,11 @@ export default function RequestService() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <header className="border-b bg-white shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+            <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
               {APP_TITLE}
             </h1>
           </Link>

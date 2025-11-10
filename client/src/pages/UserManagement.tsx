@@ -125,12 +125,12 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/admin">
-              <h1 className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600">
+              <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
                 {APP_TITLE}
               </h1>
             </Link>
@@ -143,8 +143,8 @@ export default function UserManagement() {
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">User Management</h2>
-          <p className="text-gray-600">Manage admin users and change your password</p>
+          <h2 className="text-3xl font-bold text-foreground mb-2">User Management</h2>
+          <p className="text-muted-foreground">Manage admin users and change your password</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
@@ -321,17 +321,17 @@ export default function UserManagement() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Total Users</span>
+                <span className="text-sm text-muted-foreground">Total Users</span>
                 <span className="text-2xl font-bold">{users?.length || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Active Users</span>
+                <span className="text-sm text-muted-foreground">Active Users</span>
                 <span className="text-2xl font-bold text-green-600">
                   {users?.filter(u => u.isActive).length || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Inactive Users</span>
+                <span className="text-sm text-muted-foreground">Inactive Users</span>
                 <span className="text-2xl font-bold text-gray-400">
                   {users?.filter(u => !u.isActive).length || 0}
                 </span>
@@ -352,7 +352,7 @@ export default function UserManagement() {
                 users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-background transition-colors"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -381,7 +381,7 @@ export default function UserManagement() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                           <Mail className="h-3 w-3" />
                           {user.email}
                         </div>
