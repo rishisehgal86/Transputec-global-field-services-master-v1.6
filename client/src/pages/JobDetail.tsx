@@ -58,8 +58,8 @@ export default function JobDetail() {
   const duplicateJobMutation = trpc.jobs.duplicate.useMutation({
     onSuccess: (data) => {
       toast.success("Job duplicated successfully!");
-      // Navigate to the new job's detail page
-      setLocation(`/admin/create`);
+      // Navigate to create page with duplicate parameter
+      setLocation(`/admin/create?duplicate=${job?.id}`);
     },
     onError: (error) => {
       toast.error(`Failed to duplicate job: ${error.message}`);

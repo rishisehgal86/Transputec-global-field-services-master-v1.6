@@ -352,3 +352,8 @@ ns
 
 - [x] Fix Admin Controls section white background in JobDetail page dark mode
 
+
+
+- [ ] Fix job filter categorization logic - investigate and correct miscategorization issues
+- [x] Fix job duplication to pre-fill form with original job data instead of showing empty form
+

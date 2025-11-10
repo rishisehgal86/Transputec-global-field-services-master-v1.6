@@ -23,6 +23,16 @@ export default function CreateJob() {
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Check if duplicating a job
+  const urlParams = new URLSearchParams(window.location.search);
+  const duplicateJobId = urlParams.get('duplicate') ? parseInt(urlParams.get('duplicate')!) : null;
+  
+  // Fetch job data if duplicating
+  const { data: duplicateJob } = trpc.jobs.getById.useQuery(
+    { id: duplicateJobId! },
+    { enabled: !!duplicateJobId && isAuthenticated }
+  );
 
   const searchMutation = trpc.geocoding.search.useMutation({
     onSuccess: (data) => {
@@ -236,7 +246,7 @@ export default function CreateJob() {
                 <h3 className="text-lg font-semibold border-b pb-2">Client Information</h3>
                 <div>
                   <Label htmlFor="clientName">Client Name *</Label>
-                  <Input id="clientName" name="clientName" required />
+                  <Input id="clientName" name="clientName" required defaultValue={duplicateJob?.clientName || ""} />
                 </div>
               </div>
 
@@ -246,16 +256,16 @@ export default function CreateJob() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="siteName">Site Name *</Label>
-                    <Input id="siteName" name="siteName" required />
+                    <Input id="siteName" name="siteName" required defaultValue={duplicateJob?.siteName || ""} />
                   </div>
                   <div>
                     <Label htmlFor="siteId">Site ID</Label>
-                    <Input id="siteId" name="siteId" />
+                    <Input id="siteId" name="siteId" defaultValue={duplicateJob?.siteId || ""} />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="siteLocation">Site Location/City</Label>
-                  <Input id="siteLocation" name="siteLocation" />
+                  <Input id="siteLocation" name="siteLocation" defaultValue={duplicateJob?.siteLocation || ""} />
                 </div>
                 
                 {/* Address Search */}
@@ -350,11 +360,11 @@ export default function CreateJob() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="siteContactName">Contact Name</Label>
-                    <Input id="siteContactName" name="siteContactName" />
+                    <Input id="siteContactName" name="siteContactName" defaultValue={duplicateJob?.siteContactName || ""} />
                   </div>
                   <div>
                     <Label htmlFor="siteContactNumber">Contact Number</Label>
-                    <Input id="siteContactNumber" name="siteContactNumber" type="tel" />
+                    <Input id="siteContactNumber" name="siteContactNumber" type="tel" defaultValue={duplicateJob?.siteContactNumber || ""} />
                   </div>
                 </div>
               </div>
@@ -365,21 +375,21 @@ export default function CreateJob() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="changeNumber">Change Number</Label>
-                    <Input id="changeNumber" name="changeNumber" />
+                    <Input id="changeNumber" name="changeNumber" defaultValue={duplicateJob?.changeNumber || ""} />
                   </div>
                   <div>
                     <Label htmlFor="incidentNumber">Incident Number</Label>
-                    <Input id="incidentNumber" name="incidentNumber" />
+                    <Input id="incidentNumber" name="incidentNumber" defaultValue={duplicateJob?.incidentNumber || ""} />
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="projectName">Project Name</Label>
-                    <Input id="projectName" name="projectName" />
+                    <Input id="projectName" name="projectName" defaultValue={duplicateJob?.projectName || ""} />
                   </div>
                   <div>
                     <Label htmlFor="hoursRequired">Hours Required</Label>
-                    <Input id="hoursRequired" name="hoursRequired" />
+                    <Input id="hoursRequired" name="hoursRequired" defaultValue={duplicateJob?.hoursRequired || ""} />
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -388,7 +398,7 @@ export default function CreateJob() {
                     <Input id="scheduledDateTime" name="scheduledDateTime" type="datetime-local" />
                   </div>
                   <div className="flex items-center space-x-2 pt-8">
-                    <Checkbox id="downTime" name="downTime" />
+                    <Checkbox id="downTime" name="downTime" defaultChecked={duplicateJob?.downTime || false} />
                     <Label htmlFor="downTime" className="cursor-pointer">Down Time</Label>
                   </div>
                 </div>
@@ -399,19 +409,19 @@ export default function CreateJob() {
                 <h3 className="text-lg font-semibold border-b pb-2">Technical Requirements</h3>
                 <div>
                   <Label htmlFor="toolsRequired">Tools Required</Label>
-                  <Textarea id="toolsRequired" name="toolsRequired" rows={2} />
+                  <Textarea id="toolsRequired" name="toolsRequired" rows={2} defaultValue={duplicateJob?.toolsRequired || ""} />
                 </div>
                 <div>
                   <Label htmlFor="deviceDetails">Device Details for T-Shoot</Label>
-                  <Textarea id="deviceDetails" name="deviceDetails" rows={2} />
+                  <Textarea id="deviceDetails" name="deviceDetails" rows={2} defaultValue={duplicateJob?.deviceDetails || ""} />
                 </div>
                 <div>
                   <Label htmlFor="incidentDetails">Incident/Change Details</Label>
-                  <Textarea id="incidentDetails" name="incidentDetails" rows={3} />
+                  <Textarea id="incidentDetails" name="incidentDetails" rows={3} defaultValue={duplicateJob?.incidentDetails || ""} />
                 </div>
                 <div>
                   <Label htmlFor="scopeOfWork">Scope of Work / Activities</Label>
-                  <Textarea id="scopeOfWork" name="scopeOfWork" rows={3} />
+                  <Textarea id="scopeOfWork" name="scopeOfWork" rows={3} defaultValue={duplicateJob?.scopeOfWork || ""} />
                 </div>
               </div>
 
@@ -426,7 +436,7 @@ export default function CreateJob() {
                 </div>
                 <div>
                   <Label htmlFor="notes">Notes (Delivery Tracking, Special Instructions)</Label>
-                  <Textarea id="notes" name="notes" rows={3} />
+                  <Textarea id="notes" name="notes" rows={3} defaultValue={duplicateJob?.notes || ""} />
                 </div>
               </div>
 
