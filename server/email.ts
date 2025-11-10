@@ -41,10 +41,13 @@ function getTransporter() {
  * Send email notification via Gmail SMTP
  */
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
+  console.log(`[Email] 📤 Attempting to send email to: ${options.to}`);
+  console.log(`[Email] 📧 Subject: ${options.subject}`);
+  
   try {
     const transport = getTransporter();
     
-    await transport.sendMail({
+    const info = await transport.sendMail({
       from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
       to: options.to,
       subject: options.subject,
@@ -52,10 +55,13 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       html: options.html,
     });
     
-    console.log(`[Email] ✓ Sent to ${options.to}: ${options.subject}`);
+    console.log(`[Email] ✅ Successfully sent to ${options.to}`);
+    console.log(`[Email] 📬 Message ID: ${info.messageId}`);
+    console.log(`[Email] 📊 Response: ${info.response}`);
     return true;
   } catch (error) {
-    console.error('[Email] ✗ Failed to send:', error);
+    console.error('[Email] ❌ Failed to send email to:', options.to);
+    console.error('[Email] ❌ Error details:', error);
     return false;
   }
 }

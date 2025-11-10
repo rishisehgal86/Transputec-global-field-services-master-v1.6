@@ -120,6 +120,9 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
+        console.log('🎫 [CreateRequest] New service request received');
+        console.log('📧 [CreateRequest] Client email from form:', input.clientEmail);
+        
         const jobToken = randomBytes(32).toString('hex');
         
         const job = await createJob({
@@ -130,8 +133,11 @@ export const appRouter = router({
           createdBy: null,
         });
         
+        console.log('✅ [CreateRequest] Job created with ID:', job?.id);
+        
         // Send email notification to admin
-        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminEmail = 'rishi@karrdservicesuae.com';
+        console.log('📤 [CreateRequest] Preparing to send admin email to:', adminEmail);
         if (adminEmail && job) {
           try {
             await sendNewTicketNotification({
@@ -152,6 +158,7 @@ export const appRouter = router({
         }
         
         // Send confirmation email to client
+        console.log('📤 [CreateRequest] Preparing to send client confirmation to:', input.clientEmail);
         if (input.clientEmail && job) {
           try {
             await sendClientConfirmation({
@@ -434,7 +441,7 @@ export const appRouter = router({
         
         // Add admin email if not the author
         if (input.authorType !== 'admin') {
-          const adminEmail = process.env.ADMIN_EMAIL;
+          const adminEmail = 'rishi@karrdservicesuae.com';
           if (adminEmail) {
             recipients.push(adminEmail);
           }
@@ -611,7 +618,7 @@ export const appRouter = router({
         }
         
         // Send to admin
-        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminEmail = 'rishi@karrdservicesuae.com';
         if (adminEmail) {
           try {
             await sendJobCompletionNotification(adminEmail, {
