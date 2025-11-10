@@ -301,3 +301,7 @@
 
 ns
 
+
+
+- [x] Fix client tracking link not working in email notifications
+

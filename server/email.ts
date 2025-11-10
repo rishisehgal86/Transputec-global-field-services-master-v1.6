@@ -6,6 +6,16 @@ import nodemailer from 'nodemailer';
  * Uses Gmail SMTP with nodemailer
  */
 
+// Get base URL for email links (works in both dev and production)
+const getBaseUrl = () => {
+  // In production, use the public URL from environment or default Manus domain
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  }
+  // In development, use localhost
+  return 'http://localhost:3000';
+};
+
 interface EmailOptions {
   to: string;
   subject: string;
@@ -189,10 +199,13 @@ export async function sendClientConfirmation(ticketData: {
   hoursRequired: string;
   ticketId: number;
   trackingToken: string;
+  baseUrl?: string;
 }): Promise<boolean> {
   const subject = `Service Request Confirmation - ${ticketData.siteName}`;
   
-  const trackingUrl = `/track/${ticketData.trackingToken}`;
+  // Use provided baseUrl or construct from environment
+  const base = ticketData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${ticketData.trackingToken}`;
   
   const html = `
     <!DOCTYPE html>
@@ -655,10 +668,12 @@ export async function sendJobAssignmentNotification(engineerData: {
   scheduledDateTime?: Date;
   incidentDetails: string;
   jobToken: string;
+  baseUrl?: string;
 }): Promise<boolean> {
   const subject = `New Job Assignment: ${engineerData.siteName}`;
   
-  const jobUrl = `/engineer/${engineerData.jobToken}`;
+  const base = engineerData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const jobUrl = `${base}/engineer/${engineerData.jobToken}`;
   
   const html = `
     <!DOCTYPE html>
@@ -759,10 +774,11 @@ This is an automated notification from Transputec Field Engineer Dispatch System
  * Send status update notification to client
  */
 export async function sendStatusUpdateNotification(clientEmail: string, statusData: {
-  siteName: string;
   status: string;
   engineerName?: string;
+  siteName: string;
   jobToken: string;
+  baseUrl?: string;
   eta?: string;
 }): Promise<boolean> {
   const statusMessages: Record<string, { title: string; message: string; color: string }> = {
@@ -795,7 +811,8 @@ export async function sendStatusUpdateNotification(clientEmail: string, statusDa
   };
   
   const subject = `${statusInfo.title}: ${statusData.siteName}`;
-  const trackingUrl = `/track/${statusData.jobToken}`;
+  const base = statusData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${statusData.jobToken}`;
   
   const html = `
     <!DOCTYPE html>
@@ -880,11 +897,12 @@ This is an automated notification from Transputec Field Engineer Dispatch System
  * Send new comment notification
  */
 export async function sendCommentNotification(recipientEmail: string, commentData: {
-  siteName: string;
   authorName: string;
   authorType: 'engineer' | 'client' | 'admin';
-  comment: string;
+  commentText: string;
+  siteName: string;
   jobToken: string;
+  baseUrl?: string;
 }): Promise<boolean> {
   const authorLabels = {
     engineer: '🔧 Engineer',
@@ -893,7 +911,8 @@ export async function sendCommentNotification(recipientEmail: string, commentDat
   };
   
   const subject = `New Comment on ${commentData.siteName}`;
-  const trackingUrl = `/track/${commentData.jobToken}`;
+  const base = commentData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${commentData.jobToken}`;
   
   const html = `
     <!DOCTYPE html>
@@ -921,7 +940,7 @@ export async function sendCommentNotification(recipientEmail: string, commentDat
           
           <div class="comment-box">
             <div class="author">${authorLabels[commentData.authorType]} ${commentData.authorName}</div>
-            <div class="comment-text">${commentData.comment}</div>
+            <div class="comment-text">${commentData.commentText}</div>
           </div>
           
           <a href="${trackingUrl}" class="button">
@@ -942,7 +961,7 @@ export async function sendCommentNotification(recipientEmail: string, commentDat
 New Comment on ${commentData.siteName}
 
 ${authorLabels[commentData.authorType]} ${commentData.authorName} wrote:
-"${commentData.comment}"
+"${commentData.commentText}"
 
 View full conversation: ${trackingUrl}
 
@@ -961,12 +980,14 @@ This is an automated notification from Transputec Field Engineer Dispatch System
  * Send job completion notification with SVR to client and admin
  */
 export async function sendJobCompletionNotification(recipientEmail: string, completionData: {
+  engineerName?: string;
   siteName: string;
-  engineerName: string;
   jobToken: string;
+  baseUrl?: string;
 }): Promise<boolean> {
   const subject = `Job Completed: ${completionData.siteName}`;
-  const trackingUrl = `/track/${completionData.jobToken}`;
+  const base = completionData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${completionData.jobToken}`;
   
   const html = `
     <!DOCTYPE html>

@@ -20,6 +20,13 @@ import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from
 import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail } from "./email";
 import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
 
+// Helper function to get base URL from request
+function getBaseUrl(req: any): string {
+  const protocol = req.headers['x-forwarded-proto'] || (req.connection.encrypted ? 'https' : 'http');
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  return `${protocol}://${host}`;
+}
+
 export const appRouter = router({
   system: systemRouter,
 
@@ -119,9 +126,10 @@ export const appRouter = router({
         videoConferenceLink: z.string().optional(),
         notes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         console.log('🎫 [CreateRequest] New service request received');
         console.log('📧 [CreateRequest] Client email from form:', input.clientEmail);
+        const baseUrl = getBaseUrl(ctx.req);
         
         const jobToken = randomBytes(32).toString('hex');
         
@@ -171,6 +179,7 @@ export const appRouter = router({
               hoursRequired: input.hoursRequired,
               ticketId: job.id,
               trackingToken: jobToken,
+              baseUrl,
             });
             console.log('[Notification] Client confirmation email sent for ticket #', job.id);
           } catch (error) {
@@ -257,7 +266,8 @@ export const appRouter = router({
         engineerEmail: z.string().email(),
         engineerName: z.string(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const job = await getJobById(input.jobId);
         if (!job) throw new Error("Job not found");
 
@@ -275,6 +285,7 @@ export const appRouter = router({
             scheduledDateTime: job.scheduledDateTime || undefined,
             incidentDetails: job.incidentDetails || 'N/A',
             jobToken: job.jobToken,
+            baseUrl,
           });
           console.log('[Email] Job assignment sent to engineer:', input.engineerEmail);
           return { success: true, message: 'Job assignment email sent successfully' };
@@ -292,7 +303,8 @@ export const appRouter = router({
         engineerEmail: z.string().optional(),
         engineerPhone: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
         if (job.status !== "created" && job.status !== "sent_to_engineer") {
@@ -321,6 +333,7 @@ export const appRouter = router({
               status: 'accepted',
               engineerName: input.engineerName,
               jobToken: job.jobToken,
+              baseUrl,
             });
             console.log('[Email] Status update sent to client:', job.clientEmail);
           } catch (error) {
@@ -361,7 +374,8 @@ export const appRouter = router({
         longitude: z.string().optional(),
         notes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
 
@@ -394,6 +408,7 @@ export const appRouter = router({
               status: input.status,
               engineerName: job.engineerName || 'Engineer',
               jobToken: job.jobToken,
+              baseUrl,
             });
             console.log('[Email] Status update sent to client:', job.clientEmail);
           } catch (error) {
@@ -408,11 +423,13 @@ export const appRouter = router({
     addComment: publicProcedure
       .input(z.object({
         token: z.string(),
-        authorName: z.string(),
-        authorType: z.enum(["engineer", "client", "admin"]),
         comment: z.string(),
+        authorName: z.string(),
+        authorType: z.enum(['engineer', 'client', 'admin']),
+        authorEmail: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const { addJobComment } = await import('./db');
         
         const job = await getJobByToken(input.token);
@@ -454,8 +471,9 @@ export const appRouter = router({
               siteName: job.siteName,
               authorName: input.authorName,
               authorType: input.authorType,
-              comment: input.comment,
+              commentText: input.comment,
               jobToken: job.jobToken,
+              baseUrl,
             });
             console.log('[Email] Comment notification sent to:', email);
           } catch (error) {
@@ -567,7 +585,8 @@ export const appRouter = router({
         clientSignatory: z.string(),
         clientSignatureData: z.string(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
 
@@ -610,6 +629,7 @@ export const appRouter = router({
               siteName: job.siteName,
               engineerName: input.engineerName,
               jobToken: job.jobToken,
+              baseUrl,
             });
             console.log('[Email] Completion notification sent to client:', job.clientEmail);
           } catch (error) {
@@ -625,6 +645,7 @@ export const appRouter = router({
               siteName: job.siteName,
               engineerName: input.engineerName,
               jobToken: job.jobToken,
+              baseUrl,
             });
             console.log('[Email] Completion notification sent to admin:', adminEmail);
           } catch (error) {
