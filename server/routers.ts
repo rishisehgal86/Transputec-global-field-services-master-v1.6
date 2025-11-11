@@ -169,9 +169,11 @@ export const appRouter = router({
         
         // Send confirmation email to client
         console.log('📤 [CreateRequest] Preparing to send client confirmation to:', input.clientEmail);
+        console.log('📤 [CreateRequest] Client email exists?', !!input.clientEmail, 'Job exists?', !!job);
         if (input.clientEmail && job) {
+          console.log('📤 [CreateRequest] Calling sendClientConfirmation...');
           try {
-            await sendClientConfirmation({
+            const clientEmailResult = await sendClientConfirmation({
               clientName: input.clientName,
               clientEmail: input.clientEmail,
               siteName: input.siteName,
@@ -183,9 +185,10 @@ export const appRouter = router({
               trackingToken: jobToken,
               baseUrl,
             });
-            console.log('[Notification] Client confirmation email sent for ticket #', job.id);
+            console.log('[Notification] ✅ Client confirmation email sent successfully for ticket #', job.id, 'Result:', clientEmailResult);
           } catch (error) {
-            console.error('[Notification] Failed to send client confirmation:', error);
+            console.error('[Notification] ❌ Failed to send client confirmation:', error);
+            console.error('[Notification] ❌ Error stack:', error instanceof Error ? error.stack : error);
             // Don't fail the request if email fails
           }
         }

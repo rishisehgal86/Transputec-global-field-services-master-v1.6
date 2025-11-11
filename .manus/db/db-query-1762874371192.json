@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, clientName, clientEmail, siteName, status, createdAt FROM jobs ORDER BY createdAt DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, clientName, clientEmail, siteName, status, createdAt FROM jobs ORDER BY createdAt DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "510002",
+      "clientName": "tasdok",
+      "clientEmail": "rishis@transputec.com",
+      "siteName": "asdosd",
+      "status": "pending_approval",
+      "createdAt": "2025-11-11 15:17:46"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tclientName\tclientEmail\tsiteName\tstatus\tcreatedAt\n510002\ttasdok\trishis@transputec.com\tasdosd\tpending_approval\t2025-11-11 15:17:46\n",
+  "stderr": "",
+  "execution_time_ms": 913
+}
