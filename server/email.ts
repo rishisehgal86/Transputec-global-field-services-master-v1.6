@@ -29,13 +29,13 @@ const EMAIL_CONFIG = {
   port: 587,
   secure: false, // Use TLS
   auth: {
-    user: 'rishi@karrdservicesuae.com',
-    pass: 'lmiidxwmwamnzikf', // Gmail App Password
+    user: 'admin@field-pulse.io',
+    pass: 'mtcglnmbucshoyev', // Gmail App Password
   },
 };
 
-const FROM_EMAIL = 'rishi@karrdservicesuae.com';
-const FROM_NAME = 'DespatchApp';
+const FROM_EMAIL = 'admin@field-pulse.io';
+const FROM_NAME = 'FieldPulse Go';
 
 // Create reusable transporter
 let transporter: nodemailer.Transporter | null = null;

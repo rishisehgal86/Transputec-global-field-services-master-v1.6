@@ -469,3 +469,12 @@ ns
 - [x] Style tagline appropriately
 - [x] Test display on all pages
 
+
+
+
+## Email Sender Update
+
+- [x] Update email sender address to admin@field-pulse.io
+- [x] Update all email templates with new sender
+- [x] Update Gmail app password for new account
+
