@@ -42,11 +42,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            {APP_LOGO ? (
-              <img src={APP_LOGO} alt={APP_TITLE} className="h-16 object-contain" />
-            ) : (
-              <div className="text-3xl font-bold text-primary">{APP_TITLE}</div>
-            )}
+            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-16 object-contain" />}
           </div>
           <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
           <CardDescription className="text-center">

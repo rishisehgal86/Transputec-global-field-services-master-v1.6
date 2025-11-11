@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, ArrowLeft, Copy, Check, MapPin, Search } from "lucide-react";
-import { APP_TITLE } from "@/const";
+import { APP_LOGO } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -146,9 +146,7 @@ export default function CreateJob() {
         <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <Link href="/admin">
-              <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
-                {APP_TITLE}
-              </h1>
+              {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
             </Link>
           </div>
         </header>
@@ -217,9 +215,7 @@ export default function CreateJob() {
       <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/admin">
-            <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
-              {APP_TITLE}
-            </h1>
+            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
           </Link>
         </div>
       </header>

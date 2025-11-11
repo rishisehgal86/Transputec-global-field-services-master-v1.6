@@ -23,8 +23,7 @@ export default function Home() {
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go Logo" className="h-10" />}
-            <h1 className="text-xl font-bold text-foreground">{APP_TITLE}</h1>
+            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-12" />}
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

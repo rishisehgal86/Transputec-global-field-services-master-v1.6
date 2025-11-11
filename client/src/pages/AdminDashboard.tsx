@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut } from "lucide-react";
-import { APP_TITLE } from "@/const";
+import { APP_LOGO } from "@/const";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
@@ -66,11 +66,9 @@ export default function AdminDashboard() {
       <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="flex items-center gap-4">
               <Link href="/">
-                <h1 className="text-2xl font-bold text-foreground cursor-pointer hover:text-primary">
-                  {APP_TITLE}
-                </h1>
+                {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
               </Link>
               <p className="text-sm text-muted-foreground">Admin Dashboard</p>
             </div>

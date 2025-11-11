@@ -420,3 +420,13 @@ ns
 - [x] Remove all remaining "Transputec" references and replace with "FieldPulse"
 - [x] Test color scheme across all pages
 
+
+
+
+## Header Updates
+
+- [x] Remove "Transputec" text from page headers
+- [x] Update all page headers to display FieldPulse Go logo
+- [x] Ensure logo displays properly on all pages
+- [x] Test header on light and dark modes
+
