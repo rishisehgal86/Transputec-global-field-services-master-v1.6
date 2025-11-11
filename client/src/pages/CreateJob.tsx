@@ -431,7 +431,7 @@ export default function CreateJob() {
                 <div className="flex items-center space-x-2">
                   <Checkbox id="coveredByCOI" name="coveredByCOI" defaultChecked />
                   <Label htmlFor="coveredByCOI" className="cursor-pointer">
-                    Despatch Engineer Covered by Transputec COI
+                    Despatch Engineer Covered by FieldPulse Go COI
                   </Label>
                 </div>
                 <div>

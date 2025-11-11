@@ -36,7 +36,7 @@ export async function searchAddresses(address: string, limit: number = 5): Promi
 
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Transputec-Dispatch-App/2.0",
+        "User-Agent": "FieldPulse-Go-App/2.0",
       },
     });
 
@@ -86,7 +86,7 @@ export async function geocodeAddress(address: string): Promise<GeocodingResult> 
 
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Transputec-Dispatch-App/1.0",
+        "User-Agent": "FieldPulse-Go-App/1.0",
       },
     });
 

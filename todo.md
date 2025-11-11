@@ -383,3 +383,19 @@ ns
 - [x] Display new engineer link after reassignment
 - [ ] Test reassignment workflow end-to-end
 
+
+
+
+## Phase 2: Rebranding to FieldPulse Go
+
+- [x] Copy logo to public directory
+- [x] Update VITE_APP_TITLE and VITE_APP_LOGO environment variables (user must update via Management UI)
+- [x] Update client/src/const.ts with new branding
+- [x] Implement FieldPulse Go color palette (Pulse Orange #FF7A00, Electric Cyan #00D7D7, Deep Navy #0A1E3D)
+- [x] Update typography to Poppins headers and Inter body text
+- [x] Add gradient accent styles (linear-gradient(90deg, #FF7A00 0%, #00D7D7 100%))
+- [x] Update all page references from Transputec to FieldPulse Go
+- [x] Enhance landing page with design language elements
+- [x] Update email templates with FieldPulse Go branding
+- [x] Test all pages with new branding
+

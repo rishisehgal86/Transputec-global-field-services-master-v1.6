@@ -129,7 +129,7 @@ export default function RequestService() {
                 Request Submitted Successfully!
               </CardTitle>
               <CardDescription className="text-base mt-2">
-                Your service request has been sent to Transputec for review
+                Your service request has been sent to FieldPulse Go for review
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -171,7 +171,7 @@ export default function RequestService() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2">What happens next?</h3>
                 <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-                  <li>Transputec admin will review your request</li>
+                  <li>FieldPulse Go admin will review your request</li>
                   <li>Once approved, an engineer will be assigned</li>
                   <li>You'll receive updates on the engineer's progress</li>
                   <li>A confirmation email with tracking link has been sent to you</li>
