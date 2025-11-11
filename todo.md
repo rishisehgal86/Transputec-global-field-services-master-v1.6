@@ -430,3 +430,12 @@ ns
 - [x] Ensure logo displays properly on all pages
 - [x] Test header on light and dark modes
 
+
+
+
+## Dark Mode Logo
+
+- [x] Generate white text version of FieldPulse Go logo for dark mode
+- [x] Implement theme-aware logo switching in all components
+- [x] Test logo visibility in both light and dark modes
+

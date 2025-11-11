@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { trpc } from "@/lib/trpc";
-import { APP_TITLE, APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { Loader2 } from "lucide-react";
 
 export default function Login() {
@@ -42,7 +42,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-16 object-contain" />}
+            <LogoImage className="h-16" />
           </div>
           <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
           <CardDescription className="text-center">

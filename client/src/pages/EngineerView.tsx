@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle, RefreshCw } from "lucide-react";
-import { APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
@@ -242,7 +242,7 @@ export default function EngineerView() {
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10" />}
+            <LogoImage className="h-10" />
             <p className="text-sm text-muted-foreground">Field Engineer Portal</p>
           </div>
         </div>

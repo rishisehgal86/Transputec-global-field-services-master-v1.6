@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2, Copy, Link as LinkIcon } from "lucide-react";
-import { APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { useLocation } from "wouter";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -147,7 +147,7 @@ export default function JobDetail() {
         <header className="border-b bg-background">
           <div className="container mx-auto px-4 py-4">
             <Link href="/admin">
-              {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
+              <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
             </Link>
           </div>
         </header>
@@ -187,7 +187,7 @@ export default function JobDetail() {
       <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link href="/admin">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
+            <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
           </Link>
         </div>
       </header>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut } from "lucide-react";
-import { APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/">
-                {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
+                <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
               </Link>
               <p className="text-sm text-muted-foreground">Admin Dashboard</p>
             </div>

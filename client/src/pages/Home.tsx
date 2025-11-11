@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MapPin, Clock, CheckCircle2, Users, Zap, Radio } from "lucide-react";
-import { APP_LOGO, APP_TITLE } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { Link } from "wouter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -23,7 +23,7 @@ export default function Home() {
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-12" />}
+            <LogoImage className="h-12" />
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

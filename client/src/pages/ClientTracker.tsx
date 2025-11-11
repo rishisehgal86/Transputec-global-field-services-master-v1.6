@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History, Printer } from "lucide-react";
-import { APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
@@ -194,7 +194,7 @@ export default function ClientTracker() {
       <header className="border-b bg-background shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10" />}
+            <LogoImage className="h-10" />
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <RefreshCw className="h-4 w-4" />

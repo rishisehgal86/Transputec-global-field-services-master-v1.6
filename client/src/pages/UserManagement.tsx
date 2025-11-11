@@ -10,7 +10,7 @@ import { Loader2, UserPlus, Key, Shield, User, Mail, Trash2, CheckCircle2 } from
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
-import { APP_LOGO } from "@/const";
+import { LogoImage } from "@/components/LogoImage";
 
 export default function UserManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -130,7 +130,7 @@ export default function UserManagement() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/admin">
-              {APP_LOGO && <img src={APP_LOGO} alt="FieldPulse Go" className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />}
+              <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
             </Link>
             <Link href="/admin">
               <Button variant="outline">Back to Dashboard</Button>
