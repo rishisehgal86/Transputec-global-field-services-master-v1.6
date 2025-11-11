@@ -1,11 +1,40 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean } from "drizzle-orm/mysql-core";
 
 /**
+ * Organizations table - multi-tenant support
+ * Each organization represents a separate company/tenant using the system
+ */
+export const organizations = mysqlTable("organizations", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(), // URL-friendly identifier
+  
+  // Trial and Subscription
+  trialEndsAt: timestamp("trialEndsAt"),
+  subscriptionStatus: mysqlEnum("subscriptionStatus", ["trial", "active", "past_due", "cancelled", "expired"]).default("trial").notNull(),
+  subscriptionPlan: mysqlEnum("subscriptionPlan", ["go_only", "core_only", "both"]), // null during trial
+  
+  // Stripe Integration (prepared for future)
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  
+  // Settings
+  isActive: boolean("isActive").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = typeof organizations.$inferInsert;
+
+/**
  * Core user table for local authentication.
  * Supports email/password login with role-based access.
  */
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
+  organizationId: int("organizationId").notNull().references(() => organizations.id),
   email: varchar("email", { length: 320 }).notNull().unique(),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
   name: text("name").notNull(),
@@ -24,6 +53,7 @@ export type InsertUser = typeof users.$inferInsert;
  */
 export const jobs = mysqlTable("jobs", {
   id: int("id").autoincrement().primaryKey(),
+  organizationId: int("organizationId").notNull().references(() => organizations.id),
   
   // Unique identifier for shareable links
   jobToken: varchar("jobToken", { length: 64 }).notNull().unique(),
