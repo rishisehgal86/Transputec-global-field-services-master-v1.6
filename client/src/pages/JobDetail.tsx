@@ -145,9 +145,9 @@ export default function JobDetail() {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-background">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-6">
             <Link href="/admin">
-              <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
+              <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
             </Link>
           </div>
         </header>

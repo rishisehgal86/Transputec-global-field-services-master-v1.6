@@ -127,10 +127,10 @@ export default function UserManagement() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-background shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link href="/admin">
-              <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
+              <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
             </Link>
             <Link href="/admin">
               <Button variant="outline">Back to Dashboard</Button>

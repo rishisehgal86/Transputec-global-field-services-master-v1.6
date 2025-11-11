@@ -449,3 +449,13 @@ ns
 - [x] Remove theme-specific logo switching
 - [x] Test visibility on both light and dark modes
 
+
+
+
+## Logo Resizing
+
+- [x] Increase header height and padding to accommodate logo
+- [x] Enlarge logo size for better visibility
+- [x] Update all page headers with expanded dimensions
+- [x] Test logo display across all pages
+

@@ -21,9 +21,9 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <LogoImage className="h-12" />
+            <LogoImage className="h-16" />
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

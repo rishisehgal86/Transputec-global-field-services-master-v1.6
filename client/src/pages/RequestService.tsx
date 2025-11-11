@@ -110,9 +110,9 @@ export default function RequestService() {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-background shadow-sm">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-6">
             <Link href="/">
-              <LogoImage className="h-10 cursor-pointer hover:opacity-80 transition-opacity" />
+              <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
             </Link>
           </div>
         </header>
