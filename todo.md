@@ -439,3 +439,13 @@ ns
 - [x] Implement theme-aware logo switching in all components
 - [x] Test logo visibility in both light and dark modes
 
+
+
+
+## Universal Logo Fix
+
+- [x] Generate logo with outlined white text that works on both light and dark backgrounds
+- [x] Update LogoImage component to use single universal logo
+- [x] Remove theme-specific logo switching
+- [x] Test visibility on both light and dark modes
+
