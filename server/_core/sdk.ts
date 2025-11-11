@@ -257,7 +257,6 @@ class SDKServer {
   }
 
   async authenticateRequest(req: Request): Promise<User> {
-    // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
     
@@ -265,7 +264,28 @@ class SDKServer {
       throw ForbiddenError("No session cookie");
     }
 
-    // Verify JWT token
+    // Try to validate as SSO token first
+    const { validateTokenLocal } = await import('../sso-auth');
+    const ssoPayload = validateTokenLocal(sessionCookie);
+    
+    if (ssoPayload) {
+      // SSO token - return user object from token payload
+      console.log('[SSO] Authenticated user from SSO token:', ssoPayload.email);
+      return {
+        id: ssoPayload.userId,
+        email: ssoPayload.email,
+        name: ssoPayload.name || ssoPayload.email,
+        role: ssoPayload.role as 'admin' | 'user',
+        organizationId: ssoPayload.organizationId,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: new Date(),
+        passwordHash: null,
+      } as User;
+    }
+
+    // Fallback to local authentication (for backwards compatibility)
     const { verifyToken, getUserById } = await import('../auth');
     const decoded = verifyToken(sessionCookie);
     
@@ -273,7 +293,6 @@ class SDKServer {
       throw ForbiddenError("Invalid session token");
     }
 
-    // Get user from database
     const user = await getUserById(decoded.userId);
     
     if (!user) {

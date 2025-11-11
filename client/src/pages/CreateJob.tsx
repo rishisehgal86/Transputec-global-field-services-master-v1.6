@@ -13,7 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function CreateJob() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth({ redirectOnUnauthenticated: true });
   const [, setLocation] = useLocation();
   const [copiedEngineer, setCopiedEngineer] = useState(false);
   const [copiedClient, setCopiedClient] = useState(false);
@@ -72,8 +72,8 @@ export default function CreateJob() {
     );
   }
 
+  // SSO handles authentication - if not authenticated, useAuth will redirect to login
   if (!isAuthenticated) {
-    setLocation("/login");
     return null;
   }
 

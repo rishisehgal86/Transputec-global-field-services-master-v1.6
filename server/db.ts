@@ -21,16 +21,19 @@ export async function getDb() {
 
 // Job Management Functions
 
-export async function createJob(job: InsertJob) {
+export async function createJob(job: Omit<InsertJob, 'organizationId'>, organizationId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
   // Filter out undefined values to prevent "default" string insertion
   const cleanedJob = Object.fromEntries(
     Object.entries(job).filter(([_, value]) => value !== undefined)
-  ) as InsertJob;
+  );
   
-  const result = await db.insert(jobs).values(cleanedJob);
+  // Add organizationId to the job
+  const jobWithOrg = { ...cleanedJob, organizationId } as InsertJob;
+  
+  const result = await db.insert(jobs).values(jobWithOrg);
   const insertId = Number(result[0].insertId);
   
   // Fetch and return the created job
@@ -54,11 +57,13 @@ export async function getJobById(id: number) {
   return result.length > 0 ? result[0] : null;
 }
 
-export async function getAllJobs() {
+export async function getAllJobs(organizationId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  return await db.select().from(jobs).orderBy(desc(jobs.createdAt));
+  return await db.select().from(jobs)
+    .where(eq(jobs.organizationId, organizationId))
+    .orderBy(desc(jobs.createdAt));
 }
 
 export async function updateJobStatus(jobId: number, status: string, additionalFields?: Partial<InsertJob>) {
@@ -180,7 +185,7 @@ export async function getJobComments(jobId: number) {
 
 // Filtered Job Queries
 
-export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "pending" | "in_progress") {
+export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "pending" | "in_progress", organizationId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -191,18 +196,20 @@ export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "
     case "today":
       // Jobs created today
       return await db.select().from(jobs)
-        .where(gte(jobs.createdAt, todayStart))
+        .where(and(eq(jobs.organizationId, organizationId), gte(jobs.createdAt, todayStart)))
         .orderBy(desc(jobs.createdAt));
     
     case "urgent":
       // Jobs with downTime=true (urgent)
       return await db.select().from(jobs)
-        .where(eq(jobs.downTime, true))
+        .where(and(eq(jobs.organizationId, organizationId), eq(jobs.downTime, true)))
         .orderBy(desc(jobs.createdAt));
     
     case "overdue":
       // Jobs that are older than 24 hours and not completed/cancelled
-      const allJobs = await db.select().from(jobs).orderBy(desc(jobs.createdAt));
+      const allJobs = await db.select().from(jobs)
+        .where(eq(jobs.organizationId, organizationId))
+        .orderBy(desc(jobs.createdAt));
       return allJobs.filter(job => 
         job.status !== "completed" && 
         job.status !== "cancelled" &&
@@ -211,14 +218,18 @@ export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "
     
     case "pending":
       // Jobs with status "pending_approval" or "created"
-      const pendingJobs = await db.select().from(jobs).orderBy(desc(jobs.createdAt));
+      const pendingJobs = await db.select().from(jobs)
+        .where(eq(jobs.organizationId, organizationId))
+        .orderBy(desc(jobs.createdAt));
       return pendingJobs.filter(job => 
         job.status === "pending_approval" || job.status === "created"
       );
     
     case "in_progress":
       // Jobs with status "sent_to_engineer", "accepted", "en_route", or "on_site"
-      const activeJobs = await db.select().from(jobs).orderBy(desc(jobs.createdAt));
+      const activeJobs = await db.select().from(jobs)
+        .where(eq(jobs.organizationId, organizationId))
+        .orderBy(desc(jobs.createdAt));
       return activeJobs.filter(job => 
         job.status === "sent_to_engineer" ||
         job.status === "accepted" ||
@@ -227,11 +238,11 @@ export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "
       );
     
     default:
-      return await getAllJobs();
+      return await getAllJobs(organizationId);
   }
 }
 
-export async function getJobFilterCounts() {
+export async function getJobFilterCounts(organizationId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
@@ -239,8 +250,9 @@ export async function getJobFilterCounts() {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
-  // Get all jobs and filter in memory
-  const allJobs = await db.select().from(jobs);
+  // Get all jobs for this organization and filter in memory
+  const allJobs = await db.select().from(jobs)
+    .where(eq(jobs.organizationId, organizationId));
   
   return {
     today: allJobs.filter(job => job.createdAt >= todayStart).length,

@@ -10,7 +10,7 @@ import { JobFilters } from "@/components/JobFilters";
 import { useState } from "react";
 
 export default function AdminDashboard() {
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth({ redirectOnUnauthenticated: true });
   const [, setLocation] = useLocation();
   const [activeFilter, setActiveFilter] = useState<"all" | "today" | "urgent" | "overdue" | "pending" | "in_progress">("all");
   
@@ -37,8 +37,8 @@ export default function AdminDashboard() {
     );
   }
 
+  // SSO handles authentication - if not authenticated, useAuth will redirect to login
   if (!isAuthenticated) {
-    setLocation("/login");
     return null;
   }
 
