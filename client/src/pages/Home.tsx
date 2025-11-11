@@ -43,7 +43,7 @@ export default function Home() {
 
       {/* Hero Section with FieldPulse Go Design Language */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1E3D] via-[#1C273A] to-[#0A1E3D] opacity-5 dark:opacity-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1E3D]/5 via-[#1C273A]/5 to-[#0A1E3D]/5 dark:from-[#0A1E3D]/20 dark:via-[#1C273A]/20 dark:to-[#0A1E3D]/20"></div>
         <div className="container mx-auto px-4 py-24 relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 mb-6">
@@ -52,7 +52,7 @@ export default function Home() {
             </div>
             <h2 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               Instant Field Coverage.<br />
-              <span className="gradient-pulse bg-clip-text text-transparent">Always in Sync.</span>
+              <span className="text-primary">Always in Sync.</span>
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Deploy engineers on demand, track arrivals live, and stay ahead with real-time visibility. 
@@ -60,7 +60,7 @@ export default function Home() {
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link href="/request">
-                <Button size="lg" className="text-lg px-8 py-6 gradient-pulse text-white hover:shadow-lg hover:shadow-primary/50 transition-all">
+                <Button size="lg" className="text-lg px-8 py-6 gradient-orange text-white hover:shadow-lg hover:shadow-primary/50 transition-all">
                   <Zap className="h-5 w-5 mr-2" />
                   Request Service
                 </Button>
@@ -77,7 +77,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features with FieldPulse Go Color Palette */}
+      {/* Features with Navy Blue and Orange */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
           <h3 className="text-3xl font-bold text-foreground mb-3">Every Heartbeat of Your Field, Visualised Live</h3>
@@ -142,9 +142,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer with Gradient */}
+      {/* Footer with Orange Accent */}
       <footer className="relative overflow-hidden mt-20">
-        <div className="absolute inset-0 gradient-pulse opacity-10"></div>
+        <div className="absolute inset-0 bg-primary/5"></div>
         <div className="relative border-t bg-background">
           <div className="container mx-auto px-4 py-8 text-center">
             <p className="text-muted-foreground mb-2">&copy; 2025 FieldPulse Go</p>

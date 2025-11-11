@@ -41,12 +41,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
-  /* FieldPulse Go Custom Colors */
-  --color-pulse-orange: oklch(0.68 0.18 45); /* #FF7A00 */
-  --color-electric-cyan: oklch(0.78 0.13 195); /* #00D7D7 */
-  --color-deep-navy: oklch(0.15 0.03 250); /* #0A1E3D */
-  --color-slate-grey: oklch(0.20 0.02 250); /* #1C273A */
-  --color-soft-white: oklch(0.97 0.005 250); /* #F5F7FA */
+  /* FieldPulse Go Brand Colors - Navy Blue, Orange, White */
+  --color-fp-orange: oklch(0.68 0.18 45); /* #FF7A00 - Primary Orange */
+  --color-fp-navy: oklch(0.15 0.03 250); /* #0A1E3D - Deep Navy from logo */
+  --color-fp-navy-light: oklch(0.25 0.02 250); /* Lighter navy for cards */
+  --color-fp-blue: oklch(0.45 0.10 250); /* Medium blue for accents */
   
   /* Font families */
   --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;
@@ -54,76 +53,76 @@
 }
 
 :root {
-  /* FieldPulse Go - Light Theme (Pulse Orange primary) */
-  --primary: var(--color-pulse-orange);
+  /* FieldPulse Go - Light Theme (Orange primary, Navy accents) */
+  --primary: var(--color-fp-orange);
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: var(--color-pulse-orange);
+  --sidebar-primary: var(--color-fp-orange);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --chart-1: var(--color-pulse-orange);
-  --chart-2: var(--color-electric-cyan);
+  --chart-1: var(--color-fp-orange);
+  --chart-2: var(--color-fp-blue);
   --chart-3: oklch(0.60 0.15 45);
-  --chart-4: oklch(0.70 0.12 195);
-  --chart-5: var(--color-deep-navy);
+  --chart-4: oklch(0.50 0.08 250);
+  --chart-5: var(--color-fp-navy);
   --radius: 0.65rem;
   --background: oklch(1 0 0);
-  --foreground: var(--color-deep-navy);
+  --foreground: var(--color-fp-navy);
   --card: oklch(1 0 0);
-  --card-foreground: var(--color-deep-navy);
+  --card-foreground: var(--color-fp-navy);
   --popover: oklch(1 0 0);
-  --popover-foreground: var(--color-deep-navy);
+  --popover-foreground: var(--color-fp-navy);
   --secondary: oklch(0.96 0.005 250);
-  --secondary-foreground: var(--color-deep-navy);
+  --secondary-foreground: var(--color-fp-navy);
   --muted: oklch(0.94 0.005 250);
   --muted-foreground: oklch(0.50 0.02 250);
-  --accent: var(--color-electric-cyan);
-  --accent-foreground: var(--color-deep-navy);
+  --accent: var(--color-fp-blue);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.88 0.01 250);
   --input: oklch(0.88 0.01 250);
-  --ring: var(--color-pulse-orange);
+  --ring: var(--color-fp-orange);
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: var(--color-deep-navy);
+  --sidebar-foreground: var(--color-fp-navy);
   --sidebar-accent: oklch(0.96 0.005 250);
-  --sidebar-accent-foreground: var(--color-deep-navy);
+  --sidebar-accent-foreground: var(--color-fp-navy);
   --sidebar-border: oklch(0.88 0.01 250);
-  --sidebar-ring: var(--color-pulse-orange);
+  --sidebar-ring: var(--color-fp-orange);
 }
 
 .dark {
-  /* FieldPulse Go - Dark Theme (Deep Navy background) */
-  --primary: var(--color-pulse-orange);
+  /* FieldPulse Go - Dark Theme (Navy background, Orange accents) */
+  --primary: var(--color-fp-orange);
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: var(--color-pulse-orange);
+  --sidebar-primary: var(--color-fp-orange);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --background: var(--color-deep-navy);
-  --foreground: var(--color-soft-white);
-  --card: var(--color-slate-grey);
-  --card-foreground: var(--color-soft-white);
-  --popover: var(--color-slate-grey);
-  --popover-foreground: var(--color-soft-white);
-  --secondary: oklch(0.25 0.02 250);
-  --secondary-foreground: var(--color-soft-white);
-  --muted: oklch(0.30 0.02 250);
+  --background: var(--color-fp-navy);
+  --foreground: oklch(0.95 0 0);
+  --card: var(--color-fp-navy-light);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: var(--color-fp-navy-light);
+  --popover-foreground: oklch(0.95 0 0);
+  --secondary: oklch(0.30 0.02 250);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.35 0.02 250);
   --muted-foreground: oklch(0.65 0.01 250);
-  --accent: var(--color-electric-cyan);
-  --accent-foreground: var(--color-deep-navy);
+  --accent: var(--color-fp-blue);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: var(--color-pulse-orange);
-  --chart-1: var(--color-pulse-orange);
-  --chart-2: var(--color-electric-cyan);
+  --ring: var(--color-fp-orange);
+  --chart-1: var(--color-fp-orange);
+  --chart-2: var(--color-fp-blue);
   --chart-3: oklch(0.60 0.15 45);
-  --chart-4: oklch(0.70 0.12 195);
+  --chart-4: oklch(0.50 0.08 250);
   --chart-5: oklch(0.40 0.03 250);
-  --sidebar: var(--color-slate-grey);
-  --sidebar-foreground: var(--color-soft-white);
-  --sidebar-accent: oklch(0.30 0.02 250);
-  --sidebar-accent-foreground: var(--color-soft-white);
+  --sidebar: var(--color-fp-navy-light);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-accent: oklch(0.35 0.02 250);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: var(--color-pulse-orange);
+  --sidebar-ring: var(--color-fp-orange);
 }
 
 @layer base {
@@ -188,9 +187,9 @@
     }
   }
   
-  /* FieldPulse Go gradient utility */
-  .gradient-pulse {
-    background: linear-gradient(90deg, #FF7A00 0%, #00D7D7 100%);
+  /* FieldPulse Go orange gradient utility */
+  .gradient-orange {
+    background: linear-gradient(135deg, #FF7A00 0%, #FF9940 100%);
   }
   
   /* Pulse glow effect for buttons */

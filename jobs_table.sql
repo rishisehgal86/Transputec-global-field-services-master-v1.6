@@ -1,5 +1,5 @@
 -- MySQL Script for Jobs Table
--- Transputec Field Engineer Dispatch & Tracking System
+-- FieldPulse Go Field Engineer Dispatch Transputec Field Engineer Dispatch & Tracking System Tracking System
 -- Version 2.0.3
 
 CREATE TABLE IF NOT EXISTS `jobs` (

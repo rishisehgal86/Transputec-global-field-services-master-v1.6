@@ -1,4 +1,4 @@
-# Transputec Field Engineer Dispatch & Tracking System
+# FieldPulse Go Field Engineer Dispatch Transputec Field Engineer Dispatch & Tracking System Tracking System
 
 A comprehensive web-based application for managing on-demand IT field service engineer dispatch with real-time GPS tracking, client self-service portal, and digital site visit reports.
 
@@ -64,8 +64,8 @@ A comprehensive web-based application for managing on-demand IT field service en
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/rishisehgal86/Transputec-global-field-services-master-v1.6.git
-cd Transputec-global-field-services-master-v1.6
+git clone https://github.com/rishisehgal86/FieldPulse-Go-field-services-master-v1.6.git
+cd FieldPulse-Go-field-services-master-v1.6
 ```
 
 2. **Install dependencies**
@@ -79,7 +79,7 @@ Create a `.env` file in the root directory:
 DATABASE_URL=mysql://user:password@host:port/database
 JWT_SECRET=your-secret-key
 ADMIN_EMAIL=admin@transputec.com
-VITE_APP_TITLE=Transputec Field Services
+VITE_APP_TITLE=FieldPulse Go Field Services
 VITE_APP_LOGO=https://your-logo-url.com/logo.png
 ```
 
@@ -181,5 +181,5 @@ For technical support or customization requests, contact the development team.
 
 ## License
 
-Proprietary - Transputec Global IT Services
+Proprietary - FieldPulse Go
 

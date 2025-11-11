@@ -1,4 +1,4 @@
-# Transputec Dispatch App TODO
+# FieldPulse Go Dispatch App TODO
 
 ## Database Schema & Backend
 - [x] Create jobs table with all dispatch form fields
@@ -108,7 +108,7 @@
 - [x] Create email template for SVR delivery
 
 ## Version 1.5 - Site Visit Report (SVR) - Complete
-- [x] Build SVR form component with all Transputec SVR fields
+- [x] Build SVR form component with all FieldPulse SVR fields
 - [x] Add digital signature capture for client sign-off
 - [x] Integrate SVR form into engineer job completion workflow
 - [x] Require SVR completion before ticket can be marked as completed
@@ -398,4 +398,25 @@ ns
 - [x] Enhance landing page with design language elements
 - [x] Update email templates with FieldPulse Go branding
 - [x] Test all pages with new branding
+
+
+
+
+## Color Scheme Refinement
+
+- [ ] Update color palette to navy blue, orange, and white (remove cyan/teal)
+- [ ] Simplify gradient to use only orange
+- [ ] Update all accent colors from cyan to orange or blue
+- [ ] Test color scheme across all pages
+
+
+
+
+## Color Scheme Refinement
+
+- [x] Update color palette to navy blue, orange, and white (remove cyan/teal)
+- [x] Simplify gradient to use only orange
+- [x] Update all accent colors from cyan to orange or blue
+- [x] Remove all remaining "Transputec" references and replace with "FieldPulse"
+- [x] Test color scheme across all pages
 

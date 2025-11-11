@@ -47,7 +47,7 @@ async function testEmail() {
     const info = await transporter.sendMail({
       from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
       to: testRecipient,
-      subject: 'Test Email - Transputec Dispatch System',
+      subject: 'Test Email - FieldPulse Go Dispatch System',
       text: 'This is a test email from the Transputec Field Engineer Dispatch system.',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">

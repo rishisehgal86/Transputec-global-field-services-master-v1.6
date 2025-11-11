@@ -1,7 +1,7 @@
 # Email Notification System - Implementation Summary
 
 ## Overview
-Automated email notification system has been fully implemented for the Transputec Field Engineer Dispatch application. All job events now trigger appropriate email notifications to relevant parties (admin, engineer, client).
+Automated email notification system has been fully implemented for the FieldPulse Go Field Engineer Dispatch application. All job events now trigger appropriate email notifications to relevant parties (admin, engineer, client).
 
 ## Email Configuration
 - **SMTP Provider**: Gmail SMTP (smtp.gmail.com:587)

@@ -1,6 +1,6 @@
 # Hosting Configuration Guide
 
-This document explains how to properly host the Transputec Field Engineer Dispatch & Tracking application on various platforms.
+This document explains how to properly host the FieldPulse Go Field Engineer Dispatch Transputec Field Engineer Dispatch & Tracking Tracking application on various platforms.
 
 ## Important: Single Page Application (SPA) Routing
 
@@ -185,7 +185,7 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
 
 # App Branding
-VITE_APP_TITLE=Transputec Field Engineer Dispatch & Tracking
+VITE_APP_TITLE=FieldPulse Go Field Engineer Dispatch Transputec Field Engineer Dispatch & Tracking Tracking
 VITE_APP_LOGO=https://your-logo-url.com/logo.png
 ```
 
