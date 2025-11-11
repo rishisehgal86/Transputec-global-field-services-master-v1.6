@@ -146,7 +146,7 @@ export const appRouter = router({
         console.log('✅ [CreateRequest] Job created with ID:', job?.id);
         
         // Send email notification to admin
-        const adminEmail = 'rishi@karrdservicesuae.com';
+        const adminEmail = 'admin@field-pulse.io';
         console.log('📤 [CreateRequest] Preparing to send admin email to:', adminEmail);
         if (adminEmail && job) {
           try {
@@ -602,7 +602,7 @@ export const appRouter = router({
         
         // Add admin email if not the author
         if (input.authorType !== 'admin') {
-          const adminEmail = 'rishi@karrdservicesuae.com';
+          const adminEmail = 'admin@field-pulse.io';
           if (adminEmail) {
             recipients.push(adminEmail);
           }
@@ -782,7 +782,7 @@ export const appRouter = router({
         }
         
         // Send to admin
-        const adminEmail = 'rishi@karrdservicesuae.com';
+        const adminEmail = 'admin@field-pulse.io';
         if (adminEmail) {
           try {
             await sendJobCompletionNotification(adminEmail, {

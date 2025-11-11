@@ -478,3 +478,14 @@ ns
 - [x] Update all email templates with new sender
 - [x] Update Gmail app password for new account
 
+
+
+
+## Email Delivery Issue
+
+- [x] Check server logs for email errors
+- [x] Verify email sending code is being called
+- [x] Test SMTP connection
+- [x] Fix email delivery issue (updated admin email to admin@field-pulse.io)
+- [x] Verify emails are received
+
