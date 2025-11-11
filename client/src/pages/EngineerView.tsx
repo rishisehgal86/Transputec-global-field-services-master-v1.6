@@ -243,7 +243,10 @@ export default function EngineerView() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <LogoImage className="h-14" />
-            <p className="text-sm text-muted-foreground">Field Engineer Portal</p>
+            <div className="hidden md:block border-l border-border pl-4">
+              <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+              <p className="text-xs text-muted-foreground">Field Engineer Portal</p>
+            </div>
           </div>
         </div>
       </header>

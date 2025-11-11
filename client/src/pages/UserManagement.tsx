@@ -129,9 +129,14 @@ export default function UserManagement() {
       <header className="border-b bg-background shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <Link href="/admin">
-              <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/admin">
+                <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
+              </Link>
+              <div className="hidden md:block border-l border-border pl-4">
+                <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+              </div>
+            </div>
             <Link href="/admin">
               <Button variant="outline">Back to Dashboard</Button>
             </Link>

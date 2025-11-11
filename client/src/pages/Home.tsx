@@ -24,6 +24,9 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <LogoImage className="h-16" />
+            <div className="hidden md:block border-l border-border pl-3">
+              <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

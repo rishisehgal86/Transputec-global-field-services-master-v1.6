@@ -70,7 +70,10 @@ export default function AdminDashboard() {
               <Link href="/">
                 <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
               </Link>
-              <p className="text-sm text-muted-foreground">Admin Dashboard</p>
+              <div className="hidden md:block border-l border-border pl-4">
+                <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+                <p className="text-xs text-muted-foreground">Admin Dashboard</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <Link href="/admin/users">

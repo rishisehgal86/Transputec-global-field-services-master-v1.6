@@ -194,7 +194,12 @@ export default function ClientTracker() {
       <header className="border-b bg-background shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <LogoImage className="h-14" />
+            <div className="flex items-center gap-4">
+              <LogoImage className="h-14" />
+              <div className="hidden md:block border-l border-border pl-4">
+                <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+              </div>
+            </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <RefreshCw className="h-4 w-4" />

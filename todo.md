@@ -459,3 +459,13 @@ ns
 - [x] Update all page headers with expanded dimensions
 - [x] Test logo display across all pages
 
+
+
+
+## Header Tagline
+
+- [x] Add "On-Demand Despatch Field Services Platform" tagline next to logo
+- [x] Update all page headers with tagline
+- [x] Style tagline appropriately
+- [x] Test display on all pages
+
