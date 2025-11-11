@@ -357,3 +357,29 @@ ns
 - [ ] Fix job filter categorization logic - investigate and correct miscategorization issues
 - [x] Fix job duplication to pre-fill form with original job data instead of showing empty form
 
+
+
+
+## Job Cancellation Workflow
+- [x] Add cancellationReason field to jobs table schema
+- [x] Add cancelledBy field to track who cancelled the job
+- [x] Add cancelledAt timestamp field
+- [x] Push database schema changes
+- [x] Create sendCancellationNotification email function
+- [x] Add cancelJob endpoint in backend with reason parameter
+- [x] Create CancelJobDialog component with reason dropdown
+- [x] Add Cancel Job button to JobDetail page (admin only)
+- [x] Send notifications to client, engineer (if assigned), and admin
+- [ ] Test cancellation workflow end-to-end
+
+
+
+
+## Engineer Reassignment Feature
+- [x] Create reassign endpoint to generate new job token
+- [x] Clear previous engineer details when reassigning
+- [x] Add reassignment email notification function (admin can use existing Send to Engineer)
+- [x] Add "Reassign to Another Engineer" button for declined jobs
+- [x] Display new engineer link after reassignment
+- [ ] Test reassignment workflow end-to-end
+

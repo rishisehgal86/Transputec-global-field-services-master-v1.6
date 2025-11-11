@@ -84,6 +84,11 @@ export const jobs = mysqlTable("jobs", {
   enRouteAt: timestamp("enRouteAt"),
   arrivedAt: timestamp("arrivedAt"),
   completedAt: timestamp("completedAt"),
+  cancelledAt: timestamp("cancelledAt"),
+  
+  // Cancellation tracking
+  cancellationReason: varchar("cancellationReason", { length: 500 }),
+  cancelledBy: varchar("cancelledBy", { length: 255 }), // Name of person who cancelled
   
   // Client Information
   clientName: varchar("clientName", { length: 255 }).notNull(),

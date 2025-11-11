@@ -1066,3 +1066,152 @@ Thank you for using Transputec Field Engineer Services.
   });
 }
 
+
+
+
+/**
+ * Send job cancellation notification
+ */
+export async function sendCancellationNotification(data: {
+  jobId: number;
+  siteName: string;
+  clientName: string;
+  clientEmail?: string;
+  engineerName?: string;
+  engineerEmail?: string;
+  cancellationReason: string;
+  cancelledBy: string;
+  trackingUrl: string;
+  baseUrl: string;
+}): Promise<boolean> {
+  const {
+    jobId,
+    siteName,
+    clientName,
+    clientEmail,
+    engineerName,
+    engineerEmail,
+    cancellationReason,
+    cancelledBy,
+    trackingUrl,
+    baseUrl,
+  } = data;
+
+  const adminEmail = "rishi@karrdservicesuae.com";
+
+  // Email template
+  const emailTemplate = (recipientType: string) => `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
+        .info-box { background-color: #fff; padding: 15px; margin: 15px 0; border-left: 4px solid #dc2626; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>⚠️ Job Cancelled</h1>
+        </div>
+        <div class="content">
+          <p>Dear ${recipientType},</p>
+          
+          <p>This is to inform you that the following service request has been <strong>cancelled</strong>:</p>
+          
+          <div class="info-box">
+            <p><strong>Job ID:</strong> #${jobId}</p>
+            <p><strong>Site:</strong> ${siteName}</p>
+            <p><strong>Client:</strong> ${clientName}</p>
+            ${engineerName ? `<p><strong>Engineer:</strong> ${engineerName}</p>` : ''}
+          </div>
+
+          <div class="info-box">
+            <p><strong>Cancelled By:</strong> ${cancelledBy}</p>
+            <p><strong>Reason:</strong> ${cancellationReason}</p>
+            <p><strong>Cancelled At:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+
+          ${recipientType === 'Client' ? `
+            <p>We apologize for any inconvenience this may cause. If you have any questions or would like to reschedule, please contact us.</p>
+            <a href="${trackingUrl}" class="button">View Job Details</a>
+          ` : ''}
+
+          ${recipientType === 'Engineer' ? `
+            <p>You are no longer required to attend this service call. Please disregard any previous notifications for this job.</p>
+          ` : ''}
+
+          ${recipientType === 'Admin' ? `
+            <p>The job has been cancelled and all parties have been notified.</p>
+            <a href="${baseUrl}/admin/job/${jobId}" class="button">View Job Details</a>
+          ` : ''}
+        </div>
+        <div class="footer">
+          <p>© 2025 Transputec. Global IT Service Provider.</p>
+          <p>This is an automated notification. Please do not reply to this email.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const results: boolean[] = [];
+
+  // Send to admin
+  try {
+    console.log(`[Email] 📤 Attempting to send cancellation notification to admin: ${adminEmail}`);
+    await sendEmail({
+      to: adminEmail,
+      subject: `Job Cancelled: ${siteName} - ${clientName}`,
+      html: emailTemplate('Admin'),
+    });
+    console.log(`[Email] ✅ Successfully sent cancellation notification to admin: ${adminEmail}`);
+    results.push(true);
+  } catch (error) {
+    console.error(`[Email] ✗ Failed to send cancellation notification to admin:`, error);
+    results.push(false);
+  }
+
+  // Send to client if email provided
+  if (clientEmail) {
+    try {
+      console.log(`[Email] 📤 Attempting to send cancellation notification to client: ${clientEmail}`);
+      await sendEmail({
+        to: clientEmail,
+        subject: `Service Request Cancelled - ${siteName}`,
+        html: emailTemplate('Client'),
+      });
+      console.log(`[Email] ✅ Successfully sent cancellation notification to client: ${clientEmail}`);
+      results.push(true);
+    } catch (error) {
+      console.error(`[Email] ✗ Failed to send cancellation notification to client:`, error);
+      results.push(false);
+    }
+  }
+
+  // Send to engineer if email provided
+  if (engineerEmail) {
+    try {
+      console.log(`[Email] 📤 Attempting to send cancellation notification to engineer: ${engineerEmail}`);
+      await sendEmail({
+        to: engineerEmail,
+        subject: `Job Cancelled - ${siteName}`,
+        html: emailTemplate('Engineer'),
+      });
+      console.log(`[Email] ✅ Successfully sent cancellation notification to engineer: ${engineerEmail}`);
+      results.push(true);
+    } catch (error) {
+      console.error(`[Email] ✗ Failed to send cancellation notification to engineer:`, error);
+      results.push(false);
+    }
+  }
+
+  // Return true if at least one email was sent successfully
+  return results.some(result => result);
+}
+

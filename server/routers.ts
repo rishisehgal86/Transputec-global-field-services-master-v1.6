@@ -19,7 +19,7 @@ import {
 } from "./db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
-import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail } from "./email";
+import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification } from "./email";
 import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
 
 // Helper function to get base URL from request
@@ -289,6 +289,84 @@ export const appRouter = router({
           jobToken,
           engineerLink: `/engineer/${jobToken}`,
           clientLink: `/track/${jobToken}`,
+        };
+      }),
+
+    // Cancel a job with reason (admin only)
+    cancel: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+        reason: z.string(),
+        cancelledBy: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const job = await getJobById(input.jobId);
+        if (!job) {
+          throw new Error('Job not found');
+        }
+        
+        // Update job status to cancelled and add cancellation details
+        await updateJobStatus(input.jobId, 'cancelled', {
+          cancellationReason: input.reason,
+          cancelledBy: input.cancelledBy,
+          cancelledAt: new Date(),
+        });
+        
+        // Get base URL for email links
+        const baseUrl = getBaseUrl(ctx.req);
+        const trackingUrl = `${baseUrl}/track/${job.jobToken}`;
+        
+        // Send cancellation notifications to all parties
+        try {
+          await sendCancellationNotification({
+            jobId: job.id,
+            siteName: job.siteName,
+            clientName: job.clientName,
+            clientEmail: job.clientEmail || undefined,
+            engineerName: job.engineerName || undefined,
+            engineerEmail: job.engineerEmail || undefined,
+            cancellationReason: input.reason,
+            cancelledBy: input.cancelledBy,
+            trackingUrl,
+            baseUrl,
+          });
+          console.log(`[CancelJob] Cancellation notifications sent for job #${job.id}`);
+        } catch (error) {
+          console.error(`[CancelJob] Failed to send cancellation notifications:`, error);
+        }
+        
+        return { success: true };
+      }),
+
+    // Reassign job to another engineer (admin only)
+    reassign: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const job = await getJobById(input.jobId);
+        if (!job) {
+          throw new Error('Job not found');
+        }
+        
+        // Generate new job token
+        const newJobToken = randomBytes(32).toString('hex');
+        
+        // Update job with new token and clear engineer details
+        await updateJobStatus(input.jobId, 'created', {
+          jobToken: newJobToken,
+          engineerName: null,
+          engineerEmail: null,
+          engineerPhone: null,
+          acceptedAt: null,
+        });
+        
+        console.log(`[ReassignJob] Job #${job.id} reassigned with new token`);
+        
+        return { 
+          success: true,
+          jobToken: newJobToken,
+          engineerLink: `/engineer/${newJobToken}`,
         };
       }),
 

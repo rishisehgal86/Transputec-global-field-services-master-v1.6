@@ -13,6 +13,7 @@ import { LiveMap } from "@/components/LiveMap";
 import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
 import { JobComments } from "@/components/JobComments";
+import { CancelJobDialog } from "@/components/CancelJobDialog";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -20,6 +21,7 @@ export default function JobDetail() {
   const [match, params] = useRoute("/admin/job/:id");
   const jobId = params?.id ? parseInt(params.id) : 0;
   const [eta, setEta] = useState<string | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const { data: job, isLoading, refetch } = trpc.jobs.getById.useQuery(
     { id: jobId },
@@ -63,6 +65,36 @@ export default function JobDetail() {
     },
     onError: (error) => {
       toast.error(`Failed to duplicate job: ${error.message}`);
+    },
+  });
+
+  const cancelJobMutation = trpc.jobs.cancel.useMutation({
+    onSuccess: () => {
+      toast.success("Job cancelled successfully!");
+      setCancelDialogOpen(false);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to cancel job: ${error.message}`);
+    },
+  });
+
+  const handleCancelJob = (reason: string) => {
+    if (!job) return;
+    cancelJobMutation.mutate({
+      jobId: job.id,
+      reason,
+      cancelledBy: "Admin", // In a real app, this would be the logged-in user's name
+    });
+  };
+
+  const reassignJobMutation = trpc.jobs.reassign.useMutation({
+    onSuccess: () => {
+      toast.success("Job reassigned! New engineer link generated.");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to reassign job: ${error.message}`);
     },
   });
 
@@ -369,6 +401,21 @@ export default function JobDetail() {
                           Mark as Completed
                         </Button>
                       )}
+                      {job.status === "declined" && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => {
+                            if (confirm("This will generate a new engineer link and reset the job status. Continue?")) {
+                              reassignJobMutation.mutate({ jobId: job.id });
+                            }
+                          }}
+                          disabled={reassignJobMutation.isPending}
+                        >
+                          <User className="h-4 w-4 mr-1" />
+                          Reassign to Another Engineer
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
@@ -381,13 +428,8 @@ export default function JobDetail() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => {
-                          if (confirm("Are you sure you want to cancel this job?")) {
-                            // We'll need to add a cancel mutation
-                            toast.info("Cancel functionality - update job status to cancelled in database");
-                          }
-                        }}
-                        disabled={updateStatusMutation.isPending}
+                        onClick={() => setCancelDialogOpen(true)}
+                        disabled={cancelJobMutation.isPending}
                       >
                         <XCircle className="h-4 w-4 mr-1" />
                         Cancel Job
@@ -674,6 +716,13 @@ export default function JobDetail() {
           </div>
         )}
       </main>
+
+      <CancelJobDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleCancelJob}
+        isLoading={cancelJobMutation.isPending}
+      />
     </div>
   );
 }
