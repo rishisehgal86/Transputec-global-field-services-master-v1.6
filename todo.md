@@ -499,3 +499,12 @@ ns
 - [x] Fix client email delivery
 - [x] Test client receives confirmation email (working - emails delivered successfully)
 
+
+
+
+## Admin Credentials Update
+
+- [x] Update super admin email to admin@field-pulse.io
+- [x] Update super admin password to Admin@123
+- [x] Test login with new credentials
+
