@@ -143,7 +143,6 @@ export const jobs = mysqlTable("jobs", {
   projectName: varchar("projectName", { length: 255 }),
   downTime: boolean("downTime").default(false),
   scheduledDateTime: timestamp("scheduledDateTime"),
-  clientTimezone: varchar("clientTimezone", { length: 100 }), // IANA timezone (e.g., "America/New_York")
   hoursRequired: varchar("hoursRequired", { length: 100 }),
   
   // Technical Requirements
@@ -199,31 +198,6 @@ export const jobs = mysqlTable("jobs", {
 
 export type Job = typeof jobs.$inferSelect;
 export type InsertJob = typeof jobs.$inferInsert;
-
-/**
- * Job Documents table - stores uploaded files for jobs
- * Clients can upload instruction guides, task documents, etc.
- */
-export const jobDocuments = mysqlTable("job_documents", {
-  id: int("id").autoincrement().primaryKey(),
-  jobId: int("jobId").notNull().references(() => jobs.id, { onDelete: 'cascade' }),
-  
-  // File information
-  fileName: varchar("fileName", { length: 255 }).notNull(),
-  fileUrl: text("fileUrl").notNull(), // S3 URL
-  fileKey: varchar("fileKey", { length: 500 }).notNull(), // S3 key for deletion
-  fileSize: int("fileSize").notNull(), // in bytes
-  mimeType: varchar("mimeType", { length: 100 }).notNull(),
-  
-  // Upload metadata
-  uploadedBy: varchar("uploadedBy", { length: 100 }).notNull(), // 'client', 'admin', 'engineer'
-  description: text("description"),
-  
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type JobDocument = typeof jobDocuments.$inferSelect;
-export type InsertJobDocument = typeof jobDocuments.$inferInsert;
 
 /**
  * Job Locations - stores GPS tracking data

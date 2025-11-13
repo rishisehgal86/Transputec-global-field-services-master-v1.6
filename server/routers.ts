@@ -427,31 +427,17 @@ export const appRouter = router({
 
         // Send email notification to engineer
         try {
-          const { generateEngineerAssignmentEmail } = await import('./email-templates');
-          const { sendEmail } = await import('./email-sender');
-          
-          const emailData = generateEngineerAssignmentEmail({
+          const { sendJobAssignmentNotification } = await import('./email');
+          await sendJobAssignmentNotification({
+            engineerEmail: input.engineerEmail,
             engineerName: input.engineerName,
-            jobId: job.id,
             siteName: job.siteName,
-            siteAddress: job.siteAddress || 'Address not provided',
+            siteAddress: job.siteAddress || 'N/A',
             scheduledDateTime: job.scheduledDateTime || undefined,
-            timezone: job.clientTimezone || undefined,
-            incidentDetails: job.incidentDetails || undefined,
-            engineerLink: `${baseUrl}/engineer/${job.jobToken}`,
+            incidentDetails: job.incidentDetails || 'N/A',
+            jobToken: job.jobToken,
+            baseUrl,
           });
-          
-          const emailSent = await sendEmail({
-            to: input.engineerEmail,
-            subject: emailData.subject,
-            html: emailData.html,
-            text: emailData.text,
-          });
-          
-          if (!emailSent) {
-            console.warn(`[Job ${job.id}] Failed to send email to engineer, but job status updated`);
-          }
-          
           console.log('[Email] Job assignment sent to engineer:', input.engineerEmail);
           return { success: true, message: 'Job assignment email sent successfully' };
         } catch (error) {
@@ -1401,40 +1387,6 @@ export const appRouter = router({
         }
         
         return { success: true, isActive: input.isActive };
-      }),
-
-    // Upload document for a job
-    uploadDocument: publicProcedure
-      .input(z.object({
-        jobId: z.number(),
-        fileName: z.string(),
-        fileUrl: z.string(),
-        fileKey: z.string(),
-        fileSize: z.number(),
-        mimeType: z.string(),
-        uploadedBy: z.string(),
-        description: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const { addJobDocument } = await import('./job-documents-db');
-        return await addJobDocument(input);
-      }),
-
-    // Get documents for a job
-    getDocuments: publicProcedure
-      .input(z.object({ jobId: z.number() }))
-      .query(async ({ input }) => {
-        const { getJobDocuments } = await import('./job-documents-db');
-        return await getJobDocuments(input.jobId);
-      }),
-
-    // Delete a document
-    deleteDocument: protectedProcedure
-      .input(z.object({ documentId: z.number() }))
-      .mutation(async ({ input }) => {
-        const { deleteJobDocument } = await import('./job-documents-db');
-        await deleteJobDocument(input.documentId);
-        return { success: true };
       }),
   }),
 });
