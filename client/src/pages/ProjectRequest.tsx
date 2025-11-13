@@ -81,7 +81,7 @@ export default function ProjectRequest() {
           </div>
         </div>
       )}
-      <RequestService projectId={projectId} />
+      <RequestService projectId={projectId} project={project} />
     </div>
   );
 }

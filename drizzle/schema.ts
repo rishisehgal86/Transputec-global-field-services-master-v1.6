@@ -50,12 +50,49 @@ export const projects = mysqlTable("projects", {
   // Status
   isActive: boolean("isActive").default(true).notNull(),
   
+  // Site restriction
+  restrictToSites: boolean("restrictToSites").default(false).notNull(), // If true, only predefined sites can be selected
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = typeof projects.$inferInsert;
+
+/**
+ * Project Sites table - predefined sites for project-based job requests
+ * Each site belongs to a specific project
+ */
+export const projectSites = mysqlTable("project_sites", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: varchar("projectId", { length: 100 }).notNull().references(() => projects.projectId, { onDelete: 'cascade' }),
+  
+  // Site information
+  siteName: varchar("siteName", { length: 255 }).notNull(),
+  siteAddress: text("siteAddress").notNull(),
+  city: varchar("city", { length: 100 }),
+  postalCode: varchar("postalCode", { length: 20 }),
+  
+  // Geocoding
+  latitude: varchar("latitude", { length: 50 }).notNull(),
+  longitude: varchar("longitude", { length: 50 }).notNull(),
+  
+  // Contact information
+  contactName: varchar("contactName", { length: 255 }),
+  contactPhone: varchar("contactPhone", { length: 50 }),
+  contactEmail: varchar("contactEmail", { length: 320 }),
+  
+  // Additional info
+  notes: text("notes"),
+  isActive: boolean("isActive").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ProjectSite = typeof projectSites.$inferSelect;
+export type InsertProjectSite = typeof projectSites.$inferInsert;
 
 /**
  * Core user table for local authentication.

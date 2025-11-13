@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Check, MapPin, Search, Building2 } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { Link } from "wouter";
@@ -11,7 +12,7 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function RequestService({ projectId }: { projectId?: string }) {
+export default function RequestService({ projectId, project }: { projectId?: string; project?: any }) {
   const [searching, setSearching] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
@@ -22,6 +23,13 @@ export default function RequestService({ projectId }: { projectId?: string }) {
   const [manualProjectId, setManualProjectId] = useState("");
   const [verifyingProject, setVerifyingProject] = useState(false);
   const [projectValid, setProjectValid] = useState<boolean | null>(null);
+  const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
+  
+  // Fetch project sites if project restricts to predefined sites
+  const { data: projectSites } = trpc.projects.getSites.useQuery(
+    { projectId: projectId || "" },
+    { enabled: !!projectId && !!project?.restrictToSites }
+  );
   
   // Verify project ID mutation
   const verifyProjectMutation = trpc.projects.verify.useMutation({
@@ -292,9 +300,72 @@ export default function RequestService({ projectId }: { projectId?: string }) {
                   </div>
                 </div>
 
-                {/* Address Search */}
-                <div>
-                  <Label htmlFor="addressSearch">Site Address *</Label>
+                {/* Site Selection - Conditional based on project settings */}
+                {project?.restrictToSites && projectSites ? (
+                  /* Predefined Site Selector */
+                  <div>
+                    <Label htmlFor="siteSelector">Select Site *</Label>
+                    <Select
+                      value={selectedSiteId?.toString() || ""}
+                      onValueChange={(value) => {
+                        const siteId = parseInt(value);
+                        const site = projectSites.find(s => s.id === siteId);
+                        if (site) {
+                          setSelectedSiteId(siteId);
+                          setSelectedAddress(site.siteAddress);
+                          setSiteCoordinates({
+                            lat: site.latitude,
+                            lng: site.longitude,
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Choose a site from the list" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projectSites.map((site) => (
+                          <SelectItem key={site.id} value={site.id.toString()}>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              <div>
+                                <div className="font-medium">{site.siteName}</div>
+                                <div className="text-xs text-muted-foreground">{site.siteAddress}</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Selected Site Display */}
+                    {selectedSiteId && projectSites.find(s => s.id === selectedSiteId) && (
+                      <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-900">
+                              {projectSites.find(s => s.id === selectedSiteId)?.siteName}
+                            </p>
+                            <p className="text-sm text-green-700 mt-1">
+                              {projectSites.find(s => s.id === selectedSiteId)?.siteAddress}
+                            </p>
+                            {projectSites.find(s => s.id === selectedSiteId)?.contactName && (
+                              <p className="text-xs text-green-600 mt-1">
+                                Contact: {projectSites.find(s => s.id === selectedSiteId)?.contactName}
+                                {projectSites.find(s => s.id === selectedSiteId)?.contactPhone && 
+                                  ` • ${projectSites.find(s => s.id === selectedSiteId)?.contactPhone}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Standard Address Search */
+                  <div>
+                    <Label htmlFor="addressSearch">Site Address *</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       id="addressSearch"
@@ -353,7 +424,7 @@ export default function RequestService({ projectId }: { projectId?: string }) {
                   )}
 
                   {/* Selected Address Display */}
-                  {selectedAddress && (
+                  {selectedAddress && !project?.restrictToSites && (
                     <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-start gap-2">
                         <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -365,6 +436,7 @@ export default function RequestService({ projectId }: { projectId?: string }) {
                     </div>
                   )}
                 </div>
+                )}
               </div>
 
               {/* Contact Information */}

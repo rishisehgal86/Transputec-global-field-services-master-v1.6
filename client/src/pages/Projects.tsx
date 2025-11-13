@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import ProjectSites from "@/components/ProjectSites";
 
 export default function Projects() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -290,21 +291,9 @@ export default function Projects() {
                     </div>
                   </div>
                   
-                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                    <div className="text-xs text-gray-500 mb-1">Project Request Link:</div>
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm flex-1 bg-white px-2 py-1 rounded border">
-                        {window.location.origin}/request/{project.projectId}
-                      </code>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => copyProjectLink(project.projectId)}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
+                  {/* Site Management */}
+                  <div className="mt-6">
+                    <ProjectSites projectId={project.projectId} />
                   </div>
                 </CardContent>
               </Card>

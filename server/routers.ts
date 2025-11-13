@@ -1148,6 +1148,155 @@ export const appRouter = router({
         const { deleteProject } = await import('./projects-db');
         return await deleteProject(input.projectId);
       }),
+
+    // Download site upload template
+    downloadSiteTemplate: protectedProcedure
+      .mutation(async () => {
+        const { generateSiteTemplate } = await import('./site-template');
+        const buffer = generateSiteTemplate();
+        return {
+          data: buffer.toString('base64'),
+          filename: 'project-sites-template.xlsx',
+        };
+      }),
+
+    // Upload and parse site file
+    uploadSites: protectedProcedure
+      .input(z.object({
+        projectId: z.string(),
+        fileData: z.string(), // Base64 encoded file
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { parseSiteUpload } = await import('./site-template');
+        const { bulkCreateProjectSites } = await import('./project-sites-db');
+        const { geocodeAddress } = await import('./geocoding');
+        
+        // Decode base64 file
+        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        
+        // Parse Excel file
+        const { sites, errors } = parseSiteUpload(fileBuffer);
+        
+        if (errors.length > 0) {
+          return { success: false, errors, imported: 0 };
+        }
+        
+        // Geocode sites that don't have coordinates
+        const sitesWithCoords = await Promise.all(
+          sites.map(async (site) => {
+            let lat = site.latitude;
+            let lng = site.longitude;
+            
+            // If coordinates not provided, geocode the address
+            if (!lat || !lng) {
+              try {
+                const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''}`.trim();
+                const coords = await geocodeAddress(fullAddress);
+                lat = coords.latitude;
+                lng = coords.longitude;
+              } catch (error) {
+                errors.push(`Failed to geocode address for "${site.siteName}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+                return null;
+              }
+            }
+            
+            return {
+              projectId: input.projectId,
+              siteName: site.siteName,
+              siteAddress: site.siteAddress,
+              city: site.city,
+              postalCode: site.postalCode,
+              latitude: lat,
+              longitude: lng,
+              contactName: site.contactName,
+              contactPhone: site.contactPhone,
+              contactEmail: site.contactEmail,
+              notes: site.notes,
+              isActive: true,
+            };
+          })
+        );
+        
+        // Filter out failed geocoding
+        const validSites = sitesWithCoords.filter(site => site !== null);
+        
+        if (validSites.length === 0) {
+          return { success: false, errors, imported: 0 };
+        }
+        
+        // Bulk insert sites
+        const imported = await bulkCreateProjectSites(validSites as any[]);
+        
+        return {
+          success: true,
+          imported,
+          errors,
+        };
+      }),
+
+    // Get sites for a project
+    getSites: protectedProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input }) => {
+        const { getProjectSites } = await import('./project-sites-db');
+        return await getProjectSites(input.projectId);
+      }),
+
+    // Add single site
+    addSite: protectedProcedure
+      .input(z.object({
+        projectId: z.string(),
+        siteName: z.string(),
+        siteAddress: z.string(),
+        city: z.string().optional(),
+        postalCode: z.string().optional(),
+        latitude: z.string().optional(),
+        longitude: z.string().optional(),
+        contactName: z.string().optional(),
+        contactPhone: z.string().optional(),
+        contactEmail: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createProjectSite } = await import('./project-sites-db');
+        const { geocodeAddress } = await import('./geocoding');
+        
+        let lat = input.latitude;
+        let lng = input.longitude;
+        
+        // Geocode if coordinates not provided
+        if (!lat || !lng) {
+          const fullAddress = `${input.siteAddress}, ${input.city || ''} ${input.postalCode || ''}`.trim();
+          const coords = await geocodeAddress(fullAddress);
+          lat = coords.latitude;
+          lng = coords.longitude;
+        }
+        
+        return await createProjectSite({
+          projectId: input.projectId,
+          siteName: input.siteName,
+          siteAddress: input.siteAddress,
+          city: input.city,
+          postalCode: input.postalCode,
+          latitude: lat,
+          longitude: lng,
+          contactName: input.contactName,
+          contactPhone: input.contactPhone,
+          contactEmail: input.contactEmail,
+          notes: input.notes,
+          isActive: true,
+        });
+      }),
+
+    // Delete site
+    deleteSite: protectedProcedure
+      .input(z.object({ siteId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteProjectSite } = await import('./project-sites-db');
+        return await deleteProjectSite(input.siteId);
+      }),
   }),
 
   users: router({

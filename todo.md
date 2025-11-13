@@ -548,3 +548,15 @@ ns
 - [x] Generate unique project request links
 - [x] Test project-based job assignment
 
+
+
+## Project Site Management
+- [x] Add restrictToSites boolean field to projects table
+- [x] Create project_sites table with geocoding support
+- [x] Build Excel template generator for site uploads
+- [x] Implement bulk site import with validation
+- [x] Create site management UI in project details
+- [x] Add site selector to project request forms
+- [x] Implement automatic geocoding for uploaded sites
+- [x] Test site upload and selection workflow
+
