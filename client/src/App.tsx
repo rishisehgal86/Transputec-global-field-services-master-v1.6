@@ -13,6 +13,8 @@ import JobDetail from "./pages/JobDetail";
 import EngineerView from "./pages/EngineerView";
 import ClientTracker from "./pages/ClientTracker";
 import UserManagement from "./pages/UserManagement";
+import Projects from "./pages/Projects";
+import ProjectRequest from "./pages/ProjectRequest";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -20,10 +22,12 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path="/login" component={Login} />
+      <Route path="/request/:projectId" component={ProjectRequest} />
       <Route path="/request" component={RequestService} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/create" component={CreateJob} />
       <Route path="/admin/users" component={UserManagement} />
+      <Route path="/projects" component={Projects} />
       <Route path="/admin/job/:id" component={JobDetail} />
       <Route path="/engineer/:token" component={EngineerView} />
       <Route path="/track/:token" component={ClientTracker} />

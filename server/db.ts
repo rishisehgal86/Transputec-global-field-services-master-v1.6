@@ -1,4 +1,4 @@
-import { eq, desc, gte, lt, and, or, not, sql } from "drizzle-orm";
+import { eq, desc, gte, lte, lt, and, or, not, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory, svrMediaFiles, InsertSvrMediaFile, jobComments, InsertJobComment } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -52,6 +52,35 @@ export async function getJobById(id: number) {
   
   const result = await db.select().from(jobs).where(eq(jobs.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+export async function getJobsByDateRange(
+  startDate: Date, 
+  endDate: Date, 
+  organizationId: number,
+  status?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [
+    eq(jobs.organizationId, organizationId),
+    gte(jobs.createdAt, startDate),
+    lte(jobs.createdAt, endDate)
+  ];
+  
+  // Add status filter if provided
+  if (status && status !== 'all') {
+    conditions.push(sql`${jobs.status} = ${status}`);
+  }
+  
+  const result = await db
+    .select()
+    .from(jobs)
+    .where(and(...conditions))
+    .orderBy(desc(jobs.createdAt));
+  
+  return result;
 }
 
 export async function getAllJobs() {

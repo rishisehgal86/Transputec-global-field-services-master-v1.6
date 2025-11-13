@@ -2,17 +2,23 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
+import { ExportJobsDialog } from "@/components/ExportJobsDialog";
 import { useState } from "react";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [activeFilter, setActiveFilter] = useState<"all" | "today" | "urgent" | "overdue" | "pending" | "in_progress">("all");
+  const [selectedProject, setSelectedProject] = useState<string>("all");
+  
+  // Fetch projects for filter
+  const { data: projects } = trpc.projects.list.useQuery();
   
   // Fetch all jobs or filtered jobs based on active filter
   const { data: allJobs, isLoading: isLoadingAll } = trpc.jobs.list.useQuery(undefined, {
@@ -26,8 +32,13 @@ export default function AdminDashboard() {
   
   const { data: filterCounts } = trpc.jobs.getFilterCounts.useQuery();
   
-  const jobs = activeFilter === "all" ? allJobs : filteredJobs;
+  let jobs = activeFilter === "all" ? allJobs : filteredJobs;
   const isLoading = activeFilter === "all" ? isLoadingAll : isLoadingFiltered;
+  
+  // Apply project filter if selected
+  if (selectedProject !== "all" && jobs) {
+    jobs = jobs.filter(job => job.projectId === selectedProject);
+  }
 
   if (authLoading) {
     return (
@@ -82,12 +93,21 @@ export default function AdminDashboard() {
                   User Management
                 </Button>
               </Link>
-              <Link href="/admin/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create New Job
+              <Link href="/projects">
+                <Button variant="outline">
+                  <FolderOpen className="h-4 w-4 mr-2" />
+                  Projects
                 </Button>
               </Link>
+              <div className="flex gap-2">
+                <ExportJobsDialog />
+                <Link href="/admin/create">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Job
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -101,12 +121,41 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Filters */}
-        <div className="mb-6">
+        <div className="mb-6 space-y-4">
           <JobFilters
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
             counts={filterCounts}
           />
+          
+          {/* Project Filter */}
+          {projects && projects.length > 0 && (
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium">Filter by Project:</label>
+              <Select value={selectedProject} onValueChange={setSelectedProject}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="All Projects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.projectId}>
+                      {project.name} ({project.projectId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedProject !== "all" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedProject("all")}
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {isLoading ? (

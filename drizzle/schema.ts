@@ -20,6 +20,7 @@ export const organizations = mysqlTable("organizations", {
   
   // Settings
   isActive: boolean("isActive").default(true).notNull(),
+  projectsEnabled: boolean("projectsEnabled").default(false).notNull(), // Enable/disable multi-project feature
   
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -27,6 +28,34 @@ export const organizations = mysqlTable("organizations", {
 
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
+
+/**
+ * Projects table - allows organizing jobs by project/client
+ * Each project has a unique ID that can be used for job assignment
+ */
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  organizationId: int("organizationId").notNull().references(() => organizations.id),
+  
+  // Project identification
+  projectId: varchar("projectId", { length: 100 }).notNull().unique(), // Unique identifier (e.g., "PROJ-001")
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Client information
+  clientName: varchar("clientName", { length: 255 }),
+  clientEmail: varchar("clientEmail", { length: 320 }),
+  clientPhone: varchar("clientPhone", { length: 50 }),
+  
+  // Status
+  isActive: boolean("isActive").default(true).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
 
 /**
  * Core user table for local authentication.
@@ -54,6 +83,7 @@ export type InsertUser = typeof users.$inferInsert;
 export const jobs = mysqlTable("jobs", {
   id: int("id").autoincrement().primaryKey(),
   organizationId: int("organizationId").notNull().references(() => organizations.id),
+  projectId: varchar("projectId", { length: 100 }).references(() => projects.projectId), // Optional project assignment
   
   // Unique identifier for shareable links
   jobToken: varchar("jobToken", { length: 64 }).notNull().unique(),

@@ -8,6 +8,7 @@ import {
   getJobByToken, 
   getJobById, 
   getAllJobs, 
+  getJobsByDateRange,
   updateJobStatus, 
   addJobLocation, 
   getJobLocations,
@@ -138,6 +139,7 @@ export const appRouter = router({
         const job = await createJob({
           ...input,
           jobToken,
+          organizationId: 1, // Default organization for public requests
           status: "pending_approval",
           coveredByCOI: true,
           createdBy: null,
@@ -233,6 +235,7 @@ export const appRouter = router({
         await createJob({
           ...input,
           jobToken,
+          organizationId: ctx.user.organizationId,
           status: "created",
           createdBy: ctx.user.id,
         });
@@ -260,6 +263,7 @@ export const appRouter = router({
         
         // Create new job with same details but new token and status
         await createJob({
+          organizationId: ctx.user.organizationId,
           siteName: originalJob.siteName,
           siteId: originalJob.siteId || undefined,
           siteLocation: originalJob.siteLocation || undefined,
@@ -711,6 +715,148 @@ export const appRouter = router({
 
         return await getJobStatusHistory(job.id);
       }),
+
+    // Export jobs by date range and status
+    exportJobs: protectedProcedure
+      .input(z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+        status: z.string().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const jobs = await getJobsByDateRange(
+          input.startDate,
+          input.endDate,
+          ctx.user.organizationId,
+          input.status
+        );
+        
+        // Format jobs for export - core fields only
+        const exportData = jobs.map(job => ({
+          'Job ID': job.id,
+          'Site Name': job.siteName,
+          'Site Address': job.siteAddress || '',
+          'Client Name': job.clientName || '',
+          'Contact Number': job.siteContactNumber || '',
+          'Status': job.status,
+          'Engineer': job.engineerName || 'Unassigned',
+          'Scheduled': job.scheduledDateTime ? new Date(job.scheduledDateTime).toLocaleDateString() : '',
+          'Created': new Date(job.createdAt).toLocaleDateString(),
+          'Completed': job.completedAt ? new Date(job.completedAt).toLocaleDateString() : '',
+        }));
+        
+        return exportData;
+      }),
+
+    // Email export to specified recipient
+    emailExport: protectedProcedure
+      .input(z.object({
+        startDate: z.date(),
+        endDate: z.date(),
+        status: z.string().optional(),
+        format: z.enum(['csv', 'excel']),
+        recipientEmail: z.string().email(),
+        recipientName: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const jobs = await getJobsByDateRange(
+          input.startDate,
+          input.endDate,
+          ctx.user.organizationId,
+          input.status
+        );
+        
+        // Format jobs for export - core fields only
+        const exportData = jobs.map(job => ({
+          'Job ID': job.id,
+          'Site Name': job.siteName,
+          'Site Address': job.siteAddress || '',
+          'Client Name': job.clientName || '',
+          'Contact Number': job.siteContactNumber || '',
+          'Status': job.status,
+          'Engineer': job.engineerName || 'Unassigned',
+          'Scheduled': job.scheduledDateTime ? new Date(job.scheduledDateTime).toLocaleDateString() : '',
+          'Created': new Date(job.createdAt).toLocaleDateString(),
+          'Completed': job.completedAt ? new Date(job.completedAt).toLocaleDateString() : '',
+        }));
+        
+        // Send email with export
+        const { sendExportEmail } = await import('./email-export');
+        const success = await sendExportEmail({
+          recipientEmail: input.recipientEmail,
+          recipientName: input.recipientName,
+          exportData,
+          format: input.format,
+          dateRange: {
+            start: input.startDate.toISOString().split('T')[0],
+            end: input.endDate.toISOString().split('T')[0],
+          },
+          status: input.status,
+        });
+        
+        return { success, count: exportData.length };
+      }),
+
+    // Create or update scheduled export
+    scheduleExport: protectedProcedure
+      .input(z.object({
+        id: z.string().optional(),
+        schedule: z.enum(['daily', 'weekly', 'monthly']),
+        recipientEmail: z.string().email(),
+        recipientName: z.string().optional(),
+        format: z.enum(['csv', 'excel']),
+        status: z.string().optional(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { scheduleExport } = await import('./scheduled-exports');
+        
+        const exportId = input.id || `export_${ctx.user.organizationId}_${Date.now()}`;
+        const cronExpression = input.schedule === 'daily' ? '0 8 * * *' : 
+                              input.schedule === 'weekly' ? '0 8 * * 1' : 
+                              '0 8 1 * *';
+        
+        const success = scheduleExport({
+          id: exportId,
+          organizationId: ctx.user.organizationId,
+          schedule: input.schedule,
+          cronExpression,
+          recipientEmail: input.recipientEmail,
+          recipientName: input.recipientName,
+          format: input.format,
+          status: input.status,
+          isActive: input.isActive,
+        });
+        
+        return { success, exportId };
+      }),
+
+    // Get all scheduled exports for organization
+    getScheduledExports: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { getScheduledExports } = await import('./scheduled-exports');
+        const allExports = getScheduledExports();
+        
+        // Filter by organization
+        return allExports.filter(exp => exp.organizationId === ctx.user.organizationId);
+      }),
+
+    // Remove scheduled export
+    removeScheduledExport: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ input }) => {
+        const { removeScheduledExport } = await import('./scheduled-exports');
+        const success = removeScheduledExport(input.id);
+        return { success };
+      }),
   }),
 
   // Site Visit Reports
@@ -904,6 +1050,103 @@ export const appRouter = router({
           console.error("Failed to send SVR email:", error);
           throw new Error("Failed to send SVR email");
         }
+      }),
+  }),
+
+  projects: router({
+    // Create new project (admin only)
+    create: protectedProcedure
+      .input(z.object({
+        projectId: z.string().min(1).max(100),
+        name: z.string().min(1).max(255),
+        description: z.string().optional(),
+        clientName: z.string().optional(),
+        clientEmail: z.string().email().optional(),
+        clientPhone: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { createProject } = await import('./projects-db');
+        const project = await createProject({
+          organizationId: ctx.user.organizationId,
+          projectId: input.projectId,
+          name: input.name,
+          description: input.description,
+          clientName: input.clientName,
+          clientEmail: input.clientEmail,
+          clientPhone: input.clientPhone,
+          isActive: true,
+        });
+        
+        return project;
+      }),
+
+    // List all projects for organization
+    list: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { getProjectsByOrganization } = await import('./projects-db');
+        return await getProjectsByOrganization(ctx.user.organizationId);
+      }),
+
+    // Get project by ID
+    getByProjectId: protectedProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { getProjectByProjectId } = await import('./projects-db');
+        return await getProjectByProjectId(input.projectId);
+      }),
+
+    // Verify project exists and belongs to organization
+    verify: protectedProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        return { isValid };
+      }),
+
+    // Update project
+    update: protectedProcedure
+      .input(z.object({
+        projectId: z.string(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        clientName: z.string().optional(),
+        clientEmail: z.string().email().optional(),
+        clientPhone: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { projectId, ...updates } = input;
+        const { updateProject } = await import('./projects-db');
+        return await updateProject(projectId, updates);
+      }),
+
+    // Toggle project status
+    toggleStatus: protectedProcedure
+      .input(z.object({
+        projectId: z.string(),
+        isActive: z.boolean(),
+      }))
+      .mutation(async ({ input }) => {
+        const { toggleProjectStatus } = await import('./projects-db');
+        return await toggleProjectStatus(input.projectId, input.isActive);
+      }),
+
+    // Delete project
+    delete: protectedProcedure
+      .input(z.object({ projectId: z.string() }))
+      .mutation(async ({ input }) => {
+        const { deleteProject } = await import('./projects-db');
+        return await deleteProject(input.projectId);
       }),
   }),
 

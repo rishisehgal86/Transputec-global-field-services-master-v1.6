@@ -11,7 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function RequestService() {
+export default function RequestService({ projectId }: { projectId?: string }) {
   const [searching, setSearching] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
@@ -19,6 +19,27 @@ export default function RequestService() {
   const [searchQuery, setSearchQuery] = useState("");
   const [requestSubmitted, setRequestSubmitted] = useState(false);
   const [trackingToken, setTrackingToken] = useState<string | null>(null);
+  const [manualProjectId, setManualProjectId] = useState("");
+  const [verifyingProject, setVerifyingProject] = useState(false);
+  const [projectValid, setProjectValid] = useState<boolean | null>(null);
+  
+  // Verify project ID mutation
+  const verifyProjectMutation = trpc.projects.verify.useMutation({
+    onSuccess: (data) => {
+      setProjectValid(data.isValid);
+      setVerifyingProject(false);
+      if (data.isValid) {
+        toast.success("Project ID verified");
+      } else {
+        toast.error("Invalid project ID");
+      }
+    },
+    onError: () => {
+      setProjectValid(false);
+      setVerifyingProject(false);
+      toast.error("Failed to verify project ID");
+    },
+  });
 
   const searchMutation = trpc.geocoding.search.useMutation({
     onSuccess: (data) => {
@@ -100,6 +121,7 @@ export default function RequestService() {
       projectName: formData.get("projectName") as string || undefined,
       toolsRequired: formData.get("toolsRequired") as string || undefined,
       deviceDetails: formData.get("deviceDetails") as string || undefined,
+      projectId: projectId || (manualProjectId && projectValid ? manualProjectId : undefined),
       scopeOfWork: formData.get("scopeOfWork") as string || undefined,
       videoConferenceLink: formData.get("videoConferenceLink") as string || undefined,
       notes: formData.get("notes") as string || undefined,
@@ -429,6 +451,50 @@ export default function RequestService() {
                   <Label htmlFor="projectName">Project Name</Label>
                   <Input id="projectName" name="projectName" placeholder="Network Upgrade Project" />
                 </div>
+
+                {/* Project ID Field (only show if not already provided via URL) */}
+                {!projectId && (
+                  <div>
+                    <Label htmlFor="manualProjectId">Project ID (Optional)</Label>
+                    <div className="flex gap-2">
+                      <Input 
+                        id="manualProjectId" 
+                        value={manualProjectId}
+                        onChange={(e) => {
+                          setManualProjectId(e.target.value.toUpperCase());
+                          setProjectValid(null);
+                        }}
+                        placeholder="e.g., PROJ-001" 
+                        className={projectValid === false ? "border-red-500" : projectValid === true ? "border-green-500" : ""}
+                      />
+                      {manualProjectId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setVerifyingProject(true);
+                            verifyProjectMutation.mutate({ projectId: manualProjectId });
+                          }}
+                          disabled={verifyingProject}
+                        >
+                          {verifyingProject ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : projectValid ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            "Verify"
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                    {projectValid === false && (
+                      <p className="text-xs text-red-600 mt-1">Invalid project ID</p>
+                    )}
+                    {projectValid === true && (
+                      <p className="text-xs text-green-600 mt-1">Project ID verified</p>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="toolsRequired">Special Tools or Equipment Needed</Label>
