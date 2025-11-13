@@ -1,0 +1,35 @@
+{
+  "query": "SELECT id, siteName, projectId FROM project_sites LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, siteName, projectId FROM project_sites LIMIT 5",
+  "rows": [
+    {
+      "id": "1",
+      "siteName": "buckingham pa;ace",
+      "projectId": "DIAGEO"
+    },
+    {
+      "id": "2",
+      "siteName": "transputec",
+      "projectId": "DIAGEO"
+    },
+    {
+      "id": "3",
+      "siteName": "RISHI HOUSE",
+      "projectId": "DIAGEO"
+    },
+    {
+      "id": "30001",
+      "siteName": "buckingham pa;ace",
+      "projectId": "DIAGEO"
+    },
+    {
+      "id": "30002",
+      "siteName": "transputec",
+      "projectId": "DIAGEO"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsiteName\tprojectId\n1\tbuckingham pa;ace\tDIAGEO\n2\ttransputec\tDIAGEO\n3\tRISHI HOUSE\tDIAGEO\n30001\tbuckingham pa;ace\tDIAGEO\n30002\ttransputec\tDIAGEO\n",
+  "stderr": "",
+  "execution_time_ms": 186
+}

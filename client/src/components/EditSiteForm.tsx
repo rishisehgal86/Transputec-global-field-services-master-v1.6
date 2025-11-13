@@ -1,39 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import type { ProjectSite } from "../../../drizzle/schema";
 
-interface AddSiteFormProps {
-  projectId: string;
+interface EditSiteFormProps {
+  site: ProjectSite;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function AddSiteForm({ projectId, onSuccess, onCancel }: AddSiteFormProps) {
+export default function EditSiteForm({ site, onSuccess, onCancel }: EditSiteFormProps) {
   const [formData, setFormData] = useState({
-    siteName: "",
-    siteAddress: "",
-    city: "",
-    postalCode: "",
-    country: "",
-    contactName: "",
-    contactPhone: "",
-    contactEmail: "",
-    notes: "",
+    siteName: site.siteName || "",
+    siteAddress: site.siteAddress || "",
+    city: site.city || "",
+    postalCode: site.postalCode || "",
+    country: site.country || "",
+    contactName: site.contactName || "",
+    contactPhone: site.contactPhone || "",
+    contactEmail: site.contactEmail || "",
+    notes: site.notes || "",
   });
-  
-  const addSiteMutation = trpc.projects.addSite.useMutation({
+
+  const updateSiteMutation = trpc.projects.updateSite.useMutation({
     onSuccess: () => {
-      toast.success("Site added successfully");
+      toast.success("Site updated successfully");
       onSuccess();
     },
     onError: (error) => {
-      console.error("Error adding site:", error);
-      toast.error(`Failed to add site: ${error.message}`);
+      console.error("Error updating site:", error);
+      toast.error(`Failed to update site: ${error.message}`);
     },
   });
 
@@ -56,9 +57,8 @@ export default function AddSiteForm({ projectId, onSuccess, onCancel }: AddSiteF
       return;
     }
     
-    // The backend will automatically geocode the address
-    addSiteMutation.mutate({
-      projectId,
+    updateSiteMutation.mutate({
+      siteId: site.id,
       siteName: formData.siteName,
       siteAddress: formData.siteAddress,
       city: formData.city || undefined,
@@ -76,39 +76,31 @@ export default function AddSiteForm({ projectId, onSuccess, onCancel }: AddSiteF
       <div className="grid gap-4">
         {/* Site Name */}
         <div className="space-y-2">
-          <Label htmlFor="siteName">
-            Site Name <span className="text-destructive">*</span>
-          </Label>
+          <Label htmlFor="siteName">Site Name *</Label>
           <Input
             id="siteName"
             name="siteName"
             value={formData.siteName}
             onChange={handleChange}
-            placeholder="e.g., Buckingham Palace"
+            placeholder="e.g., Main Office"
             required
           />
         </div>
 
         {/* Site Address */}
         <div className="space-y-2">
-          <Label htmlFor="siteAddress">
-            Address <span className="text-destructive">*</span>
-          </Label>
+          <Label htmlFor="siteAddress">Site Address *</Label>
           <Input
             id="siteAddress"
             name="siteAddress"
             value={formData.siteAddress}
             onChange={handleChange}
-            placeholder="e.g., Westminster, London"
+            placeholder="e.g., 123 Main Street"
             required
           />
-          <p className="text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 inline mr-1" />
-            Coordinates will be automatically geocoded from this address
-          </p>
         </div>
 
-        {/* City, Postal Code, and Country */}
+        {/* City, Postal Code, Country */}
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
@@ -194,17 +186,17 @@ export default function AddSiteForm({ projectId, onSuccess, onCancel }: AddSiteF
 
       {/* Action Buttons */}
       <div className="flex gap-2 justify-end pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={addSiteMutation.isPending}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={updateSiteMutation.isPending}>
           Cancel
         </Button>
-        <Button type="submit" disabled={addSiteMutation.isPending}>
-          {addSiteMutation.isPending ? (
+        <Button type="submit" disabled={updateSiteMutation.isPending}>
+          {updateSiteMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Adding Site...
+              Updating...
             </>
           ) : (
-            "Add Site"
+            "Update Site"
           )}
         </Button>
       </div>

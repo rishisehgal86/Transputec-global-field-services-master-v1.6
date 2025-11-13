@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload, Download, MapPin, Trash2, Plus } from "lucide-react";
+import { Loader2, Upload, Download, MapPin, Trash2, Plus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SiteLocationMap } from "@/components/SiteLocationMap";
+import AddSiteForm from "@/components/AddSiteForm";
+import EditSiteForm from "@/components/EditSiteForm";
 
 interface ProjectSitesProps {
   projectId: string;
@@ -16,10 +18,12 @@ interface ProjectSitesProps {
 export default function ProjectSites({ projectId }: ProjectSitesProps) {
   const [uploading, setUploading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingLocationSiteId, setEditingLocationSiteId] = useState<number | null>(null);
   const [editingSite, setEditingSite] = useState<any>(null);
   
   // Fetch sites
+  const utils = trpc.useUtils();
   const { data: sites, isLoading, refetch } = trpc.projects.getSites.useQuery({ projectId });
   
   // Download template mutation
@@ -62,7 +66,7 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
         if (result.errors.length > 0) {
           toast.warning(`${result.errors.length} issue${result.errors.length !== 1 ? 's' : ''}: ${result.errors.slice(0, 3).join(', ')}${result.errors.length > 3 ? '...' : ''}`);
         }
-        refetch();
+        utils.projects.getSites.invalidate({ projectId });
       } else {
         toast.error(`Import failed: ${result.errors.join(', ')}`);
       }
@@ -78,7 +82,8 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
   const deleteSiteMutation = trpc.projects.deleteSite.useMutation({
     onSuccess: () => {
       toast.success("Site deleted successfully");
-      refetch();
+      // Invalidate and refetch the sites query
+      utils.projects.getSites.invalidate({ projectId });
     },
     onError: (error) => {
       toast.error(`Failed to delete site: ${error.message}`);
@@ -91,7 +96,7 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
       toast.success("Site location updated successfully");
       setEditingLocationSiteId(null);
       setEditingSite(null);
-      refetch();
+      utils.projects.getSites.invalidate({ projectId });
     },
     onError: (error) => {
       toast.error(`Failed to update location: ${error.message}`);
@@ -166,9 +171,17 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
             Download Template
           </Button>
           
+          <Button
+            variant="default"
+            onClick={() => setShowAddDialog(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Site Manually
+          </Button>
+          
           <Label htmlFor="site-upload" className="cursor-pointer">
             <Button
-              variant="default"
+              variant="outline"
               disabled={uploading}
               asChild
             >
@@ -234,6 +247,17 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
+                        setEditingSite(site);
+                        setShowEditDialog(true);
+                      }}
+                      title="Edit site details"
+                    >
+                      <Pencil className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
                         setEditingLocationSiteId(site.id);
                         setEditingSite(site);
                       }}
@@ -294,6 +318,53 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
               }}
               onCancel={() => {
                 setEditingLocationSiteId(null);
+                setEditingSite(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Manual Site Creation Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Site Manually</DialogTitle>
+            <DialogDescription>
+              Enter site details below. Coordinates will be automatically geocoded from the address.
+            </DialogDescription>
+          </DialogHeader>
+          <AddSiteForm
+            projectId={projectId}
+            onSuccess={() => {
+              setShowAddDialog(false);
+              refetch();
+              toast.success("Site added successfully");
+            }}
+            onCancel={() => setShowAddDialog(false)}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Site Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Site Details</DialogTitle>
+            <DialogDescription>
+              Update site information below. Changes will be saved immediately.
+            </DialogDescription>
+          </DialogHeader>
+          {editingSite && (
+            <EditSiteForm
+              site={editingSite}
+              onSuccess={() => {
+                setShowEditDialog(false);
+                setEditingSite(null);
+                refetch();
+              }}
+              onCancel={() => {
+                setShowEditDialog(false);
                 setEditingSite(null);
               }}
             />

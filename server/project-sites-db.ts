@@ -6,18 +6,30 @@ import { projectSites, InsertProjectSite, ProjectSite } from "../drizzle/schema"
  * Get all sites for a project
  */
 export async function getProjectSites(projectId: string): Promise<ProjectSite[]> {
-  const db = await getDb();
-  if (!db) return [];
-  
-  const sites = await db
-    .select()
-    .from(projectSites)
-    .where(and(
-      eq(projectSites.projectId, projectId),
-      eq(projectSites.isActive, true)
-    ));
-  
-  return sites;
+  try {
+    const db = await getDb();
+    if (!db) {
+      console.error('[getProjectSites] Database not available');
+      return [];
+    }
+    
+    console.log('[getProjectSites] Fetching sites for project:', projectId);
+    
+    const sites = await db
+      .select()
+      .from(projectSites)
+      .where(and(
+        eq(projectSites.projectId, projectId),
+        eq(projectSites.isActive, true)
+      ));
+    
+    console.log('[getProjectSites] Found sites:', sites.length);
+    
+    return sites;
+  } catch (error) {
+    console.error('[getProjectSites] Error fetching sites:', error);
+    return [];
+  }
 }
 
 /**
@@ -43,14 +55,26 @@ export async function createProjectSite(site: InsertProjectSite): Promise<Projec
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  const result = await db.insert(projectSites).values(site);
+  await db.insert(projectSites).values(site);
   
-  // Fetch the created site
+  // Query back the created site by unique combination of projectId, siteName, and siteAddress
+  // This is more reliable than relying on insertId which may not be returned consistently
   const created = await db
     .select()
     .from(projectSites)
-    .where(eq(projectSites.id, Number(result.insertId)))
+    .where(
+      and(
+        eq(projectSites.projectId, site.projectId),
+        eq(projectSites.siteName, site.siteName),
+        eq(projectSites.siteAddress, site.siteAddress)
+      )
+    )
+    .orderBy(desc(projectSites.createdAt))
     .limit(1);
+  
+  if (!created[0]) {
+    throw new Error("Failed to retrieve created site");
+  }
   
   return created[0];
 }
@@ -67,21 +91,6 @@ export async function bulkCreateProjectSites(sites: InsertProjectSite[]): Promis
   const result = await db.insert(projectSites).values(sites);
   
   return result.affectedRows || 0;
-}
-
-/**
- * Update a project site
- */
-export async function updateProjectSite(siteId: number, updates: Partial<InsertProjectSite>): Promise<boolean> {
-  const db = await getDb();
-  if (!db) return false;
-  
-  const result = await db
-    .update(projectSites)
-    .set(updates)
-    .where(eq(projectSites.id, siteId));
-  
-  return (result.affectedRows || 0) > 0;
 }
 
 /**
@@ -150,5 +159,33 @@ export async function updateProjectSiteLocation(siteId: number, latitude: number
     .where(eq(projectSites.id, siteId));
   
   return (result.affectedRows || 0) > 0;
+}
+
+
+
+/**
+ * Update a project site
+ */
+export async function updateProjectSite(siteId: number, updates: Partial<InsertProjectSite>): Promise<ProjectSite> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db
+    .update(projectSites)
+    .set(updates)
+    .where(eq(projectSites.id, siteId));
+  
+  // Fetch the updated site
+  const updated = await db
+    .select()
+    .from(projectSites)
+    .where(eq(projectSites.id, siteId))
+    .limit(1);
+  
+  if (!updated[0]) {
+    throw new Error("Failed to retrieve updated site");
+  }
+  
+  return updated[0];
 }
 

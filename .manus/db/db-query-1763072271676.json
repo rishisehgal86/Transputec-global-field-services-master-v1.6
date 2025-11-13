@@ -1,0 +1,82 @@
+{
+  "query": "SELECT id, siteName, projectId, isActive FROM project_sites WHERE projectId = 'DIAGEO'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, siteName, projectId, isActive FROM project_sites WHERE projectId = 'DIAGEO'",
+  "rows": [
+    {
+      "id": "1",
+      "siteName": "buckingham pa;ace",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "2",
+      "siteName": "transputec",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "3",
+      "siteName": "RISHI HOUSE",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30001",
+      "siteName": "buckingham pa;ace",
+      "projectId": "DIAGEO",
+      "isActive": "0"
+    },
+    {
+      "id": "30002",
+      "siteName": "transputec",
+      "projectId": "DIAGEO",
+      "isActive": "0"
+    },
+    {
+      "id": "30003",
+      "siteName": "RISHI HOUSE",
+      "projectId": "DIAGEO",
+      "isActive": "0"
+    },
+    {
+      "id": "30004",
+      "siteName": "burj",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30005",
+      "siteName": "ranjeev",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30006",
+      "siteName": "japan",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30007",
+      "siteName": "japan",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30008",
+      "siteName": "japan",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    },
+    {
+      "id": "30009",
+      "siteName": "japan",
+      "projectId": "DIAGEO",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsiteName\tprojectId\tisActive\n1\tbuckingham pa;ace\tDIAGEO\t1\n2\ttransputec\tDIAGEO\t1\n3\tRISHI HOUSE\tDIAGEO\t1\n30001\tbuckingham pa;ace\tDIAGEO\t0\n30002\ttransputec\tDIAGEO\t0\n30003\tRISHI HOUSE\tDIAGEO\t0\n30004\tburj\tDIAGEO\t1\n30005\tranjeev\tDIAGEO\t1\n30006\tjapan\tDIAGEO\t1\n30007\tjapan\tDIAGEO\t1\n30008\tjapan\tDIAGEO\t1\n30009\tjapan\tDIAGEO\t1\n",
+  "stderr": "",
+  "execution_time_ms": 164
+}

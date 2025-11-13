@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, projectId, siteName, siteAddress FROM project_sites LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, projectId, siteName, siteAddress FROM project_sites LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "projectId": "DIAGEO",
+      "siteName": "buckingham pa;ace",
+      "siteAddress": "buckingham palace, victoria street"
+    },
+    {
+      "id": "2",
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "siteAddress": "19 heather park drive, wembley"
+    },
+    {
+      "id": "3",
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE",
+      "siteAddress": "30 FULMER DRIVE"
+    },
+    {
+      "id": "30001",
+      "projectId": "DIAGEO",
+      "siteName": "buckingham pa;ace",
+      "siteAddress": "buckingham palace, victoria street"
+    },
+    {
+      "id": "30002",
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "siteAddress": "19 heather park drive, wembley"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprojectId\tsiteName\tsiteAddress\n1\tDIAGEO\tbuckingham pa;ace\tbuckingham palace, victoria street\n2\tDIAGEO\ttransputec\t19 heather park drive, wembley\n3\tDIAGEO\tRISHI HOUSE\t30 FULMER DRIVE\n30001\tDIAGEO\tbuckingham pa;ace\tbuckingham palace, victoria street\n30002\tDIAGEO\ttransputec\t19 heather park drive, wembley\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

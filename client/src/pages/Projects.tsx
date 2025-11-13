@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Trash2, FolderOpen, Copy, ExternalLink, Edit } from "lucide-react";
+import { Loader2, Plus, Trash2, FolderOpen, Copy, ExternalLink, Edit, ToggleRight, ToggleLeft } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -33,10 +33,23 @@ export default function Projects() {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  
+  // Filter state
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   const { data: projects, isLoading, refetch } = trpc.projects.list.useQuery();
   const createProjectMutation = trpc.projects.create.useMutation();
   const deleteProjectMutation = trpc.projects.delete.useMutation();
+  const toggleStatusMutation = trpc.projects.toggleStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Project status updated");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to update status: ${error.message}`);
+    },
+  });
 
   if (authLoading) {
     return (
@@ -216,13 +229,55 @@ export default function Projects() {
 
       {/* Content */}
       <main className="container mx-auto p-6">
+        {/* Filters */}
+        {projects && projects.length > 0 && (
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="w-full px-3 py-2 border border-input rounded-md bg-background font-sans"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                <option value="all">All Projects</option>
+                {projects.map((project) => (
+                  <option key={project.projectId} value={project.projectId}>
+                    {project.name} ({project.projectId})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
+              className="px-3 py-2 border border-input rounded-md bg-background font-sans"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+          </div>
+        )}
+        
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : projects && projects.length > 0 ? (
           <div className="grid gap-4">
-            {projects.map((project) => (
+            {projects
+              .filter(project => {
+                // Project selection filter
+                if (selectedProjectId !== "all" && project.projectId !== selectedProjectId) return false;
+                
+                // Status filter
+                if (statusFilter === "active" && !project.isActive) return false;
+                if (statusFilter === "inactive" && project.isActive) return false;
+                
+                return true;
+              })
+              .map((project) => (
               <Card key={project.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -236,6 +291,21 @@ export default function Projects() {
                       {project.description && (
                         <CardDescription className="mt-2">{project.description}</CardDescription>
                       )}
+                      <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-medium">Project Specific Despatch Request Link:</span>
+                        <code className="px-2 py-1 bg-muted rounded text-xs">
+                          {window.location.origin}/request/{project.projectId}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2"
+                          onClick={() => copyProjectLink(project.projectId)}
+                          title="Copy request link"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -253,6 +323,19 @@ export default function Projects() {
                         title="Open project request page"
                       >
                         <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleStatusMutation.mutate({ projectId: project.projectId, isActive: !project.isActive })}
+                        disabled={toggleStatusMutation.isPending}
+                        title={project.isActive ? "Deactivate project" : "Activate project"}
+                      >
+                        {project.isActive ? (
+                          <ToggleRight className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <ToggleLeft className="h-4 w-4 text-gray-400" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"

@@ -610,15 +610,10 @@ ns
 - [x] Include fields: siteName, siteAddress, city, postalCode, contactName, contactPhone, contactEmail, notes
 - [x] Add automatic geocoding when address is entered
 - [x] Show geocoded coordinates preview before saving
-- [ ] Integrate form into ProjectSites component dialog
-- [ ] Add "Add Site Manually" button alongside Upload button
-- [ ] Test manual site creation end-to-end
-
-
-
-
-## International Address Support
-- [x] Add country field to projectSites schema
+- [x] Integrate AddSiteForm into ProjectSites component
+- [x] Add "Add Site Manually" button next to "Upload Sites"
+- [x] Open form dialog when button is clicked
+- [x] Refresh site list after successful creationtry field to projectSites schema
 - [x] Make city and postalCode more flexible (optional, longer lengths)
 - [ ] Update database with migration (pnpm db:push) - in progress
 - [x] Update bulk upload template to include Country column
@@ -636,4 +631,54 @@ ns
 - [x] Update uploadSites to skip duplicates during bulk upload
 - [x] Track skipped duplicates in upload result
 - [x] Show count of skipped duplicates in success message
+
+
+
+
+## Project Filters & Request Links
+- [x] Add project dropdown selector to filter/select specific projects
+- [x] Add status filter dropdown (All/Active/Inactive)
+- [x] Replace search with dropdown for better navigation
+- [x] Display full request URL in project cards
+- [x] Add copy button for request URL
+- [x] Show toast confirmation when URL is copied
+
+
+
+
+## Project Status Toggle
+- [x] Rename request link label to "Project Specific Despatch Request Link"
+- [x] Add toggle button to project cards for active/inactive status
+- [x] Backend endpoint already exists (projects.toggleStatus)
+- [x] Update UI immediately after toggle
+- [x] Show confirmation toast when status changes
+
+
+
+
+## Edit Site Functionality
+- [x] Create backend endpoint for updating site details (projects.updateSite)
+- [x] Create EditSiteForm component with all site fields pre-filled
+- [x] Add Edit button (pencil icon) next to each site in ProjectSites
+- [x] Open edit dialog when Edit button is clicked
+- [x] Refresh site list after successful update
+- [x] Show success toast after update
+
+
+
+
+## Fix Sites Not Loading
+- [x] Rebuild getProjectSites database function
+- [x] Test query returns data correctly
+- [x] Removed duplicate updateProjectSite function
+- [x] Fixed dynamic imports causing query to hang
+- [x] Verify frontend displays sites
+
+
+
+## Fix Delete Site Table Refresh
+- [x] Investigate delete site functionality in ProjectSites component
+- [x] Check if mutation invalidation is working
+- [x] Fix table refresh after deletion - added isActive filter to getProjectSites
+- [x] Test delete functionality - working correctly
 

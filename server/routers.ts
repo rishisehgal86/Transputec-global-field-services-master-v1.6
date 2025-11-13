@@ -18,6 +18,7 @@ import {
   getFilteredJobs,
   getJobFilterCounts
 } from "./db";
+import { getProjectSites, bulkCreateProjectSites, deleteProjectSite, updateProjectSiteLocation, createProjectSite, updateProjectSite } from "./project-sites-db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
 import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification } from "./email";
@@ -1175,7 +1176,6 @@ export const appRouter = router({
         if (!ctx.user) throw new Error("Unauthorized");
         
         const { parseSiteUpload } = await import('./site-template');
-        const { bulkCreateProjectSites, getProjectSites } = await import('./project-sites-db');
         const { geocodeAddress } = await import('./geocoding');
         
         // Decode base64 file
@@ -1277,8 +1277,10 @@ export const appRouter = router({
     getSites: protectedProcedure
       .input(z.object({ projectId: z.string() }))
       .query(async ({ input }) => {
-        const { getProjectSites } = await import('./project-sites-db');
-        return await getProjectSites(input.projectId);
+        console.log('[getSites endpoint] Called with projectId:', input.projectId);
+        const sites = await getProjectSites(input.projectId);
+        console.log('[getSites endpoint] Returning sites:', sites.length);
+        return sites;
       }),
 
     // Add single site
@@ -1298,7 +1300,6 @@ export const appRouter = router({
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { createProjectSite } = await import('./project-sites-db');
         const { geocodeAddress } = await import('./geocoding');
         
         let lat = input.latitude;
@@ -1308,8 +1309,8 @@ export const appRouter = router({
         if (!lat || !lng) {
           const fullAddress = `${input.siteAddress}, ${input.city || ''} ${input.postalCode || ''} ${input.country || ''}`.trim();
           const coords = await geocodeAddress(fullAddress);
-          lat = coords.latitude;
-          lng = coords.longitude;
+          lat = String(coords.latitude);
+          lng = String(coords.longitude);
         }
         
         return await createProjectSite({
@@ -1319,8 +1320,8 @@ export const appRouter = router({
           city: input.city || null,
           postalCode: input.postalCode || null,
           country: input.country || null,
-          latitude: lat,
-          longitude: lng,
+          latitude: lat || null,
+          longitude: lng || null,
           contactName: input.contactName || null,
           contactPhone: input.contactPhone || null,
           contactEmail: input.contactEmail || null,
@@ -1333,7 +1334,6 @@ export const appRouter = router({
     deleteSite: protectedProcedure
       .input(z.object({ siteId: z.number() }))
       .mutation(async ({ input }) => {
-        const { deleteProjectSite } = await import('./project-sites-db');
         return await deleteProjectSite(input.siteId);
       }),
 
@@ -1345,8 +1345,36 @@ export const appRouter = router({
         longitude: z.number(),
       }))
       .mutation(async ({ input }) => {
-        const { updateProjectSiteLocation } = await import('./project-sites-db');
         return await updateProjectSiteLocation(input.siteId, input.latitude, input.longitude);
+      }),
+
+    // Update site details
+    updateSite: protectedProcedure
+      .input(z.object({
+        siteId: z.number(),
+        siteName: z.string().optional(),
+        siteAddress: z.string().optional(),
+        city: z.string().optional(),
+        postalCode: z.string().optional(),
+        country: z.string().optional(),
+        contactName: z.string().optional(),
+        contactPhone: z.string().optional(),
+        contactEmail: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+
+        const { siteId, ...updates } = input;
+        
+        // Convert empty strings to null
+        const cleanUpdates = Object.fromEntries(
+          Object.entries(updates).map(([key, value]) => [
+            key,
+            value === '' || value === undefined ? null : value
+          ])
+        );
+        
+        return await updateProjectSite(siteId, cleanUpdates);
       }),
   }),
 
