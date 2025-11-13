@@ -560,3 +560,11 @@ ns
 - [x] Implement automatic geocoding for uploaded sites
 - [x] Test site upload and selection workflow
 
+
+
+
+## Critical Bug Fixes
+- [x] Fix project creation database error
+- [x] Verify projects table schema matches insert query
+- [x] Run database migration to create projects table
+
