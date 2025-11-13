@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS project_sites (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  projectId VARCHAR(100) NOT NULL,\n  siteName VARCHAR(255) NOT NULL,\n  siteAddress TEXT NOT NULL,\n  city VARCHAR(100),\n  postalCode VARCHAR(20),\n  latitude VARCHAR(50) NOT NULL,\n  longitude VARCHAR(50) NOT NULL,\n  contactName VARCHAR(255),\n  contactPhone VARCHAR(50),\n  contactEmail VARCHAR(320),\n  notes TEXT,\n  isActive BOOLEAN NOT NULL DEFAULT TRUE,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (projectId) REFERENCES projects(projectId) ON DELETE CASCADE\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute CREATE TABLE IF NOT EXISTS project_sites (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  projectId VARCHAR(100) NOT NULL,\n  siteName VARCHAR(255) NOT NULL,\n  siteAddress TEXT NOT NULL,\n  city VARCHAR(100),\n  postalCode VARCHAR(20),\n  latitude VARCHAR(50) NOT NULL,\n  longitude VARCHAR(50) NOT NULL,\n  contactName VARCHAR(255),\n  contactPhone VARCHAR(50),\n  contactEmail VARCHAR(320),\n  notes TEXT,\n  isActive BOOLEAN NOT NULL DEFAULT TRUE,\n  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  FOREIGN KEY (projectId) REFERENCES projects(projectId) ON DELETE CASCADE\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 325
+}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Upload, Download, MapPin, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SiteLocationMap } from "@/components/SiteLocationMap";
 
 interface ProjectSitesProps {
   projectId: string;
@@ -15,6 +16,8 @@ interface ProjectSitesProps {
 export default function ProjectSites({ projectId }: ProjectSitesProps) {
   const [uploading, setUploading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingLocationSiteId, setEditingLocationSiteId] = useState<number | null>(null);
+  const [editingSite, setEditingSite] = useState<any>(null);
   
   // Fetch sites
   const { data: sites, isLoading, refetch } = trpc.projects.getSites.useQuery({ projectId });
@@ -75,6 +78,19 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
     },
     onError: (error) => {
       toast.error(`Failed to delete site: ${error.message}`);
+    },
+  });
+  
+  // Update site location mutation
+  const updateLocationMutation = trpc.projects.updateSiteLocation.useMutation({
+    onSuccess: () => {
+      toast.success("Site location updated successfully");
+      setEditingLocationSiteId(null);
+      setEditingSite(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to update location: ${error.message}`);
     },
   });
   
@@ -166,6 +182,11 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <h4 className="font-medium">{site.siteName}</h4>
+                      {site.latitude && site.longitude && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                          ✓ Geo-located
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{site.siteAddress}</p>
                     {site.city && (
@@ -180,17 +201,30 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm(`Delete site "${site.siteName}"?`)) {
-                        deleteSiteMutation.mutate({ siteId: site.id });
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingLocationSiteId(site.id);
+                        setEditingSite(site);
+                      }}
+                      title="Edit location on map"
+                    >
+                      <MapPin className="h-4 w-4 text-primary" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Delete site "${site.siteName}"?`)) {
+                          deleteSiteMutation.mutate({ siteId: site.id });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -203,6 +237,41 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
           </div>
         )}
       </CardContent>
+      
+      {/* Location Editor Dialog */}
+      <Dialog open={editingLocationSiteId !== null} onOpenChange={(open) => {
+        if (!open) {
+          setEditingLocationSiteId(null);
+          setEditingSite(null);
+        }
+      }}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Edit Site Location</DialogTitle>
+            <DialogDescription>
+              Click on the map or drag the marker to set the exact location for this site.
+            </DialogDescription>
+          </DialogHeader>
+          {editingSite && (
+            <SiteLocationMap
+              initialLat={editingSite.latitude}
+              initialLng={editingSite.longitude}
+              siteName={editingSite.siteName}
+              onLocationChange={(lat, lng) => {
+                updateLocationMutation.mutate({
+                  siteId: editingSite.id,
+                  latitude: lat,
+                  longitude: lng,
+                });
+              }}
+              onCancel={() => {
+                setEditingLocationSiteId(null);
+                setEditingSite(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

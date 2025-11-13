@@ -568,3 +568,35 @@ ns
 - [x] Verify projects table schema matches insert query
 - [x] Run database migration to create projects table
 
+
+
+- [x] Fix Excel template download error
+- [x] Check site-template.ts endpoint
+- [x] Add error handling to template generation
+- [x] Verify xlsx package is working correctly
+
+
+
+
+## Site Geo-Location Validation
+- [x] Add coordinate validation during site upload
+- [x] Implement automatic geocoding for sites without coordinates
+- [x] Add visual indicators (badges/icons) for geo-located sites
+- [x] Filter site selector to only show geo-located sites in job requests
+- [ ] Add "Verify Location" button for sites missing coordinates
+- [ ] Display warning for non-geo-located sites in admin view
+
+
+
+
+## Interactive Map Geo-Location Editing
+- [x] Create SiteLocationMap component with Leaflet map
+- [x] Add click-to-place marker functionality on map
+- [x] Add drag-to-move marker functionality
+- [x] Add backend endpoint to update site coordinates (PUT /api/trpc/projects.updateSiteLocation)
+- [x] Integrate map editor into ProjectSites component
+- [x] Show current location on map when editing
+- [x] Display coordinates below map during editing
+- [x] Add Save and Cancel buttons for coordinate updates
+- [x] Test map editing functionality end-to-end
+

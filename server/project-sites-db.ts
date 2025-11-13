@@ -132,3 +132,23 @@ export async function countProjectSites(projectId: string): Promise<number> {
   return sites.length;
 }
 
+
+/**
+ * Update site location coordinates
+ */
+export async function updateProjectSiteLocation(siteId: number, latitude: number, longitude: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  
+  const result = await db
+    .update(projectSites)
+    .set({ 
+      latitude,
+      longitude,
+      updatedAt: new Date()
+    })
+    .where(eq(projectSites.id, siteId));
+  
+  return (result.affectedRows || 0) > 0;
+}
+

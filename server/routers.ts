@@ -1152,12 +1152,17 @@ export const appRouter = router({
     // Download site upload template
     downloadSiteTemplate: protectedProcedure
       .mutation(async () => {
-        const { generateSiteTemplate } = await import('./site-template');
-        const buffer = generateSiteTemplate();
-        return {
-          data: buffer.toString('base64'),
-          filename: 'project-sites-template.xlsx',
-        };
+        try {
+          const { generateSiteTemplate } = await import('./site-template');
+          const buffer = generateSiteTemplate();
+          return {
+            data: buffer.toString('base64'),
+            filename: 'project-sites-template.xlsx',
+          };
+        } catch (error) {
+          console.error('Template generation error:', error);
+          throw new Error(`Failed to generate template: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       }),
 
     // Upload and parse site file
@@ -1296,6 +1301,18 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const { deleteProjectSite } = await import('./project-sites-db');
         return await deleteProjectSite(input.siteId);
+      }),
+
+    // Update site location coordinates
+    updateSiteLocation: protectedProcedure
+      .input(z.object({
+        siteId: z.number(),
+        latitude: z.number(),
+        longitude: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { updateProjectSiteLocation } = await import('./project-sites-db');
+        return await updateProjectSiteLocation(input.siteId, input.latitude, input.longitude);
       }),
   }),
 

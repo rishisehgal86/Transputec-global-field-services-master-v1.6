@@ -324,7 +324,7 @@ export default function RequestService({ projectId, project }: { projectId?: str
                         <SelectValue placeholder="Choose a site from the list" />
                       </SelectTrigger>
                       <SelectContent>
-                        {projectSites.map((site) => (
+                        {projectSites.filter(site => site.latitude && site.longitude).map((site) => (
                           <SelectItem key={site.id} value={site.id.toString()}>
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
