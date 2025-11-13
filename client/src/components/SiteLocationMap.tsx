@@ -22,9 +22,16 @@ export function SiteLocationMap({
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   
-  // Safely convert null to default values
-  const defaultLat = typeof initialLat === 'number' ? initialLat : 25.2048;
-  const defaultLng = typeof initialLng === 'number' ? initialLng : 55.2708;
+  // Safely convert null/string to default values
+  // Database stores coordinates as VARCHAR, so we need to parse them
+  const parseCoordinate = (value: any, defaultValue: number): number => {
+    if (value === null || value === undefined) return defaultValue;
+    const parsed = typeof value === 'string' ? parseFloat(value) : value;
+    return isNaN(parsed) ? defaultValue : parsed;
+  };
+  
+  const defaultLat = parseCoordinate(initialLat, 25.2048);
+  const defaultLng = parseCoordinate(initialLng, 55.2708);
   
   const [currentLat, setCurrentLat] = useState<number>(defaultLat);
   const [currentLng, setCurrentLng] = useState<number>(defaultLng);
@@ -48,7 +55,9 @@ export function SiteLocationMap({
         }
 
         // Initialize map
-        const map = L.map(mapRef.current).setView([currentLat, currentLng], typeof initialLat === 'number' ? 15 : 12);
+        // Use zoom 15 if we have real coordinates, zoom 12 for default location
+        const hasRealCoordinates = initialLat !== null && initialLat !== undefined;
+        const map = L.map(mapRef.current).setView([currentLat, currentLng], hasRealCoordinates ? 15 : 12);
         mapInstanceRef.current = map;
 
         // Add tile layer
