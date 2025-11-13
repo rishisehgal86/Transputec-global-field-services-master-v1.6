@@ -176,17 +176,20 @@ export function parseSiteUpload(fileBuffer: Buffer): ParseResult {
         return;
       }
       
-      // Validate coordinates if provided
-      if (latitude && isNaN(parseFloat(latitude.toString()))) {
-        errors.push(`Row ${rowNum}: Invalid latitude format`);
+      // Validate coordinates if provided (completely optional - will geocode if missing)
+      const latStr = latitude ? latitude.toString().trim() : '';
+      const lngStr = longitude ? longitude.toString().trim() : '';
+      
+      // Only validate if there's actual content (not empty/whitespace)
+      if (latStr && latStr !== '' && isNaN(parseFloat(latStr))) {
+        errors.push(`Row ${rowNum}: Invalid latitude format - must be a number (e.g., 51.5074)`);
         return;
       }
       
-      if (longitude && isNaN(parseFloat(longitude.toString()))) {
-        errors.push(`Row ${rowNum}: Invalid longitude format`);
+      if (lngStr && lngStr !== '' && isNaN(parseFloat(lngStr))) {
+        errors.push(`Row ${rowNum}: Invalid longitude format - must be a number (e.g., -0.1278)`);
         return;
-      }
-      
+      }     
       // Add site
       sites.push({
         siteName: siteName.toString().trim(),
@@ -194,8 +197,8 @@ export function parseSiteUpload(fileBuffer: Buffer): ParseResult {
         city: city ? city.toString().trim() : undefined,
         postalCode: postalCode ? postalCode.toString().trim() : undefined,
         country: country ? country.toString().trim() : undefined,
-        latitude: latitude ? latitude.toString().trim() : undefined,
-        longitude: longitude ? longitude.toString().trim() : undefined,
+        latitude: latStr || undefined,
+        longitude: lngStr || undefined,
         contactName: contactName ? contactName.toString().trim() : undefined,
         contactPhone: contactPhone ? contactPhone.toString().trim() : undefined,
         contactEmail: contactEmail ? contactEmail.toString().trim() : undefined,
