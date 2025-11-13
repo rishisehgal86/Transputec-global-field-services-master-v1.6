@@ -189,9 +189,9 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{site.siteAddress}</p>
-                    {site.city && (
+                    {(site.city || site.postalCode || site.country) && (
                       <p className="text-xs text-muted-foreground">
-                        {site.city}{site.postalCode && `, ${site.postalCode}`}
+                        {site.city}{site.postalCode && `, ${site.postalCode}`}{site.country && `, ${site.country}`}
                       </p>
                     )}
                     {site.contactName && (

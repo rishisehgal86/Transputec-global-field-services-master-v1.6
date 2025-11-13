@@ -600,3 +600,31 @@ ns
 - [x] Add Save and Cancel buttons for coordinate updates
 - [x] Test map editing functionality end-to-end
 
+
+
+
+## Manual Site Creation Form
+- [x] Create backend endpoint for manual site creation (projects.addSite) - already exists
+- [x] Add createProjectSite function in project-sites-db.ts - already exists
+- [x] Build AddSiteForm component with form fields
+- [x] Include fields: siteName, siteAddress, city, postalCode, contactName, contactPhone, contactEmail, notes
+- [x] Add automatic geocoding when address is entered
+- [x] Show geocoded coordinates preview before saving
+- [ ] Integrate form into ProjectSites component dialog
+- [ ] Add "Add Site Manually" button alongside Upload button
+- [ ] Test manual site creation end-to-end
+
+
+
+
+## International Address Support
+- [x] Add country field to projectSites schema
+- [x] Make city and postalCode more flexible (optional, longer lengths)
+- [ ] Update database with migration (pnpm db:push) - in progress
+- [x] Update bulk upload template to include Country column
+- [x] Update parseSiteUpload to handle country field
+- [x] Update AddSiteForm to include country dropdown/input
+- [x] Update site display in ProjectSites to show country
+- [x] Update geocoding to include country in address string
+- [x] Test with addresses from multiple countries
+

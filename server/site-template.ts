@@ -23,6 +23,7 @@ export function generateSiteTemplate(): Buffer {
     ['- Address: Full street address'],
     ['- City: City name'],
     ['- Postal Code: ZIP/Postal code'],
+    ['- Country: Country name (e.g., "United Kingdom", "United States", "UAE")'],
     ['- Latitude: GPS latitude coordinate (optional, e.g., "51.5074")'],
     ['- Longitude: GPS longitude coordinate (optional, e.g., "-0.1278")'],
     ['- Contact Name: On-site contact person'],
@@ -45,6 +46,7 @@ export function generateSiteTemplate(): Buffer {
       'Address',
       'City',
       'Postal Code',
+      'Country',
       'Latitude',
       'Longitude',
       'Contact Name',
@@ -57,6 +59,7 @@ export function generateSiteTemplate(): Buffer {
       '123 Main Street',
       'London',
       'SW1A 1AA',
+      'United Kingdom',
       '51.5074',
       '-0.1278',
       'John Smith',
@@ -65,9 +68,9 @@ export function generateSiteTemplate(): Buffer {
       'Main office building'
     ],
     // Empty rows for data entry
-    ['', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', ''],
   ];
   
   const wsSites = XLSX.utils.aoa_to_sheet(sitesData);
@@ -78,6 +81,7 @@ export function generateSiteTemplate(): Buffer {
     { wch: 35 }, // Address
     { wch: 15 }, // City
     { wch: 12 }, // Postal Code
+    { wch: 18 }, // Country
     { wch: 12 }, // Latitude
     { wch: 12 }, // Longitude
     { wch: 20 }, // Contact Name
@@ -102,6 +106,7 @@ export interface ParsedSite {
   siteAddress: string;
   city?: string;
   postalCode?: string;
+  country?: string;
   latitude?: string;
   longitude?: string;
   contactName?: string;
@@ -151,6 +156,7 @@ export function parseSiteUpload(fileBuffer: Buffer): ParseResult {
         siteAddress,
         city,
         postalCode,
+        country,
         latitude,
         longitude,
         contactName,
@@ -187,6 +193,7 @@ export function parseSiteUpload(fileBuffer: Buffer): ParseResult {
         siteAddress: siteAddress.toString().trim(),
         city: city ? city.toString().trim() : undefined,
         postalCode: postalCode ? postalCode.toString().trim() : undefined,
+        country: country ? country.toString().trim() : undefined,
         latitude: latitude ? latitude.toString().trim() : undefined,
         longitude: longitude ? longitude.toString().trim() : undefined,
         contactName: contactName ? contactName.toString().trim() : undefined,

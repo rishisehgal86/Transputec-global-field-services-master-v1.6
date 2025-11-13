@@ -1197,7 +1197,7 @@ export const appRouter = router({
             // If coordinates not provided, geocode the address
             if (!lat || !lng) {
               try {
-                const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''}`.trim();
+                const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''} ${site.country || ''}`.trim();
                 const coords = await geocodeAddress(fullAddress);
                 lat = coords.latitude;
                 lng = coords.longitude;
@@ -1213,6 +1213,7 @@ export const appRouter = router({
               siteAddress: site.siteAddress,
               city: site.city,
               postalCode: site.postalCode,
+              country: site.country,
               latitude: lat,
               longitude: lng,
               contactName: site.contactName,
@@ -1257,6 +1258,7 @@ export const appRouter = router({
         siteAddress: z.string(),
         city: z.string().optional(),
         postalCode: z.string().optional(),
+        country: z.string().optional(),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         contactName: z.string().optional(),
@@ -1273,7 +1275,7 @@ export const appRouter = router({
         
         // Geocode if coordinates not provided
         if (!lat || !lng) {
-          const fullAddress = `${input.siteAddress}, ${input.city || ''} ${input.postalCode || ''}`.trim();
+          const fullAddress = `${input.siteAddress}, ${input.city || ''} ${input.postalCode || ''} ${input.country || ''}`.trim();
           const coords = await geocodeAddress(fullAddress);
           lat = coords.latitude;
           lng = coords.longitude;
@@ -1285,6 +1287,7 @@ export const appRouter = router({
           siteAddress: input.siteAddress,
           city: input.city,
           postalCode: input.postalCode,
+          country: input.country,
           latitude: lat,
           longitude: lng,
           contactName: input.contactName,
