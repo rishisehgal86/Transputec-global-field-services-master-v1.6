@@ -75,9 +75,9 @@ export const projectSites = mysqlTable("project_sites", {
   postalCode: varchar("postalCode", { length: 50 }),
   country: varchar("country", { length: 100 }),
   
-  // Geocoding
-  latitude: varchar("latitude", { length: 50 }).notNull(),
-  longitude: varchar("longitude", { length: 50 }).notNull(),
+  // Geocoding (optional - will be geocoded from address if not provided)
+  latitude: varchar("latitude", { length: 50 }),
+  longitude: varchar("longitude", { length: 50 }),
   
   // Contact information
   contactName: varchar("contactName", { length: 255 }),

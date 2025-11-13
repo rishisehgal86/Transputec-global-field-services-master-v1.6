@@ -628,3 +628,12 @@ ns
 - [x] Update geocoding to include country in address string
 - [x] Test with addresses from multiple countries
 
+
+
+
+## Duplicate Site Detection
+- [x] Add function to check for existing sites by name and address
+- [x] Update uploadSites to skip duplicates during bulk upload
+- [x] Track skipped duplicates in upload result
+- [x] Show count of skipped duplicates in success message
+

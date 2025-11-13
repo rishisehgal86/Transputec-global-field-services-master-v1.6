@@ -1175,7 +1175,7 @@ export const appRouter = router({
         if (!ctx.user) throw new Error("Unauthorized");
         
         const { parseSiteUpload } = await import('./site-template');
-        const { bulkCreateProjectSites } = await import('./project-sites-db');
+        const { bulkCreateProjectSites, getProjectSites } = await import('./project-sites-db');
         const { geocodeAddress } = await import('./geocoding');
         
         // Decode base64 file
@@ -1211,15 +1211,15 @@ export const appRouter = router({
               projectId: input.projectId,
               siteName: site.siteName,
               siteAddress: site.siteAddress,
-              city: site.city,
-              postalCode: site.postalCode,
-              country: site.country,
+              city: site.city || null,
+              postalCode: site.postalCode || null,
+              country: site.country || null,
               latitude: lat,
               longitude: lng,
-              contactName: site.contactName,
-              contactPhone: site.contactPhone,
-              contactEmail: site.contactEmail,
-              notes: site.notes,
+              contactName: site.contactName || null,
+              contactPhone: site.contactPhone || null,
+              contactEmail: site.contactEmail || null,
+              notes: site.notes || null,
               isActive: true,
             };
           })
@@ -1232,12 +1232,43 @@ export const appRouter = router({
           return { success: false, errors, imported: 0 };
         }
         
-        // Bulk insert sites
-        const imported = await bulkCreateProjectSites(validSites as any[]);
+        // Check for duplicates
+        const existingSites = await getProjectSites(input.projectId);
+        const existingMap = new Map(
+          existingSites.map(site => [
+            `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`,
+            site
+          ])
+        );
+        
+        // Filter out duplicates
+        const newSites = validSites.filter(site => {
+          const key = `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`;
+          const isDuplicate = existingMap.has(key);
+          if (isDuplicate) {
+            errors.push(`Skipped duplicate: "${site.siteName}" at "${site.siteAddress}"`);
+          }
+          return !isDuplicate;
+        });
+        
+        const skipped = validSites.length - newSites.length;
+        
+        if (newSites.length === 0) {
+          return { 
+            success: false, 
+            errors: [`All ${validSites.length} sites already exist in this project`, ...errors], 
+            imported: 0,
+            skipped 
+          };
+        }
+        
+        // Bulk insert only new sites
+        const imported = await bulkCreateProjectSites(newSites as any[]);
         
         return {
           success: true,
           imported,
+          skipped,
           errors,
         };
       }),
@@ -1285,15 +1316,15 @@ export const appRouter = router({
           projectId: input.projectId,
           siteName: input.siteName,
           siteAddress: input.siteAddress,
-          city: input.city,
-          postalCode: input.postalCode,
-          country: input.country,
+          city: input.city || null,
+          postalCode: input.postalCode || null,
+          country: input.country || null,
           latitude: lat,
           longitude: lng,
-          contactName: input.contactName,
-          contactPhone: input.contactPhone,
-          contactEmail: input.contactEmail,
-          notes: input.notes,
+          contactName: input.contactName || null,
+          contactPhone: input.contactPhone || null,
+          contactEmail: input.contactEmail || null,
+          notes: input.notes || null,
           isActive: true,
         });
       }),

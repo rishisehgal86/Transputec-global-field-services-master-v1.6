@@ -54,9 +54,13 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
   const uploadSitesMutation = trpc.projects.uploadSites.useMutation({
     onSuccess: (result) => {
       if (result.success) {
-        toast.success(`Successfully imported ${result.imported} sites`);
+        let message = `Successfully imported ${result.imported} site${result.imported !== 1 ? 's' : ''}`;
+        if (result.skipped && result.skipped > 0) {
+          message += ` (${result.skipped} duplicate${result.skipped !== 1 ? 's' : ''} skipped)`;
+        }
+        toast.success(message);
         if (result.errors.length > 0) {
-          toast.warning(`${result.errors.length} sites had issues: ${result.errors.join(', ')}`);
+          toast.warning(`${result.errors.length} issue${result.errors.length !== 1 ? 's' : ''}: ${result.errors.slice(0, 3).join(', ')}${result.errors.length > 3 ? '...' : ''}`);
         }
         refetch();
       } else {
@@ -98,20 +102,44 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    console.log('File selected:', file.name, file.type, file.size);
+    
     setUploading(true);
     
     // Read file as base64
     const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      const fileData = base64.split(',')[1]; // Remove data:... prefix
-      
-      uploadSitesMutation.mutate({
-        projectId,
-        fileData,
-      });
+    
+    reader.onerror = () => {
+      console.error('FileReader error:', reader.error);
+      toast.error('Failed to read file');
+      setUploading(false);
     };
+    
+    reader.onload = async (event) => {
+      try {
+        const base64 = event.target?.result as string;
+        if (!base64) {
+          throw new Error('Failed to read file content');
+        }
+        
+        const fileData = base64.split(',')[1]; // Remove data:... prefix
+        console.log('Uploading file, size:', fileData.length, 'bytes');
+        
+        uploadSitesMutation.mutate({
+          projectId,
+          fileData,
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setUploading(false);
+      }
+    };
+    
     reader.readAsDataURL(file);
+    
+    // Reset input so same file can be selected again
+    e.target.value = '';
   };
   
   return (
