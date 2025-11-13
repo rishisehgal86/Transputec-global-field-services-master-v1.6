@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -21,9 +21,15 @@ export function SiteLocationMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
-  const [currentLat, setCurrentLat] = useState<number>(initialLat || 25.2048); // Default to Dubai
-  const [currentLng, setCurrentLng] = useState<number>(initialLng || 55.2708);
+  
+  // Safely convert null to default values
+  const defaultLat = typeof initialLat === 'number' ? initialLat : 25.2048;
+  const defaultLng = typeof initialLng === 'number' ? initialLng : 55.2708;
+  
+  const [currentLat, setCurrentLat] = useState<number>(defaultLat);
+  const [currentLng, setCurrentLng] = useState<number>(defaultLng);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -36,12 +42,13 @@ export function SiteLocationMap({
         
         if (!L) {
           console.error("Leaflet not loaded");
-          toast.error("Map library not loaded. Please refresh the page.");
+          setMapError("Map library not loaded. Please refresh the page.");
+          setIsLoading(false);
           return;
         }
 
         // Initialize map
-        const map = L.map(mapRef.current).setView([currentLat, currentLng], initialLat ? 15 : 12);
+        const map = L.map(mapRef.current).setView([currentLat, currentLng], typeof initialLat === 'number' ? 15 : 12);
         mapInstanceRef.current = map;
 
         // Add tile layer
@@ -86,7 +93,7 @@ export function SiteLocationMap({
         setIsLoading(false);
       } catch (error) {
         console.error("Error initializing map:", error);
-        toast.error("Failed to initialize map");
+        setMapError("Failed to initialize map. Please try again.");
         setIsLoading(false);
       }
     };
@@ -96,11 +103,15 @@ export function SiteLocationMap({
     // Cleanup
     return () => {
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          console.error("Error removing map:", e);
+        }
         mapInstanceRef.current = null;
       }
     };
-  }, [siteName]);
+  }, [siteName, currentLat, currentLng, initialLat]);
 
   const handleSave = () => {
     onLocationChange(currentLat, currentLng);
@@ -120,26 +131,46 @@ export function SiteLocationMap({
       </div>
 
       {/* Map Container */}
-      <div
-        ref={mapRef}
-        className="w-full h-96 rounded-lg border border-border overflow-hidden"
-        style={{ minHeight: "384px" }}
-      />
+      {mapError ? (
+        <div className="w-full h-96 rounded-lg border border-border flex items-center justify-center bg-accent/20">
+          <div className="text-center">
+            <p className="text-destructive font-medium mb-2">{mapError}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Reload Page
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="relative">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10 rounded-lg">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+          <div
+            ref={mapRef}
+            className="w-full h-96 rounded-lg border border-border overflow-hidden"
+            style={{ minHeight: "384px" }}
+          />
+        </div>
+      )}
 
       {/* Coordinates Display */}
-      <div className="bg-accent/50 p-3 rounded-lg">
-        <div className="text-sm font-medium mb-1">Current Coordinates:</div>
-        <div className="text-xs text-muted-foreground">
-          Latitude: {currentLat.toFixed(6)} | Longitude: {currentLng.toFixed(6)}
+      {!mapError && (
+        <div className="bg-accent/50 p-3 rounded-lg">
+          <div className="text-sm font-medium mb-1">Current Coordinates:</div>
+          <div className="text-xs text-muted-foreground">
+            Latitude: {currentLat.toFixed(6)} | Longitude: {currentLng.toFixed(6)}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-2 justify-end">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={handleSave} disabled={isLoading}>
+        <Button onClick={handleSave} disabled={isLoading || !!mapError}>
           Save Location
         </Button>
       </div>
