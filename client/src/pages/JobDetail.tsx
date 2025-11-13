@@ -16,7 +16,7 @@ import { JobComments } from "@/components/JobComments";
 import { CancelJobDialog } from "@/components/CancelJobDialog";
 
 export default function JobDetail() {
-  const { isAuthenticated, loading: authLoading } = useAuth({ redirectOnUnauthenticated: true });
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/admin/job/:id");
   const jobId = params?.id ? parseInt(params.id) : 0;
@@ -136,8 +136,8 @@ export default function JobDetail() {
     );
   }
 
-  // SSO handles authentication - if not authenticated, useAuth will redirect to login
   if (!isAuthenticated) {
+    setLocation("/login");
     return null;
   }
 

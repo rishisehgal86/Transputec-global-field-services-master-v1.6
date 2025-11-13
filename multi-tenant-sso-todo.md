@@ -12,18 +12,17 @@
 
 ## Phase 2: JWT Validation Middleware
 
-- [x] Create JWT validation middleware
-- [x] Add JWT secret configuration
-- [x] Extract organizationId from JWT token
-- [x] Add organization context to request
+- [ ] Create JWT validation middleware
+- [ ] Add JWT secret configuration
+- [ ] Extract organizationId from JWT token
+- [ ] Add organization context to request
 
 ## Phase 3: Query Updates
 
-- [x] Update all job queries to filter by organizationId
-- [x] Update user queries to filter by organizationId (handled by auth system)
-- [x] Update engineer queries to filter by organizationId (no separate engineer table)
-- [x] Add organization checks to all mutations
-- [x] Create getOrganizationId helper for public/protected endpoints
+- [ ] Update all job queries to filter by organizationId
+- [ ] Update user queries to filter by organizationId
+- [ ] Update engineer queries to filter by organizationId
+- [ ] Add organization checks to all mutations
 
 ## Phase 4: SSO Integration
 

@@ -21,8 +21,6 @@ import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
 import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification } from "./email";
 import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
-import { getOrganizationId } from "./organization-helper";
-import { validateTokenLocal, extractUserFromToken } from "./sso-auth";
 
 // Helper function to get base URL from request
 function getBaseUrl(req: any): string {
@@ -37,39 +35,28 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     
-    // SSO token validation endpoint
-    validateSSOToken: publicProcedure
+    login: publicProcedure
       .input(z.object({
-        token: z.string(),
+        email: z.string().email(),
+        password: z.string(),
       }))
       .mutation(async ({ input, ctx }) => {
-        console.log('[SSO] Validating token...');
+        const { authenticateUser, generateToken } = await import('./auth');
+        const user = await authenticateUser(input.email, input.password);
         
-        // Validate token locally
-        const payload = validateTokenLocal(input.token);
-        
-        if (!payload) {
-          console.log('[SSO] Token validation failed');
-          throw new Error('Invalid or expired token');
+        if (!user) {
+          throw new Error('Invalid email or password');
         }
         
-        console.log('[SSO] Token validated successfully:', {
-          userId: payload.userId,
-          email: payload.email,
-          organizationId: payload.organizationId,
-        });
+        // Generate JWT token
+        const token = generateToken(user);
         
-        // Extract user info from token
-        const user = extractUserFromToken(payload);
-        
-        // Create session by setting cookie
+        // Set cookie
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, input.token, {
+        ctx.res.cookie(COOKIE_NAME, token, {
           ...cookieOptions,
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
-        
-        console.log('[SSO] Session created for user:', user.email);
         
         return {
           success: true,
@@ -78,7 +65,6 @@ export const appRouter = router({
             email: user.email,
             name: user.name,
             role: user.role,
-            organizationId: user.organizationId,
           },
         };
       }),
@@ -149,15 +135,13 @@ export const appRouter = router({
         
         const jobToken = randomBytes(32).toString('hex');
         
-        const organizationId = await getOrganizationId(ctx.user);
-        
         const job = await createJob({
           ...input,
           jobToken,
           status: "pending_approval",
           coveredByCOI: true,
           createdBy: null,
-        }, organizationId);
+        });
         
         console.log('✅ [CreateRequest] Job created with ID:', job?.id);
         
@@ -245,14 +229,13 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const jobToken = randomBytes(32).toString('hex');
-        const organizationId = await getOrganizationId(ctx.user);
         
         await createJob({
           ...input,
           jobToken,
           status: "created",
           createdBy: ctx.user.id,
-        }, organizationId);
+        });
         
         return { 
           success: true, 
@@ -274,7 +257,6 @@ export const appRouter = router({
         }
         
         const jobToken = randomBytes(32).toString('hex');
-        const organizationId = await getOrganizationId(ctx.user);
         
         // Create new job with same details but new token and status
         await createJob({
@@ -303,7 +285,7 @@ export const appRouter = router({
           jobToken,
           status: "created",
           createdBy: ctx.user.id,
-        }, organizationId);
+        });
         
         return { 
           success: true, 
@@ -392,9 +374,8 @@ export const appRouter = router({
       }),
 
     // Get all jobs (admin only)
-    list: protectedProcedure.query(async ({ ctx }) => {
-      const organizationId = await getOrganizationId(ctx.user);
-      return await getAllJobs(organizationId);
+    list: protectedProcedure.query(async () => {
+      return await getAllJobs();
     }),
 
     // Get filtered jobs (admin only)
@@ -402,15 +383,13 @@ export const appRouter = router({
       .input(z.object({
         filter: z.enum(["today", "urgent", "overdue", "pending", "in_progress"])
       }))
-      .query(async ({ input, ctx }) => {
-        const organizationId = await getOrganizationId(ctx.user);
-        return await getFilteredJobs(input.filter, organizationId);
+      .query(async ({ input }) => {
+        return await getFilteredJobs(input.filter);
       }),
 
     // Get filter counts (admin only)
-    getFilterCounts: protectedProcedure.query(async ({ ctx }) => {
-      const organizationId = await getOrganizationId(ctx.user);
-      return await getJobFilterCounts(organizationId);
+    getFilterCounts: protectedProcedure.query(async () => {
+      return await getJobFilterCounts();
     }),
 
     // Get job by token (public - for engineer and client access)
