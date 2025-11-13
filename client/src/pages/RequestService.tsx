@@ -11,6 +11,8 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
+import { TimezonePreview } from "@/components/TimezoneDisplay";
+import { getClientTimezone } from "@shared/timezone";
 
 export default function RequestService({ projectId, project }: { projectId?: string; project?: any }) {
   const [searching, setSearching] = useState(false);
@@ -24,6 +26,8 @@ export default function RequestService({ projectId, project }: { projectId?: str
   const [verifyingProject, setVerifyingProject] = useState(false);
   const [projectValid, setProjectValid] = useState<boolean | null>(null);
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>("");
+  const [clientTimezone] = useState<string>(getClientTimezone());
   
   // Fetch project sites if project restricts to predefined sites
   const { data: projectSites } = trpc.projects.getSites.useQuery(
@@ -93,7 +97,11 @@ export default function RequestService({ projectId, project }: { projectId?: str
 
   const handleSelectAddress = (suggestion: any) => {
     setSelectedAddress(suggestion.displayName);
-    setSiteCoordinates({ lat: suggestion.latitude, lng: suggestion.longitude });
+    const coords = { lat: suggestion.latitude, lng: suggestion.longitude };
+    setSiteCoordinates(coords);
+    // Detect timezone from site coordinates
+    const timezone = getTimezoneFromCoordinates(parseFloat(coords.lat), parseFloat(coords.lng));
+    setSiteTimezone(timezone);
     setAddressSuggestions([]);
     toast.success("Address selected and coordinates captured!");
   };
@@ -120,6 +128,7 @@ export default function RequestService({ projectId, project }: { projectId?: str
       siteContactNumber: formData.get("siteContactNumber") as string,
       incidentDetails: formData.get("incidentDetails") as string,
       scheduledDateTime: scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined,
+      clientTimezone: clientTimezone,
       hoursRequired: formData.get("hoursRequired") as string,
       downTime: formData.get("downTime") === "on",
       // Optional fields
@@ -313,10 +322,14 @@ export default function RequestService({ projectId, project }: { projectId?: str
                         if (site) {
                           setSelectedSiteId(siteId);
                           setSelectedAddress(site.siteAddress);
-                          setSiteCoordinates({
+                          const coords = {
                             lat: site.latitude,
                             lng: site.longitude,
-                          });
+                          };
+                          setSiteCoordinates(coords);
+                          // Detect timezone from site coordinates
+                          const timezone = getTimezoneFromCoordinates(parseFloat(coords.lat), parseFloat(coords.lng));
+                          setSiteTimezone(timezone);
                         }
                       }}
                     >
@@ -482,8 +495,11 @@ export default function RequestService({ projectId, project }: { projectId?: str
                       id="scheduledDateTime" 
                       name="scheduledDateTime" 
                       type="datetime-local" 
-                      required 
+                      required
+                      value={scheduledDateTime}
+                      onChange={(e) => setScheduledDateTime(e.target.value)}
                     />
+                    <TimezonePreview localDateTime={scheduledDateTime} timezone={clientTimezone} />
                   </div>
                   <div>
                     <Label htmlFor="hoursRequired">Estimated Hours Required *</Label>
