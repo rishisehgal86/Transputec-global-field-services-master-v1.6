@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { 
   createJob, 
@@ -297,6 +298,10 @@ export const appRouter = router({
           createdBy: ctx.user.id,
         });
         
+        if (!job) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create job' });
+        }
+        
         // Add initial status history
         await addJobStatusHistory({
           jobId: job.id,
@@ -331,10 +336,7 @@ export const appRouter = router({
           await addJobStatusHistory({
             jobId: job.id,
             status: 'sent_to_engineer',
-            engineerName: input.engineerName,
-            engineerEmail: input.engineerEmail,
-            emailSent: emailSent,
-            notes: emailSent ? 'Job assignment email sent to engineer' : 'Job sent to engineer (email failed)',
+            notes: emailSent ? `Job assignment email sent to ${input.engineerName} (${input.engineerEmail})` : `Job sent to ${input.engineerName} (email failed)`,
           });
         }
         
@@ -649,10 +651,7 @@ export const appRouter = router({
           status: input.status,
           latitude: input.latitude,
           longitude: input.longitude,
-          notes: input.notes,
-          engineerName: input.status === 'sent_to_engineer' ? input.engineerName : undefined,
-          engineerEmail: input.status === 'sent_to_engineer' ? input.engineerEmail : undefined,
-          emailSent: input.status === 'sent_to_engineer' ? input.sendEmailToEngineer : undefined,
+          notes: input.notes || (input.status === 'sent_to_engineer' && input.engineerName ? `Assigned to ${input.engineerName} (${input.engineerEmail})` : undefined),
         });
 
         // Send email to engineer when request is approved
@@ -671,7 +670,7 @@ export const appRouter = router({
               engineerName: input.engineerName,
               siteName: job.siteName,
               siteAddress: job.siteAddress || 'N/A',
-              scheduledDateTime: job.scheduledDateTime,
+              scheduledDateTime: job.scheduledDateTime || undefined,
               incidentDetails: job.incidentDetails || 'N/A',
               jobToken: job.jobToken,
               baseUrl,
@@ -687,10 +686,7 @@ export const appRouter = router({
           await addJobStatusHistory({
             jobId: job.id,
             status: 'sent_to_engineer',
-            engineerName: input.engineerName,
-            engineerEmail: input.engineerEmail,
-            emailSent: emailSent,
-            notes: emailSent ? 'Job assignment email sent to engineer' : 'Job sent to engineer (email failed)',
+            notes: emailSent ? `Job assignment email sent to ${input.engineerName} (${input.engineerEmail})` : `Job sent to ${input.engineerName} (email failed)`,
           });
         }
 
@@ -742,7 +738,7 @@ export const appRouter = router({
             engineerName: job.engineerName,
             siteName: job.siteName,
             siteAddress: job.siteAddress || 'N/A',
-            scheduledDateTime: job.scheduledDateTime,
+            scheduledDateTime: job.scheduledDateTime || undefined,
             incidentDetails: job.incidentDetails || 'N/A',
             jobToken: job.jobToken,
             baseUrl,
@@ -761,10 +757,7 @@ export const appRouter = router({
         await addJobStatusHistory({
           jobId: job.id,
           status: 'sent_to_engineer',
-          engineerName: job.engineerName,
-          engineerEmail: job.engineerEmail,
-          emailSent: emailSent,
-          notes: 'Job assignment email resent to engineer',
+          notes: `Job assignment email resent to ${job.engineerName} (${job.engineerEmail})`,
         });
 
         return { success: true, emailSent };

@@ -18,6 +18,11 @@ export default function AdminDashboard() {
   const [activeFilter, setActiveFilter] = useState<"all" | "today" | "urgent" | "overdue" | "pending" | "in_progress">("all");
   const [selectedProject, setSelectedProject] = useState<string>("all");
   
+  // Fetch organization for display
+  const { data: organization } = trpc.organizations.getMy.useQuery(undefined, {
+    enabled: isAuthenticated && !!user?.organizationId,
+  });
+  
   // Fetch projects for filter
   const { data: projects } = trpc.projects.list.useQuery();
   
@@ -87,6 +92,16 @@ export default function AdminDashboard() {
                 <p className="text-xs text-muted-foreground">Admin Dashboard</p>
               </div>
             </div>
+            
+            {/* Organization Display */}
+            {organization && (
+              <div className="flex items-center border-l border-border pl-4 mr-4">
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">{organization.name}</p>
+                </div>
+              </div>
+            )}
+            
             <div className="flex gap-2">
               <Link href="/admin/users">
                 <Button variant="outline">
