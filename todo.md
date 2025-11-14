@@ -745,3 +745,12 @@ ns
 - [x] Ensure consistent styling with other form inputs
 - [x] Fix database field name mismatch (address -> siteAddress)
 
+
+
+
+## Fix Logo Not Displaying
+- [ ] Check logo configuration in const.ts
+- [ ] Verify logo file exists and path is correct
+- [ ] Fix LogoImage component rendering
+- [ ] Test logo display on all pages
+
