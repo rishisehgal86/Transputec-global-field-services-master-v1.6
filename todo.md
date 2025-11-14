@@ -954,5 +954,6 @@ ns
 - [x] Move "Create New Request" button to more prominent position at top of admin dashboard
 - [x] Add quick copy button to copy public request form URL for sharing with clients
 - [x] Reorganize header with clear distinction: Admin Job Creation, Job Creation Form (with copy URL icon), Logout, and other buttons
+- [x] Make organization name more prominent and visible on mobile devices with "Organization:" label
 - [x] Verify button positioning and layout
 

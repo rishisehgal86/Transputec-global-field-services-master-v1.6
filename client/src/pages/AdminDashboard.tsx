@@ -92,16 +92,17 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
                 <p className="text-xs text-muted-foreground">Admin Dashboard</p>
               </div>
-            </div>
-            
-            {/* Organization Display */}
-            {organization && (
-              <div className="flex items-center border-l border-border pl-4 mr-4">
-                <div className="text-sm">
-                  <p className="font-medium text-foreground">{organization.name}</p>
+              
+              {/* Organization Display - Visible on all devices */}
+              {organization && (
+                <div className="flex items-center border-l border-border pl-4">
+                  <div className="text-sm">
+                    <p className="text-xs text-muted-foreground">Organization:</p>
+                    <p className="font-semibold text-foreground">{organization.name}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
             
             <div className="flex gap-2 flex-wrap">
               {/* Primary Job Creation Actions */}
