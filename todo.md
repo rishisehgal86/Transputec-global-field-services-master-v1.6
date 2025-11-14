@@ -941,9 +941,6 @@ ns
 - [x] Add routes to App.tsx (/signup, /forgot-password, /reset-password)
 - [ ] Test complete authentication flow
 
-
-
-
 ## Feature Restoration (Post-Merge Nov 14, 2025)
 - [x] Fix TypeScript compilation errors (engineerName/engineerEmail fields, scheduledDateTime null handling)
 - [x] Re-implement organization name display in admin dashboard header
@@ -951,4 +948,10 @@ ns
 - [ ] Test signup/forgot-password/reset-password flows
 - [ ] Verify UTC timezone display across all pages
 - [ ] Test admin job creation with email validation fix
+
+
+## UI Improvements (Nov 14, 2025)
+- [x] Move "Create New Request" button to more prominent position at top of admin dashboard
+- [x] Add quick copy button to copy public request form URL for sharing with clients
+- [x] Verify button positioning and layout
 

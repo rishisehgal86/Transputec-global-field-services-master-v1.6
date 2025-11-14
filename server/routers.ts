@@ -80,6 +80,99 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+
+    // Signup - Register new organization and admin user
+    signup: publicProcedure
+      .input(z.object({
+        organizationName: z.string().min(1),
+        adminName: z.string().min(1),
+        email: z.string().email(),
+        password: z.string().min(8),
+      }))
+      .mutation(async ({ input }) => {
+        const { createUser, getUserByEmail, hashPassword } = await import('./auth');
+        const { createOrganization } = await import('./organizations-db');
+        
+        // Check if user already exists
+        const existingUser = await getUserByEmail(input.email);
+        if (existingUser) {
+          throw new Error('An account with this email already exists');
+        }
+        
+        // Create organization
+        const organization = await createOrganization({
+          name: input.organizationName,
+        });
+        
+        // Create admin user
+        const passwordHash = await hashPassword(input.password);
+        const user = await createUser({
+          email: input.email,
+          name: input.adminName,
+          passwordHash,
+          organizationId: organization.id,
+          role: 'admin',
+        });
+        
+        return {
+          success: true,
+          message: 'Account created successfully. Please log in.',
+        };
+      }),
+
+    // Forgot Password - Generate reset token
+    forgotPassword: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getUserByEmail, generatePasswordResetToken } = await import('./auth');
+        
+        const user = await getUserByEmail(input.email);
+        if (!user) {
+          // Don't reveal if user exists or not for security
+          return {
+            success: true,
+            message: 'If an account exists with this email, a password reset link has been sent.',
+          };
+        }
+        
+        // Generate reset token (valid for 1 hour)
+        const resetToken = await generatePasswordResetToken(user.id);
+        
+        // TODO: Send email with reset link
+        // For now, we'll return the token (in production, this should be emailed)
+        console.log(`Password reset token for ${input.email}: ${resetToken}`);
+        
+        return {
+          success: true,
+          message: 'If an account exists with this email, a password reset link has been sent.',
+          // Remove this in production - only for development
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
+        };
+      }),
+
+    // Reset Password - Validate token and update password
+    resetPassword: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        newPassword: z.string().min(8),
+      }))
+      .mutation(async ({ input }) => {
+        const { validatePasswordResetToken, updatePassword } = await import('./auth');
+        
+        const userId = await validatePasswordResetToken(input.token);
+        if (!userId) {
+          throw new Error('Invalid or expired reset token');
+        }
+        
+        await updatePassword(userId, input.newPassword);
+        
+        return {
+          success: true,
+          message: 'Password updated successfully. Please log in with your new password.',
+        };
+      }),
   }),
 
   geocoding: router({
@@ -478,8 +571,11 @@ export const appRouter = router({
       }),
 
     // Get all jobs (admin only)
-    list: protectedProcedure.query(async () => {
-      return await getAllJobs();
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("Unauthorized");
+      
+      const { getJobsByOrganization } = await import('./db');
+      return await getJobsByOrganization(ctx.user.organizationId);
     }),
 
     // Get filtered jobs (admin only)
@@ -487,13 +583,19 @@ export const appRouter = router({
       .input(z.object({
         filter: z.enum(["today", "urgent", "overdue", "pending", "in_progress"])
       }))
-      .query(async ({ input }) => {
-        return await getFilteredJobs(input.filter);
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const { getFilteredJobsByOrganization } = await import('./db');
+        return await getFilteredJobsByOrganization(input.filter, ctx.user.organizationId);
       }),
 
     // Get filter counts (admin only)
-    getFilterCounts: protectedProcedure.query(async () => {
-      return await getJobFilterCounts();
+    getFilterCounts: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("Unauthorized");
+      
+      const { getJobFilterCountsByOrganization } = await import('./db');
+      return await getJobFilterCountsByOrganization(ctx.user.organizationId);
     }),
 
     // Get job by token (public - for engineer and client access)
@@ -1646,6 +1748,17 @@ export const appRouter = router({
         
         return await updateProjectSite(siteId, cleanUpdates);
       }),
+  }),
+
+  organizations: router({
+    // Get current user's organization
+    getMy: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user?.organizationId) {
+        return null;
+      }
+      const { getOrganizationById } = await import('./organizations-db');
+      return await getOrganizationById(ctx.user.organizationId);
+    }),
   }),
 
   users: router({

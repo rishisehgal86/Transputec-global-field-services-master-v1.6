@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
 import { ExportJobsDialog } from "@/components/ExportJobsDialog";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -103,27 +104,39 @@ export default function AdminDashboard() {
             )}
             
             <div className="flex gap-2">
-              <Link href="/admin/users">
-                <Button variant="outline">
-                  <Users className="h-4 w-4 mr-2" />
-                  User Management
+              {/* Primary Actions */}
+              <Link href="/admin/create">
+                <Button size="default" className="bg-primary hover:bg-primary/90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Request
                 </Button>
               </Link>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  const url = `${window.location.origin}/request`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('Request form link copied to clipboard!');
+                }}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Copy Request Form Link
+              </Button>
+              
+              {/* Secondary Actions */}
+              <ExportJobsDialog />
               <Link href="/projects">
                 <Button variant="outline">
                   <FolderOpen className="h-4 w-4 mr-2" />
                   Projects
                 </Button>
               </Link>
-              <div className="flex gap-2">
-                <ExportJobsDialog />
-                <Link href="/admin/create">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Job
-                  </Button>
-                </Link>
-              </div>
+              <Link href="/admin/users">
+                <Button variant="outline">
+                  <Users className="h-4 w-4 mr-2" />
+                  User Management
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
