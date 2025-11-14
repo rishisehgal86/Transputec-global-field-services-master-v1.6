@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, email, name, organizationId, role, createdAt FROM users WHERE email = 'testadmin@example.com' ORDER BY createdAt DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, email, name, organizationId, role, createdAt FROM users WHERE email = 'testadmin@example.com' ORDER BY createdAt DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "120002",
+      "email": "testadmin@example.com",
+      "name": "Test Admin",
+      "organizationId": "120002",
+      "role": "admin",
+      "createdAt": "2025-11-14 21:22:24"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\torganizationId\trole\tcreatedAt\n120002\ttestadmin@example.com\tTest Admin\t120002\tadmin\t2025-11-14 21:22:24\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT t.id, t.token, t.userId, t.expiresAt, t.used, t.createdAt, u.email \nFROM passwordResetTokens t \nJOIN users u ON t.userId = u.id \nWHERE u.email = 'testadmin@example.com' \nORDER BY t.createdAt DESC LIMIT 2",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT t.id, t.token, t.userId, t.expiresAt, t.used, t.createdAt, u.email \nFROM passwordResetTokens t \nJOIN users u ON t.userId = u.id \nWHERE u.email = 'testadmin@example.com' \nORDER BY t.createdAt DESC LIMIT 2",
+  "rows": [
+    {
+      "id": "2",
+      "token": "c25ec902065926d7d5e0dcf1705d1291871cad2ab38c4e870e0e5776e666a39d",
+      "userId": "120002",
+      "expiresAt": "2025-11-14 22:25:56",
+      "used": "0",
+      "createdAt": "2025-11-14 21:25:56",
+      "email": "testadmin@example.com"
+    },
+    {
+      "id": "1",
+      "token": "7b4df95a0227a5adece6005d1e37645dbdd372bbb22df451aee1485ddd974c45",
+      "userId": "120002",
+      "expiresAt": "2025-11-14 22:23:41",
+      "used": "0",
+      "createdAt": "2025-11-14 21:23:40",
+      "email": "testadmin@example.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttoken\tuserId\texpiresAt\tused\tcreatedAt\temail\n2\tc25ec902065926d7d5e0dcf1705d1291871cad2ab38c4e870e0e5776e666a39d\t120002\t2025-11-14 22:25:56\t0\t2025-11-14 21:25:56\ttestadmin@example.com\n1\t7b4df95a0227a5adece6005d1e37645dbdd372bbb22df451aee1485ddd974c45\t120002\t2025-11-14 22:23:41\t0\t2025-11-14 21:23:40\ttestadmin@example.com\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

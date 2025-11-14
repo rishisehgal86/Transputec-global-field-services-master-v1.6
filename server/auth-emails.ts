@@ -62,10 +62,10 @@ export async function sendPasswordResetEmail(params: PasswordResetEmailParams): 
   `.trim();
 
   try {
-    const response = await fetch(`${ENV.builtInForgeApiUrl}/notification/email`, {
+    const response = await fetch(`${ENV.forgeApiUrl}/notification/email`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${ENV.builtInForgeApiKey}`,
+        'Authorization': `Bearer ${ENV.forgeApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -157,10 +157,10 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<void
   `.trim();
 
   try {
-    const response = await fetch(`${ENV.builtInForgeApiUrl}/notification/email`, {
+    const response = await fetch(`${ENV.forgeApiUrl}/notification/email`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${ENV.builtInForgeApiKey}`,
+        'Authorization': `Bearer ${ENV.forgeApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
