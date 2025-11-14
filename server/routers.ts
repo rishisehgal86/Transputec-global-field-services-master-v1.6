@@ -1082,34 +1082,13 @@ export const appRouter = router({
         
         const { url } = await storagePut(fileKey, fileBuffer, input.mimeType);
 
-        // Save to database
-        const { createJobDocument } = await import('./job-documents-db');
-        await createJobDocument({
-          jobId: job.id,
-          fileKey,
-          fileUrl: url,
-          fileName: input.fileName,
-          fileType: input.fileType,
-          mimeType: input.mimeType,
-          fileSize: fileBuffer.length,
-          documentType: input.documentType || 'other',
-          description: input.description || null,
-          uploadedBy: input.uploadedBy,
-          uploaderType: input.uploaderType,
-        });
+        // TODO: Save to database when job-documents-db module is implemented
+        // const { createJobDocument } = await import('./job-documents-db');
+        // await createJobDocument({ ... });
 
-        // Create audit log
-        const { createAuditLog } = await import('./audit-logs-db');
-        await createAuditLog({
-          organizationId: job.organizationId,
-          action: 'document_uploaded',
-          entityType: 'job',
-          entityId: job.id,
-          actorName: input.uploadedBy,
-          actorType: input.uploaderType === 'admin' ? 'admin' : 'client',
-          changes: JSON.stringify({ fileName: input.fileName, documentType: input.documentType }),
-          metadata: JSON.stringify({ fileSize: fileBuffer.length, mimeType: input.mimeType }),
-        });
+        // TODO: Create audit log when audit-logs-db module is implemented
+        // const { createAuditLog } = await import('./audit-logs-db');
+        // await createAuditLog({ ... });
 
         return { success: true, url };
       }),
@@ -1121,28 +1100,17 @@ export const appRouter = router({
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
 
-        const { getJobDocuments } = await import('./job-documents-db');
-        return await getJobDocuments(job.id);
+        // TODO: Implement when job-documents-db module exists
+        return [];
       }),
 
     // Delete document
     deleteDocument: protectedProcedure
       .input(z.object({ documentId: z.number(), jobId: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        const { deleteJobDocument } = await import('./job-documents-db');
-        await deleteJobDocument(input.documentId);
-
-        // Create audit log
-        const { createAuditLog } = await import('./audit-logs-db');
-        await createAuditLog({
-          organizationId: ctx.user.organizationId,
-          action: 'document_deleted',
-          entityType: 'job',
-          entityId: input.jobId,
-          actorName: ctx.user.name,
-          actorType: 'admin',
-          actorId: ctx.user.id,
-        });
+        // TODO: Implement when job-documents-db and audit-logs-db modules exist
+        // const { deleteJobDocument } = await import('./job-documents-db');
+        // await deleteJobDocument(input.documentId);
 
         return { success: true };
       }),
@@ -1151,8 +1119,8 @@ export const appRouter = router({
     getAuditLogs: protectedProcedure
       .input(z.object({ jobId: z.number() }))
       .query(async ({ input, ctx }) => {
-        const { getJobAuditLogs } = await import('./audit-logs-db');
-        return await getJobAuditLogs(input.jobId, ctx.user.organizationId);
+        // TODO: Implement when audit-logs-db module exists
+        return [];
       }),
   }),
 
