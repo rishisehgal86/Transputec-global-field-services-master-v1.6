@@ -89,7 +89,7 @@ export const appRouter = router({
         email: z.string().email(),
         password: z.string().min(8),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { createUser, getUserByEmail, hashPassword } = await import('./auth');
         const { createOrganization } = await import('./organizations-db');
         
@@ -114,19 +114,38 @@ export const appRouter = router({
           role: 'admin',
         });
         
+        // Send welcome email (don't block on failure)
+        try {
+          const { sendWelcomeEmail } = await import('./auth-emails');
+          const baseUrl = getBaseUrl(ctx.req);
+          await sendWelcomeEmail({
+            email: user.email,
+            name: user.name,
+            organizationName: organization.name,
+            baseUrl,
+          });
+          console.log(`[Auth] Welcome email sent to: ${user.email}`);
+        } catch (error) {
+          console.error('[Auth] Failed to send welcome email:', error);
+          // Continue despite email failure
+        }
+        
         return {
           success: true,
           message: 'Account created successfully. Please log in.',
         };
       }),
 
-    // Forgot Password - Generate reset token
+    // Forgot Password - Generate reset token and send email
     forgotPassword: publicProcedure
       .input(z.object({
         email: z.string().email(),
       }))
-      .mutation(async ({ input }) => {
-        const { getUserByEmail, generatePasswordResetToken } = await import('./auth');
+      .mutation(async ({ input, ctx }) => {
+        const { getUserByEmail } = await import('./auth');
+        const { createPasswordResetToken } = await import('./password-reset-db');
+        const { sendPasswordResetEmail } = await import('./auth-emails');
+        const baseUrl = getBaseUrl(ctx.req);
         
         const user = await getUserByEmail(input.email);
         if (!user) {
@@ -137,18 +156,27 @@ export const appRouter = router({
           };
         }
         
-        // Generate reset token (valid for 1 hour)
-        const resetToken = await generatePasswordResetToken(user.id);
-        
-        // TODO: Send email with reset link
-        // For now, we'll return the token (in production, this should be emailed)
-        console.log(`Password reset token for ${input.email}: ${resetToken}`);
+        try {
+          // Generate reset token (valid for 1 hour)
+          const resetToken = await createPasswordResetToken(user.id);
+          
+          // Send password reset email
+          await sendPasswordResetEmail({
+            email: user.email,
+            name: user.name,
+            resetToken,
+            baseUrl,
+          });
+          
+          console.log(`[Auth] Password reset email sent to: ${input.email}`);
+        } catch (error) {
+          console.error('[Auth] Failed to send password reset email:', error);
+          // Still return success to not reveal if user exists
+        }
         
         return {
           success: true,
           message: 'If an account exists with this email, a password reset link has been sent.',
-          // Remove this in production - only for development
-          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
         };
       }),
 
@@ -159,14 +187,24 @@ export const appRouter = router({
         newPassword: z.string().min(8),
       }))
       .mutation(async ({ input }) => {
-        const { validatePasswordResetToken, updatePassword } = await import('./auth');
+        const { validatePasswordResetToken, markTokenAsUsed } = await import('./password-reset-db');
+        const { updateUserPassword } = await import('./auth');
         
         const userId = await validatePasswordResetToken(input.token);
         if (!userId) {
           throw new Error('Invalid or expired reset token');
         }
         
-        await updatePassword(userId, input.newPassword);
+        // Update password
+        const success = await updateUserPassword(userId, input.newPassword);
+        if (!success) {
+          throw new Error('Failed to update password');
+        }
+        
+        // Mark token as used
+        await markTokenAsUsed(input.token);
+        
+        console.log(`[Auth] Password successfully reset for user ID: ${userId}`);
         
         return {
           success: true,

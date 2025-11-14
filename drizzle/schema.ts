@@ -316,3 +316,18 @@ export const jobComments = mysqlTable("jobComments", {
 export type JobComment = typeof jobComments.$inferSelect;
 export type InsertJobComment = typeof jobComments.$inferInsert;
 
+/**
+ * Password Reset Tokens - stores tokens for password reset requests
+ */
+export const passwordResetTokens = mysqlTable("passwordResetTokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+

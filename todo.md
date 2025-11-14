@@ -957,3 +957,16 @@ ns
 - [x] Make organization name more prominent and visible on mobile devices with "Organization:" label
 - [x] Verify button positioning and layout
 
+
+
+## Password Reset & Email Features (Nov 14, 2025)
+- [x] Create password_reset_tokens table in database schema
+- [x] Implement forgot password backend endpoint with token generation
+- [x] Create email template for password reset instructions
+- [x] Implement reset password backend endpoint with token validation
+- [x] Reset password page already handles token-based reset correctly
+- [x] Create welcome email template for new signups
+- [x] Send welcome email on successful account creation
+- [ ] Test complete forgot password flow end-to-end
+- [ ] Test signup email delivery
+
