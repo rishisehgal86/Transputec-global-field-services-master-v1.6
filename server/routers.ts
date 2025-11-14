@@ -240,6 +240,7 @@ export const appRouter = router({
     // Create a service request (public - no auth required)
     createRequest: publicProcedure
       .input(z.object({
+        organizationId: z.number().optional(), // For tenant-specific public forms
         clientName: z.string(),
         clientEmail: z.string().email(),
         siteName: z.string(),
@@ -295,10 +296,13 @@ export const appRouter = router({
         
         const jobToken = randomBytes(32).toString('hex');
         
+        // Use organizationId from input (tenant-specific URL) or default to 1
+        const organizationId = input.organizationId || 1;
+        
         const job = await createJob({
           ...input,
           jobToken,
-          organizationId: 1, // Default organization for public requests
+          organizationId,
           status: "pending_approval",
           coveredByCOI: true,
           createdBy: null,
@@ -1797,6 +1801,14 @@ export const appRouter = router({
       const { getOrganizationById } = await import('./organizations-db');
       return await getOrganizationById(ctx.user.organizationId);
     }),
+    
+    // Get organization by slug (public - for request forms)
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const { getOrganizationBySlug } = await import('./organizations-db');
+        return await getOrganizationBySlug(input.slug);
+      }),
   }),
 
   users: router({

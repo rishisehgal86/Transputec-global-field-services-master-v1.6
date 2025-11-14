@@ -13,7 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { estimateTimezoneFromLongitude, getTimezoneAbbreviation, getTimezoneOffset, formatInUTC, convertLocalTimeToUTC, getUTCPreviewText } from "@/lib/timezone";
 
-export default function RequestService({ projectId, project }: { projectId?: string; project?: any }) {
+export default function RequestService({ projectId, project, organizationId }: { projectId?: string; project?: any; organizationId?: number }) {
   const [searching, setSearching] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
@@ -157,6 +157,7 @@ export default function RequestService({ projectId, project }: { projectId?: str
       toolsRequired: formData.get("toolsRequired") as string || undefined,
       deviceDetails: formData.get("deviceDetails") as string || undefined,
       projectId: effectiveProjectId,
+      organizationId: organizationId,
       scopeOfWork: formData.get("scopeOfWork") as string || undefined,
       videoConferenceLink: formData.get("videoConferenceLink") as string || undefined,
       notes: formData.get("notes") as string || undefined,

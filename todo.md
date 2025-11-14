@@ -980,3 +980,17 @@ ns
 - [x] Email system ready for production integration (SendGrid, AWS SES, etc.)
 - [ ] Integrate with actual email service provider when ready
 
+
+
+## Multi-Tenant Job Isolation & Tenant-Specific URLs (Nov 14, 2025)
+- [x] Add organizationId to createRequest mutation input
+- [x] Update backend to use organizationId from tenant-specific URL
+- [x] Add organizations.getBySlug query for public access (publicProcedure)
+- [x] Create TenantRequestForm wrapper component for tenant-specific request form route
+- [x] Update App.tsx routing to use TenantRequestForm for /request/:orgSlug
+- [x] Update RequestService to accept optional organizationId prop
+- [x] Admin dashboard copy button uses tenant-specific URL with organization slug
+- [x] Test tenant-specific URL end-to-end - WORKING! (/request/test-company-2-1763155844179)
+- [ ] Verify jobs created through tenant URL are assigned to correct organization
+- [ ] Verify jobs are filtered by organizationId in admin dashboard
+

@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, name, slug FROM organizations WHERE name LIKE '%Test Company 2%' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, name, slug FROM organizations WHERE name LIKE '%Test Company 2%' LIMIT 5;",
+  "rows": [
+    {
+      "id": "120003",
+      "name": "Test Company 2",
+      "slug": "test-company-2-1763155844179"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tslug\n120003\tTest Company 2\ttest-company-2-1763155844179\n",
+  "stderr": "",
+  "execution_time_ms": 99
+}

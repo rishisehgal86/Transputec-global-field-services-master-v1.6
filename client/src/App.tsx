@@ -10,6 +10,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import RequestService from "./pages/RequestService";
+import TenantRequestForm from "./pages/TenantRequestForm";
 import AdminDashboard from "./pages/AdminDashboard";
 import CreateJob from "./pages/CreateJob";
 import JobDetail from "./pages/JobDetail";
@@ -28,8 +29,8 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/request/:projectId" component={ProjectRequest} />
-      <Route path="/request" component={RequestService} />
+      <Route path="/request/:orgSlug" component={TenantRequestForm} />
+      <Route path="/project-request/:projectId" component={ProjectRequest} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/create" component={CreateJob} />
       <Route path="/admin/users" component={UserManagement} />

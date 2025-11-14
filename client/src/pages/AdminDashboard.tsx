@@ -114,23 +114,23 @@ export default function AdminDashboard() {
               </Link>
               
               <div className="flex gap-1">
-                <Link href="/request">
-                  <Button variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Job Creation Form
-                  </Button>
-                </Link>
                 <Button 
                   variant="outline"
-                  size="icon"
                   onClick={() => {
-                    const url = `${window.location.origin}/request`;
+                    if (!organization?.slug) {
+                      toast.error('Organization slug not available');
+                      return;
+                    }
+                    const url = `${window.location.origin}/request/${organization.slug}`;
                     navigator.clipboard.writeText(url);
-                    toast.success('Request form link copied to clipboard!');
+                    toast.success('Tenant-specific request form link copied!');
                   }}
-                  title="Copy request form URL"
+                  title="Copy tenant-specific request form URL"
+                  disabled={!organization?.slug}
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <Plus className="h-4 w-4 mr-2" />
+                  Job Creation Form
+                  <ExternalLink className="h-3 w-3 ml-2" />
                 </Button>
               </div>
               
