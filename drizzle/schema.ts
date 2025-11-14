@@ -235,11 +235,6 @@ export const jobStatusHistory = mysqlTable("jobStatusHistory", {
   latitude: varchar("latitude", { length: 50 }),
   longitude: varchar("longitude", { length: 50 }),
   
-  // Engineer details for sent_to_engineer status
-  engineerName: varchar("engineerName", { length: 255 }),
-  engineerEmail: varchar("engineerEmail", { length: 320 }),
-  emailSent: boolean("emailSent").default(false), // Track if notification email was sent
-  
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
@@ -317,66 +312,4 @@ export const jobComments = mysqlTable("jobComments", {
 
 export type JobComment = typeof jobComments.$inferSelect;
 export type InsertJobComment = typeof jobComments.$inferInsert;
-
-
-/**
- * Job Documents - stores instruction guides, task lists, and other documents
- * Can be uploaded during job creation or added later by client
- */
-export const jobDocuments = mysqlTable("jobDocuments", {
-  id: int("id").autoincrement().primaryKey(),
-  jobId: int("jobId").notNull().references(() => jobs.id, { onDelete: 'cascade' }),
-  
-  // File Information
-  fileKey: varchar("fileKey", { length: 500 }).notNull(), // S3 key
-  fileUrl: varchar("fileUrl", { length: 1000 }).notNull(), // S3 URL
-  fileName: varchar("fileName", { length: 255 }).notNull(),
-  fileType: varchar("fileType", { length: 100 }).notNull(), // pdf, doc, docx, txt, etc.
-  mimeType: varchar("mimeType", { length: 100 }).notNull(),
-  fileSize: int("fileSize").notNull(), // in bytes
-  
-  // Document metadata
-  documentType: mysqlEnum("documentType", ["instruction_guide", "task_list", "reference", "other"]).default("other").notNull(),
-  description: text("description"),
-  
-  // Upload tracking
-  uploadedBy: varchar("uploadedBy", { length: 255 }).notNull(), // Name of uploader
-  uploaderType: mysqlEnum("uploaderType", ["admin", "client", "system"]).notNull(),
-  
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type JobDocument = typeof jobDocuments.$inferSelect;
-export type InsertJobDocument = typeof jobDocuments.$inferInsert;
-
-/**
- * Audit Logs - comprehensive audit trail for all system actions
- */
-export const auditLogs = mysqlTable("auditLogs", {
-  id: int("id").autoincrement().primaryKey(),
-  organizationId: int("organizationId").notNull().references(() => organizations.id),
-  
-  // Action details
-  action: varchar("action", { length: 100 }).notNull(), // e.g., "document_uploaded", "job_created", "status_changed"
-  entityType: varchar("entityType", { length: 50 }).notNull(), // e.g., "job", "document", "user"
-  entityId: int("entityId").notNull(), // ID of the affected entity
-  
-  // Actor information
-  actorName: varchar("actorName", { length: 255 }).notNull(),
-  actorType: mysqlEnum("actorType", ["admin", "client", "engineer", "system"]).notNull(),
-  actorId: int("actorId"), // User ID if applicable
-  
-  // Change details
-  changes: text("changes"), // JSON string of what changed
-  metadata: text("metadata"), // Additional context as JSON
-  
-  // Request context
-  ipAddress: varchar("ipAddress", { length: 45 }), // IPv4 or IPv6
-  userAgent: varchar("userAgent", { length: 500 }),
-  
-  timestamp: timestamp("timestamp").defaultNow().notNull(),
-});
-
-export type AuditLog = typeof auditLogs.$inferSelect;
-export type InsertAuditLog = typeof auditLogs.$inferInsert;
 

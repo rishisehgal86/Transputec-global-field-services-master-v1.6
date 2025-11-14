@@ -365,23 +365,6 @@ export default function ClientTracker() {
                           <div className="flex-1 pb-4">
                             <div className="font-semibold text-foreground">{historyStatusInfo.label}</div>
                             <div className="text-sm text-muted-foreground">{formatDateTime(history.timestamp)}</div>
-                            {history.engineerName && (
-                              <div className="text-sm text-foreground mt-1">
-                                <span className="font-medium">Engineer:</span> {history.engineerName}
-                                {history.engineerEmail && (
-                                  <span className="text-muted-foreground"> ({history.engineerEmail})</span>
-                                )}
-                                {history.emailSent !== undefined && (
-                                  <span className="ml-2">
-                                    {history.emailSent ? (
-                                      <span className="text-green-600">✓ Email sent</span>
-                                    ) : (
-                                      <span className="text-orange-600">⚠ Email failed</span>
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            )}
                             {history.notes && (
                               <div className="text-sm text-foreground mt-1">{history.notes}</div>
                             )}

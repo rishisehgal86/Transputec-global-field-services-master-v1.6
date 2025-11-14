@@ -14,10 +14,6 @@ import { SiteVisitReportDisplay } from "@/components/SiteVisitReportDisplay";
 import { EditVideoConferenceLink } from "@/components/EditVideoConferenceLink";
 import { JobComments } from "@/components/JobComments";
 import { CancelJobDialog } from "@/components/CancelJobDialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -26,10 +22,6 @@ export default function JobDetail() {
   const jobId = params?.id ? parseInt(params.id) : 0;
   const [eta, setEta] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
-  const [engineerName, setEngineerName] = useState("");
-  const [engineerEmail, setEngineerEmail] = useState("");
-  const [sendEmailToEngineer, setSendEmailToEngineer] = useState(false);
 
   const { data: job, isLoading, refetch } = trpc.jobs.getById.useQuery(
     { id: jobId },
@@ -44,11 +36,6 @@ export default function JobDetail() {
   const { data: svr } = trpc.svr.getByToken.useQuery(
     { token: job?.jobToken || "" },
     { enabled: !!job && job.status === "completed" }
-  );
-
-  const { data: statusHistory = [] } = trpc.jobs.getStatusHistory.useQuery(
-    { token: job?.jobToken || "" },
-    { enabled: !!job, refetchInterval: 5000 }
   );
 
   const emailSVRMutation = trpc.svr.email.useMutation({
@@ -108,26 +95,6 @@ export default function JobDetail() {
     },
     onError: (error) => {
       toast.error(`Failed to reassign job: ${error.message}`);
-    },
-  });
-
-  const emailEngineerMutation = trpc.jobs.sendToEngineer.useMutation({
-    onSuccess: () => {
-      toast.success("Job emailed to engineer successfully!");
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(`Failed to email engineer: ${error.message}`);
-    },
-  });
-
-  const resendEngineerEmailMutation = trpc.jobs.resendEngineerEmail.useMutation({
-    onSuccess: () => {
-      toast.success("Email resent to engineer successfully!");
-      refetch();
-    },
-    onError: (error) => {
-      toast.error(`Failed to resend email: ${error.message}`);
     },
   });
 
@@ -377,7 +344,7 @@ export default function JobDetail() {
                           <Button
                             size="sm"
                             variant="default"
-                            onClick={() => setApproveDialogOpen(true)}
+                            onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "approved" })}
                             disabled={updateStatusMutation.isPending}
                           >
                             <CheckCircle2 className="h-4 w-4 mr-1" />
@@ -404,7 +371,7 @@ export default function JobDetail() {
                           <Button
                             size="sm"
                             variant="default"
-                            onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "sent_to_engineer" })}
+                            onClick={() => updateStatusMutation.mutate({ token: job.jobToken, status: "created" })}
                             disabled={updateStatusMutation.isPending}
                           >
                             Create Job & Send to Engineer
@@ -653,36 +620,6 @@ export default function JobDetail() {
                       <p className="font-medium">{job.engineerPhone}</p>
                     </div>
                   )}
-                  {job.status === 'accepted' && job.engineerEmail && (
-                    <Button
-                      onClick={() => {
-                        if (!job.engineerEmail || !job.engineerName) return;
-                        emailEngineerMutation.mutate({
-                          jobId: job.id,
-                          engineerEmail: job.engineerEmail,
-                          engineerName: job.engineerName,
-                        });
-                      }}
-                      disabled={emailEngineerMutation.isPending}
-                      className="w-full mt-2"
-                      variant="outline"
-                    >
-                      {emailEngineerMutation.isPending ? 'Sending...' : 'Email Job to Engineer'}
-                    </Button>
-                  )}
-                  {(job.status === 'sent_to_engineer' || job.status === 'accepted' || job.status === 'en_route' || job.status === 'on_site') && job.engineerEmail && (
-                    <Button
-                      onClick={() => {
-                        resendEngineerEmailMutation.mutate({ jobId: job.id });
-                      }}
-                      disabled={resendEngineerEmailMutation.isPending}
-                      className="w-full mt-2"
-                      variant="outline"
-                      size="sm"
-                    >
-                      {resendEngineerEmailMutation.isPending ? 'Sending...' : 'Resend Email to Engineer'}
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
             )}
@@ -692,50 +629,43 @@ export default function JobDetail() {
               <CardHeader>
                 <CardTitle>Timeline</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {statusHistory.length > 0 ? (
-                  statusHistory.map((history, index) => (
-                    <div key={history.id} className="flex gap-3 text-sm">
-                      <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 rounded-full bg-primary mt-1.5" />
-                        {index < statusHistory.length - 1 && (
-                          <div className="w-0.5 h-full bg-border my-1" />
-                        )}
-                      </div>
-                      <div className="flex-1 pb-3">
-                        <div className="font-medium text-foreground capitalize">
-                          {history.status.replace(/_/g, ' ')}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(history.timestamp).toLocaleString()}
-                        </div>
-                        {history.engineerName && (
-                          <div className="text-sm text-foreground mt-1">
-                            <span className="font-medium">Engineer:</span> {history.engineerName}
-                            {history.engineerEmail && (
-                              <span className="text-muted-foreground"> ({history.engineerEmail})</span>
-                            )}
-                            {history.emailSent !== undefined && (
-                              <span className="ml-2">
-                                {history.emailSent ? (
-                                  <span className="text-green-600">✓ Email sent</span>
-                                ) : (
-                                  <span className="text-orange-600">⚠ Email failed</span>
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {history.notes && (
-                          <div className="text-sm text-muted-foreground mt-1">{history.notes}</div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
+              <CardContent className="space-y-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Created</p>
+                  <p className="font-medium">{new Date(job.createdAt).toLocaleString()}</p>
+                </div>
+                {job.acceptedAt && (
                   <div>
-                    <p className="text-muted-foreground">Created</p>
-                    <p className="font-medium">{new Date(job.createdAt).toLocaleString()}</p>
+                    <p className="text-muted-foreground">Accepted</p>
+                    <p className="font-medium">{new Date(job.acceptedAt).toLocaleString()}</p>
+                  </div>
+                )}
+                {job.enRouteAt && (
+                  <div>
+                    <p className="text-muted-foreground">En Route</p>
+                    <p className="font-medium">{new Date(job.enRouteAt).toLocaleString()}</p>
+                  </div>
+                )}
+                {job.arrivedAt && (
+                  <div>
+                    <p className="text-muted-foreground">Arrived On Site</p>
+                    <p className="font-medium">{new Date(job.arrivedAt).toLocaleString()}</p>
+                    {job.enRouteAt && (
+                      <p className="text-xs text-gray-500">
+                        Travel time: {Math.round((new Date(job.arrivedAt).getTime() - new Date(job.enRouteAt).getTime()) / 60000)} minutes
+                      </p>
+                    )}
+                  </div>
+                )}
+                {job.completedAt && (
+                  <div>
+                    <p className="text-muted-foreground">Completed</p>
+                    <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
+                    {job.arrivedAt && (
+                      <p className="text-xs text-gray-500">
+                        On-site time: {Math.round((new Date(job.completedAt).getTime() - new Date(job.arrivedAt).getTime()) / 60000)} minutes
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -811,79 +741,6 @@ export default function JobDetail() {
         onConfirm={handleCancelJob}
         isLoading={cancelJobMutation.isPending}
       />
-
-      <Dialog open={approveDialogOpen} onOpenChange={setApproveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Approve Request & Assign Engineer</DialogTitle>
-            <DialogDescription>
-              Approve this service request and optionally assign an engineer. If you provide engineer details and check the box below, an email will be sent with the job details and acceptance link.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="engineerName">Engineer Name (Optional)</Label>
-              <Input
-                id="engineerName"
-                placeholder="Enter engineer's full name"
-                value={engineerName}
-                onChange={(e) => setEngineerName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="engineerEmail">Engineer Email (Optional)</Label>
-              <Input
-                id="engineerEmail"
-                type="email"
-                placeholder="engineer@example.com"
-                value={engineerEmail}
-                onChange={(e) => setEngineerEmail(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="sendEmail"
-                checked={sendEmailToEngineer}
-                onCheckedChange={(checked) => setSendEmailToEngineer(checked as boolean)}
-                disabled={!engineerEmail || !engineerName}
-              />
-              <Label htmlFor="sendEmail" className="cursor-pointer">
-                Send email notification to engineer with job details and acceptance link
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setApproveDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                updateStatusMutation.mutate({
-                  token: job?.jobToken || "",
-                  status: "approved",
-                  engineerName: engineerName || undefined,
-                  engineerEmail: engineerEmail || undefined,
-                  sendEmailToEngineer: sendEmailToEngineer,
-                });
-                setApproveDialogOpen(false);
-                setEngineerName("");
-                setEngineerEmail("");
-                setSendEmailToEngineer(false);
-              }}
-              disabled={updateStatusMutation.isPending}
-            >
-              {updateStatusMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Approving...
-                </>
-              ) : (
-                "Approve Request"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
