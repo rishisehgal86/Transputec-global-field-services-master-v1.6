@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, MapPin, Clock, User, CheckCircle2, Navigation2, XCircle, Building2, Phone, Mail, Calendar, Timer, RefreshCw, History, Printer } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
+import { DualTimeDisplay, CompactDualTime } from "@/components/DualTimeDisplay";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
@@ -177,13 +178,7 @@ export default function ClientTracker() {
     return `${hours}h ${mins}m`;
   };
 
-  const formatDateTime = (date: Date | string | null | undefined) => {
-    if (!date) return "Not set";
-    return new Date(date).toLocaleString('en-GB', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    });
-  };
+  // Removed formatDateTime - now using DualTimeDisplay component
 
   const timeOnSite = getTimeOnSite();
   const eta = job.status === "en_route" ? getETA() : null;
@@ -296,7 +291,7 @@ export default function ClientTracker() {
                   {job.scheduledDateTime && (
                     <div>
                       <div className="text-sm font-medium text-gray-500 mb-1">Scheduled Date & Time</div>
-                      <p className="text-foreground font-semibold">{formatDateTime(job.scheduledDateTime)}</p>
+                      <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
                     </div>
                   )}
                 </div>
@@ -364,7 +359,9 @@ export default function ClientTracker() {
                           </div>
                           <div className="flex-1 pb-4">
                             <div className="font-semibold text-foreground">{historyStatusInfo.label}</div>
-                            <div className="text-sm text-muted-foreground">{formatDateTime(history.timestamp)}</div>
+                            <div className="text-sm">
+                              <CompactDualTime date={history.timestamp} timezone={job.timezone} />
+                            </div>
                             {history.engineerName && (
                               <div className="text-sm text-foreground mt-1">
                                 <span className="font-medium">Engineer:</span> {history.engineerName}
@@ -490,30 +487,30 @@ export default function ClientTracker() {
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <div className="font-medium text-gray-500">Submitted</div>
-                  <div className="text-foreground">{formatDateTime(job.createdAt)}</div>
+                  <CompactDualTime date={job.createdAt} timezone={job.timezone} />
                 </div>
                 {job.acceptedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Accepted</div>
-                    <div className="text-foreground">{formatDateTime(job.acceptedAt)}</div>
+                    <CompactDualTime date={job.acceptedAt} timezone={job.timezone} />
                   </div>
                 )}
                 {job.enRouteAt && (
                   <div>
                     <div className="font-medium text-gray-500">En Route</div>
-                    <div className="text-foreground">{formatDateTime(job.enRouteAt)}</div>
+                    <CompactDualTime date={job.enRouteAt} timezone={job.timezone} />
                   </div>
                 )}
                 {job.arrivedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Arrived On Site</div>
-                    <div className="text-foreground">{formatDateTime(job.arrivedAt)}</div>
+                    <CompactDualTime date={job.arrivedAt} timezone={job.timezone} />
                   </div>
                 )}
                 {job.completedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Completed</div>
-                    <div className="text-foreground">{formatDateTime(job.completedAt)}</div>
+                    <CompactDualTime date={job.completedAt} timezone={job.timezone} />
                   </div>
                 )}
               </CardContent>

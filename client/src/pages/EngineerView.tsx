@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, Clock, CheckCircle2, Navigation, XCircle, RefreshCw } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
+import { DualTimeDisplay, InlineDualTime } from "@/components/DualTimeDisplay";
 import { useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
@@ -391,7 +392,7 @@ export default function EngineerView() {
               {/* Last Location Update */}
               {latestLocation && (
                 <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-                  Last location update: {new Date(latestLocation.timestamp).toLocaleString()}
+                  Last location update: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone} />
                 </div>
               )}
             </CardContent>
@@ -502,7 +503,7 @@ export default function EngineerView() {
                 {job.scheduledDateTime && (
                   <div>
                     <p className="text-muted-foreground">Scheduled Date & Time</p>
-                    <p className="font-medium">{new Date(job.scheduledDateTime).toLocaleString()}</p>
+                    <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
                   </div>
                 )}
                 {job.hoursRequired && (

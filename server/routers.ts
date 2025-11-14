@@ -133,6 +133,7 @@ export const appRouter = router({
         projectId: z.string().optional(),
         createNewSite: z.boolean().optional(),
         selectedProjectSiteId: z.number().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         console.log('🎫 [CreateRequest] New service request received');
@@ -260,6 +261,7 @@ export const appRouter = router({
         engineerName: z.string().optional(),
         engineerEmail: z.string().email().optional(),
         sendEmailToEngineer: z.boolean().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         // Create new site if requested
@@ -623,6 +625,7 @@ export const appRouter = router({
         engineerName: z.string().optional(),
         engineerEmail: z.string().email().optional(),
         sendEmailToEngineer: z.boolean().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         const baseUrl = getBaseUrl(ctx.req);

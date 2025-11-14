@@ -919,3 +919,82 @@ ns
 - [x] Fixed dropdown display to show correct field
 - [x] Added validation to allow submission when using existing project site
 - [x] Address now properly carries through to job details page
+
+## Global Timezone System Implementation
+- [ ] Add timezone field to jobs table to store local timezone
+- [ ] Add timezone field to job_requests table
+- [ ] Add timezone field to job_status_history table
+- [ ] Create timezone utility functions for formatting
+- [ ] Create DualTimeDisplay component showing local + UTC
+- [ ] Update request form to auto-detect and capture timezone
+- [ ] Update admin job creation to capture timezone
+- [ ] Update dashboard to show dual timezone for all jobs
+- [ ] Update job detail page with dual timezone display
+- [ ] Update engineer pages to show local and UTC times
+- [ ] Update client tracker to show dual timezone
+- [ ] Update timeline/status history with timezone info
+- [ ] Update audit logs with timezone display
+- [ ] Test timezone display across all pages
+
+
+## Global Timezone System - IN PROGRESS
+- [x] Add timezone column to jobs table
+- [x] Create timezone utility functions
+- [x] Create DualTimeDisplay component
+- [x] Add timezone capture to client request form
+
+- [ ] Update backend createRequest to accept timezone
+- [ ] Update backend createJob to accept timezone  
+- [ ] Update admin CreateJob form with timezone
+- [ ] Update Dashboard timestamps with DualTimeDisplay
+- [ ] Update JobDetail timestamps with DualTimeDisplay
+- [ ] Update Engineer pages with DualTimeDisplay
+- [ ] Update ClientTracker with DualTimeDisplay
+- [ ] Update Timeline/StatusHistory with DualTimeDisplay
+- [ ] Update AuditLogs with DualTimeDisplay
+
+- [x] Update backend createRequest to accept timezone
+- [x] Update backend createJob to accept timezone  
+- [x] Update admin CreateJob form with timezone
+- [x] Update Dashboard timestamps with DualTimeDisplay
+- [x] Update JobDetail timestamps with DualTimeDisplay
+- [x] Update Engineer pages with DualTimeDisplay
+- [x] Update ClientTracker with DualTimeDisplay
+- [x] Timeline/StatusHistory already uses DualTimeDisplay
+
+## Timezone Display in Job Creation Forms
+- [ ] Add detected timezone display to RequestService form after address selection
+- [ ] Show live UTC conversion helper for scheduled datetime in RequestService
+- [ ] Add detected timezone display to CreateJob form after address selection
+- [ ] Show live UTC conversion helper for scheduled datetime in CreateJob
+- [ ] Display format: "Scheduling in [Timezone] (UTC+X) | UTC equivalent: [time]"
+
+- [x] Add detected timezone display to RequestService form after address selection
+- [x] Show live UTC conversion helper for scheduled datetime in RequestService
+- [x] Add detected timezone display to CreateJob form after address selection
+- [x] Show live UTC conversion helper for scheduled datetime in CreateJob
+
+## Fix Datetime Local Timezone Conversion
+- [ ] Create utility function to convert datetime-local string from site timezone to UTC
+- [ ] Update RequestService form submission to convert entered time from site timezone to UTC
+- [ ] Update CreateJob form submission to convert entered time from site timezone to UTC
+- [ ] Test that job details page shows correct times after submission
+
+- [x] Create utility function to convert datetime-local string from site timezone to UTC
+- [x] Update RequestService form submission to convert entered time from site timezone to UTC
+- [x] Update CreateJob form submission to convert entered time from site timezone to UTC
+
+## Fix UTC Conversion Display
+- [ ] Fix convertLocalTimeToUTC function to correctly calculate UTC offset
+- [ ] Verify UTC equivalent displays correct time (e.g., 10:00 AM EST = 3:00 PM UTC)
+
+- [x] Fix convertLocalTimeToUTC function to correctly calculate UTC offset
+
+## Fix UTC Preview Display
+- [ ] Create getUTCPreviewText function to calculate and format UTC time from local input
+- [ ] Update RequestService form to use new preview function
+- [ ] Update CreateJob form to use new preview function
+
+- [x] Create getUTCPreviewText function to calculate and format UTC time from local input
+- [x] Update RequestService form to use new preview function
+- [x] Update CreateJob form to use new preview function

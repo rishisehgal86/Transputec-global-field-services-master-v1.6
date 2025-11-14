@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
+import { CompactDualTime } from "@/components/DualTimeDisplay";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
@@ -187,7 +188,10 @@ export default function AdminDashboard() {
                           )}
                           {job.projectName && <p><strong>Project Name:</strong> {job.projectName}</p>}
                           {job.scheduledDateTime && (
-                            <p><strong>Scheduled:</strong> {new Date(job.scheduledDateTime).toLocaleString()}</p>
+                            <div className="flex items-start gap-2">
+                              <strong>Scheduled:</strong>
+                              <CompactDualTime date={job.scheduledDateTime} timezone={job.timezone} />
+                            </div>
                           )}
                         </div>
                       </CardDescription>
@@ -226,13 +230,13 @@ export default function AdminDashboard() {
                     {job.acceptedAt && (
                       <div>
                         <p className="text-muted-foreground">Accepted At</p>
-                        <p className="font-medium">{new Date(job.acceptedAt).toLocaleString()}</p>
+                        <CompactDualTime date={job.acceptedAt} timezone={job.timezone} />
                       </div>
                     )}
                     {job.completedAt && (
                       <div>
                         <p className="text-muted-foreground">Completed At</p>
-                        <p className="font-medium">{new Date(job.completedAt).toLocaleString()}</p>
+                        <CompactDualTime date={job.completedAt} timezone={job.timezone} />
                       </div>
                     )}
                   </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2, Copy, Link as LinkIcon } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
+import { DualTimeDisplay, CompactDualTime, InlineDualTime } from "@/components/DualTimeDisplay";
 import { useLocation } from "wouter";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -284,7 +285,7 @@ export default function JobDetail() {
                   Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
                 </p>
                 <p>
-                  Last Updated: {new Date(latestLocation.timestamp).toLocaleTimeString()}
+                  Last Updated: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone} />
                 </p>
               </div>
             </CardContent>
@@ -563,7 +564,7 @@ export default function JobDetail() {
                     {job.scheduledDateTime && (
                       <div>
                         <p className="text-muted-foreground">Scheduled Date & Time</p>
-                        <p className="font-medium">{new Date(job.scheduledDateTime).toLocaleString()}</p>
+                        <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
                       </div>
                     )}
                     <div>
@@ -706,8 +707,8 @@ export default function JobDetail() {
                         <div className="font-medium text-foreground capitalize">
                           {history.status.replace(/_/g, ' ')}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(history.timestamp).toLocaleString()}
+                        <div className="text-xs">
+                          <CompactDualTime date={history.timestamp} timezone={job.timezone} />
                         </div>
                         {history.engineerName && (
                           <div className="text-sm text-foreground mt-1">
@@ -735,7 +736,7 @@ export default function JobDetail() {
                 ) : (
                   <div>
                     <p className="text-muted-foreground">Created</p>
-                    <p className="font-medium">{new Date(job.createdAt).toLocaleString()}</p>
+                    <CompactDualTime date={job.createdAt} timezone={job.timezone} />
                   </div>
                 )}
               </CardContent>
