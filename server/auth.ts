@@ -92,13 +92,13 @@ export async function authenticateUser(email: string, password: string): Promise
 }
 
 /**
- * Create a new user
+ * Create a new user (overloaded for backward compatibility)
  */
 export async function createUser(
-  email: string,
-  password: string,
-  name: string,
-  role: 'super_admin' | 'admin' = 'admin'
+  emailOrData: string | { email: string; passwordHash: string; name: string; role: 'super_admin' | 'admin'; organizationId: number },
+  password?: string,
+  name?: string,
+  role?: 'super_admin' | 'admin'
 ): Promise<User | null> {
   const db = await getDb();
   if (!db) {
@@ -107,15 +107,31 @@ export async function createUser(
   }
 
   try {
-    const passwordHash = await hashPassword(password);
+    let userData;
+    
+    if (typeof emailOrData === 'object') {
+      // New signature: createUser({ email, passwordHash, name, role, organizationId })
+      userData = {
+        email: emailOrData.email,
+        passwordHash: emailOrData.passwordHash,
+        name: emailOrData.name,
+        role: emailOrData.role,
+        organizationId: emailOrData.organizationId,
+        isActive: true,
+      };
+    } else {
+      // Old signature: createUser(email, password, name, role)
+      const passwordHash = await hashPassword(password!);
+      userData = {
+        email: emailOrData,
+        passwordHash,
+        name: name!,
+        role: role || 'admin',
+        isActive: true,
+      };
+    }
 
-    const result = await db.insert(users).values({
-      email,
-      passwordHash,
-      name,
-      role,
-      isActive: true,
-    });
+    const result = await db.insert(users).values(userData);
 
     // Fetch the created user
     const userId = Number(result[0].insertId);
@@ -253,6 +269,71 @@ export async function updateUserStatus(userId: number, isActive: boolean): Promi
   } catch (error) {
     console.error('[Auth] Update user status error:', error);
     return false;
+  }
+}
+
+/**
+ * Update user password (alias for updateUserPassword)
+ */
+export async function updatePassword(userId: number, newPassword: string): Promise<void> {
+  const success = await updateUserPassword(userId, newPassword);
+  if (!success) {
+    throw new Error('Failed to update password');
+  }
+}
+
+// In-memory storage for password reset tokens (in production, use Redis or database)
+const passwordResetTokens = new Map<string, { userId: number; expiresAt: number }>();
+
+/**
+ * Generate a password reset token
+ */
+export async function generatePasswordResetToken(userId: number): Promise<string> {
+  const token = jwt.sign(
+    { userId, type: 'password_reset' },
+    JWT_SECRET,
+    { expiresIn: '1h' } // Token valid for 1 hour
+  );
+  
+  // Store token with expiration (1 hour from now)
+  passwordResetTokens.set(token, {
+    userId,
+    expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
+  });
+  
+  return token;
+}
+
+/**
+ * Validate a password reset token and return the user ID
+ */
+export async function validatePasswordResetToken(token: string): Promise<number | null> {
+  try {
+    // Check if token exists in our storage
+    const tokenData = passwordResetTokens.get(token);
+    if (!tokenData) {
+      return null;
+    }
+    
+    // Check if token has expired
+    if (Date.now() > tokenData.expiresAt) {
+      passwordResetTokens.delete(token);
+      return null;
+    }
+    
+    // Verify JWT signature
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number; type: string };
+    if (decoded.type !== 'password_reset') {
+      return null;
+    }
+    
+    // Delete token after successful validation (one-time use)
+    passwordResetTokens.delete(token);
+    
+    return decoded.userId;
+  } catch (error) {
+    console.error('[Auth] Token validation error:', error);
+    return null;
   }
 }
 

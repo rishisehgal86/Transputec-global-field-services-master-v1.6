@@ -745,3 +745,199 @@ ns
 - [x] Ensure consistent styling with other form inputs
 - [x] Fix database field name mismatch (address -> siteAddress)
 
+
+
+
+## Fix Logo Not Displaying
+- [ ] Check logo configuration in const.ts
+- [ ] Verify logo file exists and path is correct
+- [ ] Fix LogoImage component rendering
+- [ ] Test logo display on all pages
+
+
+
+
+## Email Job to Engineer Feature
+- [x] Add email button to admin job details page (after job accepted)
+- [x] Create email template for job notification (already exists)
+- [x] Implement email sending endpoint (sendToEngineer already exists)
+- [ ] Test email delivery with job link
+
+## Document Upload System
+- [x] Create job_documents table in database
+- [x] Create audit_logs table in database
+- [ ] Add document upload UI to create job forms (admin and public)
+- [x] Implement S3 file upload for documents
+- [x] Create document upload/get/delete endpoints
+- [x] Integrate audit logging with document operations
+- [ ] Add document display to engineer job view
+- [ ] Add document display to admin job details
+- [ ] Add document display to client tracking page
+- [ ] Allow client to upload additional documents from tracking page
+- [ ] Implement audit logging for all document operations
+- [ ] Test document upload, display, and audit trail
+
+
+
+
+## Fix 404 Error on Admin Create Job Route
+- [x] Check App.tsx routing configuration
+- [x] Verify CreateJob component exists and is imported
+- [x] Fix route definition if missing (added /admin/jobs/create)
+- [x] Test route access
+
+
+
+
+## Engineer Email Assignment on Job Creation
+- [x] Add engineer email and name fields to CreateJob form
+- [x] Add "Send Email to Engineer" checkbox
+- [x] Update create job endpoint to send email when checkbox is checked
+- [x] Email should include job details and engineer acceptance link
+- [x] Test email delivery with engineer link
+
+
+
+
+## Engineer Email on Request Approval
+- [x] Add dialog/modal when admin clicks approve on pending requests
+- [x] Dialog should have engineer name and email fields
+- [x] Add "Send Email to Engineer" option in dialog
+- [x] Update approve endpoint to accept engineer details and send email
+- [x] Test approval workflow with email notification
+
+
+
+
+## Fix Engineer Email Notification Not Sending
+- [x] Check if sendJobAssignmentNotification function exists in email.ts
+- [x] Create or fix the email function with proper template
+- [x] Test email delivery when creating job with engineer email
+- [x] Test email delivery when approving request with engineer email
+
+
+
+
+## Auto-Update Job Status When Engineer Email Sent
+- [x] Update create job to change status to 'sent_to_engineer' when sendEmailToEngineer is true
+- [x] Update approve request to change status to 'sent_to_engineer' when sendEmailToEngineer is true
+- [x] Update job record with engineer name and email when sending
+- [x] Test that engineer can access job via link after email is sent
+
+
+
+
+## Manual Send to Engineer Button
+- [x] "Send to Engineer" button already exists in UI
+- [x] Verify button properly changes status to 'sent_to_engineer'
+- [x] Test manual status transition without email
+
+
+
+
+## Status Enum Validation Fix
+- [x] Added 'sent_to_engineer' to updateStatus endpoint allowed status values
+- [x] Fixed "Create Job & Send to Engineer" button validation error
+- [x] Button now successfully transitions jobs from 'approved' to 'sent_to_engineer'
+
+
+
+
+## Engineer Assignment Timeline Tracking
+- [x] Add engineerName and engineerEmail fields to job_status_history table
+- [x] Add emailSent field to track email delivery status
+- [x] Update addJobStatusHistory function to accept engineer details
+- [x] Modify updateStatus endpoint to pass engineer info to status history
+- [x] Update timeline display components to show engineer assignments
+- [x] Added engineer details display in ClientTracker status history
+- [x] Added engineer details display in JobDetail timeline
+- [x] Show email sent status with visual indicators (✓ or ⚠)
+
+
+
+
+## Email Delivery Diagnostics
+- [ ] Check SMTP configuration in email.ts
+- [ ] Verify Gmail app password is correct
+- [ ] Test email sending with diagnostic script
+- [ ] Check server logs for email errors
+- [ ] Verify email triggers in routers.ts are being called
+
+
+
+
+## Admin Job Creation Timeline Tracking
+- [ ] Update createJob endpoint to record engineer details in status history
+- [ ] Add status history entry when admin creates job with engineer assignment
+- [ ] Test timeline shows engineer details for admin-created jobs
+
+
+## Admin Job Creation Timeline Tracking
+- [x] Update createJob endpoint to record engineer details in status history
+- [x] Add status history entry when admin creates job with engineer assignment
+- [x] Track email delivery success/failure in timeline
+- [x] Add "created" status entry for all admin-created jobs
+
+## Resend Engineer Email Feature
+- [ ] Create resendEngineerEmail endpoint in backend
+- [ ] Add resend button to Engineer card in JobDetail page
+- [ ] Show success/error toast on resend
+- [ ] Update timeline when email is resent
+
+## Resend Engineer Email Feature - COMPLETED
+- [x] Create resendEngineerEmail endpoint in backend
+- [x] Add resend button to Engineer card in JobDetail page
+- [x] Show success/error toast on resend
+- [x] Update timeline when email is resent
+- [x] Validate job has engineer assigned before resending
+- [x] Track email delivery status in timeline
+
+## Project Site Auto-Fill Feature
+- [ ] Update client request form to auto-populate address from selected project site
+- [ ] Update admin job creation form to auto-populate address from selected project site
+- [ ] Hide manual address fields when project site is selected
+- [ ] Show manual address fields when "Create New Site" is selected
+- [ ] Test both forms with project site selection
+
+## Project Site Auto-Fill Feature - COMPLETED
+- [x] Update client request form to auto-populate address from selected project site
+- [x] Update admin job creation form to auto-populate address from selected project site
+- [x] Hide manual address fields when project site is selected
+- [x] Show manual address fields when "Create New Site" is selected
+- [x] Auto-populate coordinates and contact info from project site
+
+## Fix Project Site Address Submission
+- [ ] Debug why selectedAddress isn't being submitted in client request form
+- [ ] Fix client request form to include site address when project site is selected
+- [ ] Debug admin job creation form address submission
+- [ ] Fix admin job creation form to include site address when project site is selected
+- [ ] Verify address appears in job details page after submission
+
+## Fix Project Site Address Submission - COMPLETED
+- [x] Fixed field name from site.address to site.siteAddress in client request form
+- [x] Fixed field name in admin job creation form
+- [x] Fixed dropdown display to show correct field
+- [x] Added validation to allow submission when using existing project site
+- [x] Address now properly carries through to job details page
+
+
+
+## Multi-Tenant Data Isolation Issues
+- [ ] Filter projects by organizationId in all project queries
+- [ ] Filter jobs by organizationId in all job queries
+- [ ] Audit all database queries to ensure tenant filtering
+- [ ] Test that tenants can only see their own data
+
+
+
+
+## Self-Service Authentication System
+- [x] Create signup backend endpoint (register organization + admin user)
+- [x] Create forgot password backend endpoint (generate reset token)
+- [x] Create reset password backend endpoint (validate token + update password)
+- [x] Create Signup page UI with organization registration form
+- [x] Create Forgot Password page UI
+- [x] Create Reset Password page UI
+- [x] Add routes to App.tsx (/signup, /forgot-password, /reset-password)
+- [ ] Test complete authentication flow
+
