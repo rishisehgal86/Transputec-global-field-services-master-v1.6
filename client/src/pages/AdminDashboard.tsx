@@ -103,25 +103,35 @@ export default function AdminDashboard() {
               </div>
             )}
             
-            <div className="flex gap-2">
-              {/* Primary Actions */}
+            <div className="flex gap-2 flex-wrap">
+              {/* Primary Job Creation Actions */}
               <Link href="/admin/create">
                 <Button size="default" className="bg-primary hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create New Request
+                  Admin Job Creation
                 </Button>
               </Link>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  const url = `${window.location.origin}/request`;
-                  navigator.clipboard.writeText(url);
-                  toast.success('Request form link copied to clipboard!');
-                }}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Copy Request Form Link
-              </Button>
+              
+              <div className="flex gap-1">
+                <Link href="/request">
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Job Creation Form
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const url = `${window.location.origin}/request`;
+                    navigator.clipboard.writeText(url);
+                    toast.success('Request form link copied to clipboard!');
+                  }}
+                  title="Copy request form URL"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
               
               {/* Secondary Actions */}
               <ExportJobsDialog />
@@ -137,6 +147,18 @@ export default function AdminDashboard() {
                   User Management
                 </Button>
               </Link>
+              
+              {/* Logout Button */}
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  // Logout logic
+                  window.location.href = '/';
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>
