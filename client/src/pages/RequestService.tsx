@@ -24,15 +24,18 @@ export default function RequestService({ projectId, project }: { projectId?: str
   const [verifyingProject, setVerifyingProject] = useState(false);
   const [projectValid, setProjectValid] = useState<boolean | null>(null);
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
+  const [siteSelectionMode, setSiteSelectionMode] = useState<'existing' | 'new' | null>(null);
+  const [selectedProjectSite, setSelectedProjectSite] = useState<any | null>(null);
   
-  // Fetch project sites if project restricts to predefined sites
+  // Fetch project sites after verification or if provided via URL
+  const effectiveProjectId = manualProjectId && projectValid ? manualProjectId : projectId;
   const { data: projectSites } = trpc.projects.getSites.useQuery(
-    { projectId: projectId || "" },
-    { enabled: !!projectId && !!project?.restrictToSites }
+    { projectId: effectiveProjectId || "" },
+    { enabled: !!effectiveProjectId }
   );
   
   // Verify project ID mutation
-  const verifyProjectMutation = trpc.projects.verify.useMutation({
+  const verifyProjectMutation = trpc.projects.verifyPublic.useMutation({
     onSuccess: (data) => {
       setProjectValid(data.isValid);
       setVerifyingProject(false);
@@ -104,18 +107,33 @@ export default function RequestService({ projectId, project }: { projectId?: str
     
     const scheduledDateTimeStr = formData.get("scheduledDateTime") as string;
     
-    if (!selectedAddress || !siteCoordinates) {
+    // When adding new site to project, allow submission even without search
+    // The address will be captured from the search input
+    const isAddingNewSite = siteSelectionMode === 'new' && (manualProjectId && projectValid);
+    
+    if (!isAddingNewSite && !selectedAddress) {
       toast.error("Please search and select a site address");
       return;
     }
+    
+    // Use selected address if available, otherwise use search query for new sites
+    const finalAddress = selectedAddress || (isAddingNewSite ? searchQuery : '');
+    const finalCoordinates = siteCoordinates || { lat: '', lng: '' };
+    
+    if (!finalAddress) {
+      toast.error("Please enter a site address");
+      return;
+    }
+    
+    const effectiveProjectId = projectId || (manualProjectId && projectValid ? manualProjectId : undefined);
     
     createRequestMutation.mutate({
       clientName: formData.get("clientName") as string,
       clientEmail: formData.get("clientEmail") as string,
       siteName: formData.get("siteName") as string,
-      siteAddress: selectedAddress,
-      siteLatitude: siteCoordinates.lat,
-      siteLongitude: siteCoordinates.lng,
+      siteAddress: finalAddress,
+      siteLatitude: finalCoordinates.lat,
+      siteLongitude: finalCoordinates.lng,
       siteContactName: formData.get("siteContactName") as string,
       siteContactNumber: formData.get("siteContactNumber") as string,
       incidentDetails: formData.get("incidentDetails") as string,
@@ -129,10 +147,13 @@ export default function RequestService({ projectId, project }: { projectId?: str
       projectName: formData.get("projectName") as string || undefined,
       toolsRequired: formData.get("toolsRequired") as string || undefined,
       deviceDetails: formData.get("deviceDetails") as string || undefined,
-      projectId: projectId || (manualProjectId && projectValid ? manualProjectId : undefined),
+      projectId: effectiveProjectId,
       scopeOfWork: formData.get("scopeOfWork") as string || undefined,
       videoConferenceLink: formData.get("videoConferenceLink") as string || undefined,
       notes: formData.get("notes") as string || undefined,
+      // Site creation info for new sites
+      createNewSite: siteSelectionMode === 'new' && !!effectiveProjectId,
+      selectedProjectSiteId: siteSelectionMode === 'existing' ? selectedProjectSite?.id : undefined,
     });
   };
 
@@ -285,6 +306,151 @@ export default function RequestService({ projectId, project }: { projectId?: str
                   </div>
                 </div>
               </div>
+
+              {/* Project Assignment (Optional) - Only show if not already assigned via URL */}
+              {!projectId && (
+                <div className="space-y-4">
+                  <div className="border-b pb-2">
+                    <h3 className="text-lg font-semibold">Specific Project Assignment (Optional)</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Use this to assign your request to a specific pre-existing project</p>
+                  </div>
+                  <div>
+                    <Label htmlFor="manualProjectId">Project ID</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="manualProjectId"
+                        value={manualProjectId}
+                        onChange={(e) => {
+                          setManualProjectId(e.target.value.toUpperCase());
+                          setProjectValid(null);
+                        }}
+                        placeholder="Enter Project Name for Specific Project Tickets"
+                        className="uppercase"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          if (manualProjectId.trim()) {
+                            setVerifyingProject(true);
+                            verifyProjectMutation.mutate({ projectId: manualProjectId });
+                          } else {
+                            toast.error("Please enter a project ID");
+                          }
+                        }}
+                        disabled={!manualProjectId.trim() || verifyingProject}
+                      >
+                        {verifyingProject ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Verify"
+                        )}
+                      </Button>
+                    </div>
+                    {projectValid === true && (
+                      <>
+                        <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Check className="h-5 w-5 text-green-600" />
+                            <p className="text-sm font-medium text-green-900">
+                              Project ID verified successfully
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Site Selection for Verified Project */}
+                        <div className="mt-4 space-y-3">
+                          <Label>Select Project Site</Label>
+                          <div className="grid gap-2">
+                            <Button
+                              type="button"
+                              variant={siteSelectionMode === 'existing' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => {
+                                setSiteSelectionMode('existing');
+                                setSelectedProjectSite(null);
+                              }}
+                            >
+                              Select from Existing Sites ({projectSites?.length || 0})
+                            </Button>
+                            <Button
+                              type="button"
+                              variant={siteSelectionMode === 'new' ? 'default' : 'outline'}
+                              className="justify-start"
+                              onClick={() => {
+                                setSiteSelectionMode('new');
+                                setSelectedProjectSite(null);
+                              }}
+                            >
+                              Add New Site to Project
+                            </Button>
+                          </div>
+                          
+                          {/* Existing Site Dropdown */}
+                          {siteSelectionMode === 'existing' && projectSites && projectSites.length > 0 && (
+                            <div>
+                              <Label htmlFor="projectSiteSelect">Choose Site</Label>
+                              <Select
+                                value={selectedProjectSite?.id?.toString() || ''}
+                                onValueChange={(value) => {
+                                  const site = projectSites.find(s => s.id === Number(value));
+                                  if (site) {
+                                    setSelectedProjectSite(site);
+                                    // Auto-populate address fields
+                                    setSelectedAddress(site.address || '');
+                                    setSiteCoordinates({
+                                      lat: site.latitude || '',
+                                      lng: site.longitude || ''
+                                    });
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select a site..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {projectSites.map((site: any) => (
+                                    <SelectItem key={site.id} value={site.id.toString()}>
+                                      {site.siteName} - {site.address}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {selectedProjectSite && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  ✓ Site selected: {selectedProjectSite.siteName}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                          
+                          {siteSelectionMode === 'existing' && (!projectSites || projectSites.length === 0) && (
+                            <p className="text-sm text-muted-foreground">
+                              No sites found for this project. Please add a new site.
+                            </p>
+                          )}
+                          
+                          {siteSelectionMode === 'new' && (
+                            <p className="text-sm text-muted-foreground">
+                              Fill in the site information below. This site will be added to the project's site list.
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    {projectValid === false && (
+                      <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm font-medium text-red-900">
+                          Invalid project ID. Please check and try again.
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      If you have a project ID, enter it above and click Verify. Leave blank if not applicable.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Site Information */}
               <div className="space-y-4">
@@ -625,7 +791,7 @@ export default function RequestService({ projectId, project }: { projectId?: str
               <div className="flex gap-2 pt-4">
                 <Button 
                   type="submit" 
-                  disabled={createRequestMutation.isPending || !selectedAddress} 
+                  disabled={createRequestMutation.isPending} 
                   className="flex-1"
                 >
                   {createRequestMutation.isPending ? (

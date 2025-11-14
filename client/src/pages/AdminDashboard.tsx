@@ -177,7 +177,15 @@ export default function AdminDashboard() {
                         <div className="space-y-1">
                           <p><strong>Client:</strong> {job.clientName}</p>
                           {job.siteLocation && <p><strong>Location:</strong> {job.siteLocation}</p>}
-                          {job.projectName && <p><strong>Project:</strong> {job.projectName}</p>}
+                          {job.projectId && (
+                            <p>
+                              <strong>Project ID:</strong>{" "}
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                {job.projectId}
+                              </span>
+                            </p>
+                          )}
+                          {job.projectName && <p><strong>Project Name:</strong> {job.projectName}</p>}
                           {job.scheduledDateTime && (
                             <p><strong>Scheduled:</strong> {new Date(job.scheduledDateTime).toLocaleString()}</p>
                           )}

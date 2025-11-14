@@ -505,9 +505,19 @@ export default function JobDetail() {
                         <p className="font-medium">{job.incidentNumber}</p>
                       </div>
                     )}
+                    {job.projectId && (
+                      <div>
+                        <p className="text-muted-foreground">Project ID</p>
+                        <p className="font-medium">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded text-sm font-medium bg-blue-100 text-blue-800">
+                            {job.projectId}
+                          </span>
+                        </p>
+                      </div>
+                    )}
                     {job.projectName && (
                       <div>
-                        <p className="text-muted-foreground">Project</p>
+                        <p className="text-muted-foreground">Project Name</p>
                         <p className="font-medium">{job.projectName}</p>
                       </div>
                     )}

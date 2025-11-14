@@ -682,3 +682,66 @@ ns
 - [x] Fix table refresh after deletion - added isActive filter to getProjectSites
 - [x] Test delete functionality - working correctly
 
+
+
+
+## Add Project ID to Service Request Form
+- [x] Add optional project ID input field to RequestService form
+- [x] Add project ID verification in backend (projects.verify endpoint)
+- [x] Update createRequest endpoint to verify and assign project
+- [x] Display project name when valid project ID is entered
+- [x] Allow job creation without project ID (optional field)
+- [ ] Test project assignment workflow
+
+
+
+## Add Project Assignment to Admin Create Job Page
+- [x] Add project ID field with verification to CreateJob page
+- [x] Reuse same verification logic from RequestService
+- [ ] Test project assignment from admin panel
+
+
+
+## Fix Project ID Insert Error in Create Job
+- [x] Check jobs table schema for projectId field
+- [x] Fix create job mutation to properly handle projectId (both public and admin)
+- [x] Add projectId column to jobs table in database
+- [x] Add foreign key constraint
+- [ ] Test job creation with project assignment
+
+
+
+
+## Display Project Information in Admin Portal
+- [x] Add projectId column to jobs list table
+- [x] Add project information section to job details page
+- [x] Test project display in both views
+
+
+
+
+## Project Site Selection on Job Creation
+- [x] Add project sites dropdown after project verification (both forms)
+- [x] Add "Add New Site" option that shows site creation fields
+- [x] New sites should be saved to project site list
+- [x] Auto-populate job address from selected site
+- [x] Backend endpoint to create site during job creation
+- [x] Test site selection and creation workflow
+
+
+
+
+## Fix Submit Button Disabled with New Site Mode
+- [x] Check submit button disabled condition in both forms
+- [x] Update validation to allow submission when adding new site
+- [x] Test form submission works correctly
+
+
+
+
+## Update Site Selection Dropdown Styling
+- [x] Replace native select with shadcn Select component in RequestService
+- [x] Replace native select with shadcn Select component in CreateJob
+- [x] Ensure consistent styling with other form inputs
+- [x] Fix database field name mismatch (address -> siteAddress)
+

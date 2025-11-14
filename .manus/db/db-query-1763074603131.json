@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, organizationId, projectId, name, isActive FROM projects WHERE projectId = 'DIAGEO'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, organizationId, projectId, name, isActive FROM projects WHERE projectId = 'DIAGEO'",
+  "rows": [
+    {
+      "id": "1",
+      "organizationId": "1",
+      "projectId": "DIAGEO",
+      "name": "diageo sdwan",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torganizationId\tprojectId\tname\tisActive\n1\t1\tDIAGEO\tdiageo sdwan\t1\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

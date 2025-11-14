@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, ArrowLeft, Copy, Check, MapPin, Search } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { Link, useLocation } from "wouter";
@@ -23,6 +24,17 @@ export default function CreateJob() {
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [manualProjectId, setManualProjectId] = useState("");
+  const [verifyingProject, setVerifyingProject] = useState(false);
+  const [projectValid, setProjectValid] = useState<boolean | null>(null);
+  const [siteSelectionMode, setSiteSelectionMode] = useState<'existing' | 'new' | null>(null);
+  const [selectedProjectSite, setSelectedProjectSite] = useState<any | null>(null);
+  
+  // Fetch project sites after verification
+  const { data: projectSites } = trpc.projects.getSites.useQuery(
+    { projectId: manualProjectId || "" },
+    { enabled: !!manualProjectId && projectValid === true }
+  );
   
   // Check if duplicating a job
   const urlParams = new URLSearchParams(window.location.search);
@@ -33,6 +45,23 @@ export default function CreateJob() {
     { id: duplicateJobId! },
     { enabled: !!duplicateJobId && isAuthenticated }
   );
+
+  const verifyProjectMutation = trpc.projects.verifyPublic.useMutation({
+    onSuccess: (data) => {
+      setProjectValid(data.isValid);
+      setVerifyingProject(false);
+      if (data.isValid) {
+        toast.success("Project ID verified");
+      } else {
+        toast.error("Invalid project ID");
+      }
+    },
+    onError: () => {
+      setProjectValid(false);
+      setVerifyingProject(false);
+      toast.error("Failed to verify project ID");
+    },
+  });
 
   const searchMutation = trpc.geocoding.search.useMutation({
     onSuccess: (data) => {
@@ -105,6 +134,9 @@ export default function CreateJob() {
       coveredByCOI: formData.get("coveredByCOI") === "on",
       notes: formData.get("notes") as string || undefined,
       clientName: formData.get("clientName") as string,
+      projectId: manualProjectId && projectValid ? manualProjectId : undefined,
+      createNewSite: siteSelectionMode === 'new' && !!(manualProjectId && projectValid),
+      selectedProjectSiteId: siteSelectionMode === 'existing' ? selectedProjectSite?.id : undefined,
     });
   };
 
@@ -253,6 +285,149 @@ export default function CreateJob() {
                 <div>
                   <Label htmlFor="clientName">Client Name *</Label>
                   <Input id="clientName" name="clientName" required defaultValue={duplicateJob?.clientName || ""} />
+                </div>
+              </div>
+
+              {/* Project Assignment (Optional) */}
+              <div className="space-y-4">
+                <div className="border-b pb-2">
+                  <h3 className="text-lg font-semibold">Specific Project Assignment (Optional)</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Use this to assign your request to a specific pre-existing project</p>
+                </div>
+                <div>
+                  <Label htmlFor="manualProjectId">Project ID</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="manualProjectId"
+                      value={manualProjectId}
+                      onChange={(e) => {
+                        setManualProjectId(e.target.value.toUpperCase());
+                        setProjectValid(null);
+                      }}
+                      placeholder="Enter Project Name for Specific Project Tickets"
+                      className="uppercase"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (manualProjectId.trim()) {
+                          setVerifyingProject(true);
+                          verifyProjectMutation.mutate({ projectId: manualProjectId });
+                        } else {
+                          toast.error("Please enter a project ID");
+                        }
+                      }}
+                      disabled={!manualProjectId.trim() || verifyingProject}
+                    >
+                      {verifyingProject ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Verify"
+                      )}
+                    </Button>
+                  </div>
+                  {projectValid === true && (
+                    <>
+                      <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Check className="h-5 w-5 text-green-600" />
+                          <p className="text-sm font-medium text-green-900">
+                            Project ID verified successfully
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Site Selection for Verified Project */}
+                      <div className="mt-4 space-y-3">
+                        <Label>Select Project Site</Label>
+                        <div className="grid gap-2">
+                          <Button
+                            type="button"
+                            variant={siteSelectionMode === 'existing' ? 'default' : 'outline'}
+                            className="justify-start"
+                            onClick={() => {
+                              setSiteSelectionMode('existing');
+                              setSelectedProjectSite(null);
+                            }}
+                          >
+                            Select from Existing Sites ({projectSites?.length || 0})
+                          </Button>
+                          <Button
+                            type="button"
+                            variant={siteSelectionMode === 'new' ? 'default' : 'outline'}
+                            className="justify-start"
+                            onClick={() => {
+                              setSiteSelectionMode('new');
+                              setSelectedProjectSite(null);
+                            }}
+                          >
+                            Add New Site to Project
+                          </Button>
+                        </div>
+                        
+                        {/* Existing Site Dropdown */}
+                        {siteSelectionMode === 'existing' && projectSites && projectSites.length > 0 && (
+                          <div>
+                            <Label htmlFor="projectSiteSelect">Choose Site</Label>
+                            <Select
+                              value={selectedProjectSite?.id?.toString() || ''}
+                              onValueChange={(value) => {
+                                const site = projectSites.find(s => s.id === Number(value));
+                                if (site) {
+                                  setSelectedProjectSite(site);
+                                  // Auto-populate address fields
+                                  setSelectedAddress(site.address || '');
+                                  setSiteCoordinates({
+                                    lat: site.latitude || '',
+                                    lng: site.longitude || ''
+                                  });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a site..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {projectSites.map((site: any) => (
+                                  <SelectItem key={site.id} value={site.id.toString()}>
+                                    {site.siteName} - {site.address}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {selectedProjectSite && (
+                              <p className="text-xs text-green-600 mt-1">
+                                ✓ Site selected: {selectedProjectSite.siteName}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {siteSelectionMode === 'existing' && (!projectSites || projectSites.length === 0) && (
+                          <p className="text-sm text-muted-foreground">
+                            No sites found for this project. Please add a new site.
+                          </p>
+                        )}
+                        
+                        {siteSelectionMode === 'new' && (
+                          <p className="text-sm text-muted-foreground">
+                            Fill in the site information below. This site will be added to the project's site list.
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                  {projectValid === false && (
+                    <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm font-medium text-red-900">
+                        Invalid project ID. Please check and try again.
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    If you have a project ID, enter it above and click Verify. Leave blank if not applicable.
+                  </p>
                 </div>
               </div>
 

@@ -19,6 +19,7 @@ import {
   getJobFilterCounts
 } from "./db";
 import { getProjectSites, bulkCreateProjectSites, deleteProjectSite, updateProjectSiteLocation, createProjectSite, updateProjectSite } from "./project-sites-db";
+import { getProjectByProjectId } from "./projects-db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
 import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification } from "./email";
@@ -129,11 +130,35 @@ export const appRouter = router({
         scopeOfWork: z.string().optional(),
         videoConferenceLink: z.string().optional(),
         notes: z.string().optional(),
+        projectId: z.string().optional(),
+        createNewSite: z.boolean().optional(),
+        selectedProjectSiteId: z.number().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         console.log('🎫 [CreateRequest] New service request received');
         console.log('📧 [CreateRequest] Client email from form:', input.clientEmail);
         const baseUrl = getBaseUrl(ctx.req);
+        
+        // Create new site if requested
+        if (input.createNewSite && input.projectId) {
+          const { createProjectSite } = await import('./project-sites-db');
+          try {
+            await createProjectSite({
+              projectId: input.projectId,
+              siteName: input.siteName,
+              siteAddress: input.siteAddress,
+              latitude: input.siteLatitude || null,
+              longitude: input.siteLongitude || null,
+              contactName: input.siteContactName || null,
+              contactPhone: input.siteContactNumber || null,
+              isActive: true,
+            });
+            console.log('✅ [CreateRequest] New site created for project:', input.projectId);
+          } catch (error) {
+            console.error('❌ [CreateRequest] Failed to create site:', error);
+            // Continue with job creation even if site creation fails
+          }
+        }
         
         const jobToken = randomBytes(32).toString('hex');
         
@@ -229,8 +254,32 @@ export const appRouter = router({
         videoConferenceLink: z.string().optional(),
         notes: z.string().optional(),
         clientName: z.string(),
+        projectId: z.string().optional(),
+        createNewSite: z.boolean().optional(),
+        selectedProjectSiteId: z.number().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // Create new site if requested
+        if (input.createNewSite && input.projectId && input.siteName && input.siteAddress) {
+          const { createProjectSite } = await import('./project-sites-db');
+          try {
+            await createProjectSite({
+              projectId: input.projectId,
+              siteName: input.siteName,
+              siteAddress: input.siteAddress,
+              latitude: input.siteLatitude || null,
+              longitude: input.siteLongitude || null,
+              contactName: input.siteContactName || null,
+              contactPhone: input.siteContactNumber || null,
+              isActive: true,
+            });
+            console.log('✅ [CreateJob] New site created for project:', input.projectId);
+          } catch (error) {
+            console.error('❌ [CreateJob] Failed to create site:', error);
+            // Continue with job creation even if site creation fails
+          }
+        }
+        
         const jobToken = randomBytes(32).toString('hex');
         
         await createJob({
@@ -1346,6 +1395,19 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return await updateProjectSiteLocation(input.siteId, input.latitude, input.longitude);
+      }),
+
+    // Verify project ID exists (public endpoint for service request form)
+    verifyPublic: publicProcedure
+      .input(z.object({
+        projectId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const project = await getProjectByProjectId(input.projectId);
+        return {
+          isValid: !!project,
+          projectName: project?.name,
+        };
       }),
 
     // Update site details
