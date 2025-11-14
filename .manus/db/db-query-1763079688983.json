@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS auditLogs (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  organizationId INT NOT NULL,\n  action VARCHAR(100) NOT NULL,\n  entityType VARCHAR(50) NOT NULL,\n  entityId INT NOT NULL,\n  actorName VARCHAR(255) NOT NULL,\n  actorType ENUM('admin', 'client', 'engineer', 'system') NOT NULL,\n  actorId INT,\n  changes TEXT,\n  metadata TEXT,\n  ipAddress VARCHAR(45),\n  userAgent VARCHAR(500),\n  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (organizationId) REFERENCES organizations(id)\n)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute CREATE TABLE IF NOT EXISTS auditLogs (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  organizationId INT NOT NULL,\n  action VARCHAR(100) NOT NULL,\n  entityType VARCHAR(50) NOT NULL,\n  entityId INT NOT NULL,\n  actorName VARCHAR(255) NOT NULL,\n  actorType ENUM('admin', 'client', 'engineer', 'system') NOT NULL,\n  actorId INT,\n  changes TEXT,\n  metadata TEXT,\n  ipAddress VARCHAR(45),\n  userAgent VARCHAR(500),\n  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (organizationId) REFERENCES organizations(id)\n)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 270
+}

@@ -26,6 +26,7 @@ function Router() {
       <Route path="/request" component={RequestService} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/create" component={CreateJob} />
+      <Route path="/admin/jobs/create" component={CreateJob} />
       <Route path="/admin/users" component={UserManagement} />
       <Route path="/projects" component={Projects} />
       <Route path="/admin/job/:id" component={JobDetail} />

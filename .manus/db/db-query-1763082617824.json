@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE jobStatusHistory ADD COLUMN IF NOT EXISTS engineerName VARCHAR(255), ADD COLUMN IF NOT EXISTS engineerEmail VARCHAR(320), ADD COLUMN IF NOT EXISTS emailSent BOOLEAN DEFAULT false;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute ALTER TABLE jobStatusHistory ADD COLUMN IF NOT EXISTS engineerName VARCHAR(255), ADD COLUMN IF NOT EXISTS engineerEmail VARCHAR(320), ADD COLUMN IF NOT EXISTS emailSent BOOLEAN DEFAULT false;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1149
+}

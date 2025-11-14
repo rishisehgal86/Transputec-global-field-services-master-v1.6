@@ -110,8 +110,9 @@ export default function RequestService({ projectId, project }: { projectId?: str
     // When adding new site to project, allow submission even without search
     // The address will be captured from the search input
     const isAddingNewSite = siteSelectionMode === 'new' && (manualProjectId && projectValid);
+    const isUsingExistingSite = siteSelectionMode === 'existing' && selectedProjectSite;
     
-    if (!isAddingNewSite && !selectedAddress) {
+    if (!isAddingNewSite && !isUsingExistingSite && !selectedAddress) {
       toast.error("Please search and select a site address");
       return;
     }
@@ -397,7 +398,7 @@ export default function RequestService({ projectId, project }: { projectId?: str
                                   if (site) {
                                     setSelectedProjectSite(site);
                                     // Auto-populate address fields
-                                    setSelectedAddress(site.address || '');
+                                    setSelectedAddress(site.siteAddress || '');
                                     setSiteCoordinates({
                                       lat: site.latitude || '',
                                       lng: site.longitude || ''
@@ -409,11 +410,11 @@ export default function RequestService({ projectId, project }: { projectId?: str
                                   <SelectValue placeholder="Select a site..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {projectSites.map((site: any) => (
-                                    <SelectItem key={site.id} value={site.id.toString()}>
-                                      {site.siteName} - {site.address}
-                                    </SelectItem>
-                                  ))}
+                                   {projectSites.map((site: any) => (
+                                     <SelectItem key={site.id} value={site.id.toString()}>
+                                       {site.siteName} - {site.siteAddress}
+                                     </SelectItem>
+                                   ))}
                                 </SelectContent>
                               </Select>
                               {selectedProjectSite && (
@@ -529,8 +530,9 @@ export default function RequestService({ projectId, project }: { projectId?: str
                     )}
                   </div>
                 ) : (
-                  /* Standard Address Search */
-                  <div>
+                  /* Standard Address Search - Only show if not using existing project site */
+                  (siteSelectionMode !== 'existing' || !selectedProjectSite) && (
+                    <div>
                     <Label htmlFor="addressSearch">Site Address *</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
@@ -601,7 +603,8 @@ export default function RequestService({ projectId, project }: { projectId?: str
                       </div>
                     </div>
                   )}
-                </div>
+                    </div>
+                  )
                 )}
               </div>
 

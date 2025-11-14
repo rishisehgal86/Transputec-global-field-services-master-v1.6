@@ -137,6 +137,9 @@ export default function CreateJob() {
       projectId: manualProjectId && projectValid ? manualProjectId : undefined,
       createNewSite: siteSelectionMode === 'new' && !!(manualProjectId && projectValid),
       selectedProjectSiteId: siteSelectionMode === 'existing' ? selectedProjectSite?.id : undefined,
+      engineerName: formData.get("engineerName") as string || undefined,
+      engineerEmail: formData.get("engineerEmail") as string || undefined,
+      sendEmailToEngineer: formData.get("sendEmailToEngineer") === "on",
     });
   };
 
@@ -377,7 +380,7 @@ export default function CreateJob() {
                                 if (site) {
                                   setSelectedProjectSite(site);
                                   // Auto-populate address fields
-                                  setSelectedAddress(site.address || '');
+                                  setSelectedAddress(site.siteAddress || '');
                                   setSiteCoordinates({
                                     lat: site.latitude || '',
                                     lng: site.longitude || ''
@@ -391,7 +394,7 @@ export default function CreateJob() {
                               <SelectContent>
                                 {projectSites.map((site: any) => (
                                   <SelectItem key={site.id} value={site.id.toString()}>
-                                    {site.siteName} - {site.address}
+                                    {site.siteName} - {site.siteAddress}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -449,10 +452,11 @@ export default function CreateJob() {
                   <Input id="siteLocation" name="siteLocation" defaultValue={duplicateJob?.siteLocation || ""} />
                 </div>
                 
-                {/* Address Search */}
-                <div>
-                  <Label htmlFor="addressSearch">Site Address Search</Label>
-                  <div className="flex gap-2 mt-1">
+                {/* Address Search - Only show if not using existing project site */}
+                {(siteSelectionMode !== 'existing' || !selectedProjectSite) ? (
+                  <div>
+                    <Label htmlFor="addressSearch">Site Address Search</Label>
+                    <div className="flex gap-2 mt-1">
                     <Input
                       id="addressSearch"
                       placeholder="Enter address to search..."
@@ -527,12 +531,13 @@ export default function CreateJob() {
                     </div>
                   )}
                   
-                  <Input
-                    type="hidden"
-                    name="siteAddress"
-                    value={selectedAddress}
-                  />
-                </div>
+                    <Input
+                      type="hidden"
+                      name="siteAddress"
+                      value={selectedAddress}
+                    />
+                  </div>
+                ) : null}
               </div>
 
               {/* Contact Information */}
@@ -603,6 +608,37 @@ export default function CreateJob() {
                 <div>
                   <Label htmlFor="scopeOfWork">Scope of Work / Activities</Label>
                   <Textarea id="scopeOfWork" name="scopeOfWork" rows={3} defaultValue={duplicateJob?.scopeOfWork || ""} />
+                </div>
+              </div>
+
+              {/* Engineer Assignment (Optional) */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Engineer Assignment (Optional)</h3>
+                <p className="text-sm text-muted-foreground">Assign and notify an engineer immediately upon job creation</p>
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="engineerName">Engineer Name</Label>
+                    <Input
+                      id="engineerName"
+                      name="engineerName"
+                      placeholder="Enter engineer's full name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="engineerEmail">Engineer Email</Label>
+                    <Input
+                      id="engineerEmail"
+                      name="engineerEmail"
+                      type="email"
+                      placeholder="engineer@example.com"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="sendEmailToEngineer" name="sendEmailToEngineer" />
+                    <Label htmlFor="sendEmailToEngineer" className="cursor-pointer">
+                      Send email notification to engineer with job details and acceptance link
+                    </Label>
+                  </div>
                 </div>
               </div>
 
