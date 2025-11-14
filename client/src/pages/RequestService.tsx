@@ -11,6 +11,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
+import { estimateTimezoneFromLongitude, getTimezoneAbbreviation, getTimezoneOffset, formatInUTC, convertLocalTimeToUTC, getUTCPreviewText } from "@/lib/timezone";
 
 export default function RequestService({ projectId, project }: { projectId?: string; project?: any }) {
   const [searching, setSearching] = useState(false);
@@ -26,6 +27,8 @@ export default function RequestService({ projectId, project }: { projectId?: str
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
   const [siteSelectionMode, setSiteSelectionMode] = useState<'existing' | 'new' | null>(null);
   const [selectedProjectSite, setSelectedProjectSite] = useState<any | null>(null);
+  const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>("");
   
   // Fetch project sites after verification or if provided via URL
   const effectiveProjectId = manualProjectId && projectValid ? manualProjectId : projectId;
@@ -96,8 +99,12 @@ export default function RequestService({ projectId, project }: { projectId?: str
 
   const handleSelectAddress = (suggestion: any) => {
     setSelectedAddress(suggestion.displayName);
-    setSiteCoordinates({ lat: suggestion.latitude, lng: suggestion.longitude });
+    const coords = { lat: suggestion.latitude, lng: suggestion.longitude };
+    setSiteCoordinates(coords);
     setAddressSuggestions([]);
+    // Detect and set timezone
+    const tz = estimateTimezoneFromLongitude(coords.lng);
+    setDetectedTimezone(tz);
     toast.success("Address selected and coordinates captured!");
   };
 
@@ -110,8 +117,9 @@ export default function RequestService({ projectId, project }: { projectId?: str
     // When adding new site to project, allow submission even without search
     // The address will be captured from the search input
     const isAddingNewSite = siteSelectionMode === 'new' && (manualProjectId && projectValid);
+    const isUsingExistingSite = siteSelectionMode === 'existing' && selectedProjectSite;
     
-    if (!isAddingNewSite && !selectedAddress) {
+    if (!isAddingNewSite && !isUsingExistingSite && !selectedAddress) {
       toast.error("Please search and select a site address");
       return;
     }
@@ -137,9 +145,10 @@ export default function RequestService({ projectId, project }: { projectId?: str
       siteContactName: formData.get("siteContactName") as string,
       siteContactNumber: formData.get("siteContactNumber") as string,
       incidentDetails: formData.get("incidentDetails") as string,
-      scheduledDateTime: scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined,
+      scheduledDateTime: scheduledDateTimeStr && detectedTimezone ? convertLocalTimeToUTC(scheduledDateTimeStr, detectedTimezone) : (scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined),
       hoursRequired: formData.get("hoursRequired") as string,
       downTime: formData.get("downTime") === "on",
+      timezone: finalCoordinates.lng ? estimateTimezoneFromLongitude(finalCoordinates.lng) : undefined, // Determine timezone from site location
       // Optional fields
       siteId: formData.get("siteId") as string || undefined,
       changeNumber: formData.get("changeNumber") as string || undefined,
@@ -397,11 +406,17 @@ export default function RequestService({ projectId, project }: { projectId?: str
                                   if (site) {
                                     setSelectedProjectSite(site);
                                     // Auto-populate address fields
-                                    setSelectedAddress(site.address || '');
-                                    setSiteCoordinates({
+                                    setSelectedAddress(site.siteAddress || '');
+                                    const coords = {
                                       lat: site.latitude || '',
                                       lng: site.longitude || ''
-                                    });
+                                    };
+                                    setSiteCoordinates(coords);
+                                    // Detect and set timezone
+                                    if (coords.lng) {
+                                      const tz = estimateTimezoneFromLongitude(coords.lng);
+                                      setDetectedTimezone(tz);
+                                    }
                                   }
                                 }}
                               >
@@ -409,11 +424,11 @@ export default function RequestService({ projectId, project }: { projectId?: str
                                   <SelectValue placeholder="Select a site..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {projectSites.map((site: any) => (
-                                    <SelectItem key={site.id} value={site.id.toString()}>
-                                      {site.siteName} - {site.address}
-                                    </SelectItem>
-                                  ))}
+                                   {projectSites.map((site: any) => (
+                                     <SelectItem key={site.id} value={site.id.toString()}>
+                                       {site.siteName} - {site.siteAddress}
+                                     </SelectItem>
+                                   ))}
                                 </SelectContent>
                               </Select>
                               {selectedProjectSite && (
@@ -529,8 +544,9 @@ export default function RequestService({ projectId, project }: { projectId?: str
                     )}
                   </div>
                 ) : (
-                  /* Standard Address Search */
-                  <div>
+                  /* Standard Address Search - Only show if not using existing project site */
+                  (siteSelectionMode !== 'existing' || !selectedProjectSite) && (
+                    <div>
                     <Label htmlFor="addressSearch">Site Address *</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
@@ -601,7 +617,8 @@ export default function RequestService({ projectId, project }: { projectId?: str
                       </div>
                     </div>
                   )}
-                </div>
+                    </div>
+                  )
                 )}
               </div>
 
@@ -642,14 +659,26 @@ export default function RequestService({ projectId, project }: { projectId?: str
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="scheduledDateTime">Preferred Date & Time *</Label>
+                    {detectedTimezone && (
+                      <p className="text-sm text-muted-foreground">
+                        Enter time in <span className="font-medium">{getTimezoneAbbreviation(detectedTimezone)}</span> {getTimezoneOffset(detectedTimezone)}
+                      </p>
+                    )}
                     <Input 
                       id="scheduledDateTime" 
                       name="scheduledDateTime" 
                       type="datetime-local" 
-                      required 
+                      required
+                      value={scheduledDateTime}
+                      onChange={(e) => setScheduledDateTime(e.target.value)}
                     />
+                    {scheduledDateTime && detectedTimezone && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        UTC equivalent: {getUTCPreviewText(scheduledDateTime, detectedTimezone)}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="hoursRequired">Estimated Hours Required *</Label>

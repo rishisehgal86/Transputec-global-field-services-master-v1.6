@@ -79,99 +79,6 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
-
-    // Signup - Register new organization and admin user
-    signup: publicProcedure
-      .input(z.object({
-        organizationName: z.string().min(1),
-        adminName: z.string().min(1),
-        email: z.string().email(),
-        password: z.string().min(8),
-      }))
-      .mutation(async ({ input }) => {
-        const { createUser, getUserByEmail, hashPassword } = await import('./auth');
-        const { createOrganization } = await import('./organizations-db');
-        
-        // Check if user already exists
-        const existingUser = await getUserByEmail(input.email);
-        if (existingUser) {
-          throw new Error('An account with this email already exists');
-        }
-        
-        // Create organization
-        const organization = await createOrganization({
-          name: input.organizationName,
-        });
-        
-        // Create admin user
-        const passwordHash = await hashPassword(input.password);
-        const user = await createUser({
-          email: input.email,
-          name: input.adminName,
-          passwordHash,
-          organizationId: organization.id,
-          role: 'admin',
-        });
-        
-        return {
-          success: true,
-          message: 'Account created successfully. Please log in.',
-        };
-      }),
-
-    // Forgot Password - Generate reset token
-    forgotPassword: publicProcedure
-      .input(z.object({
-        email: z.string().email(),
-      }))
-      .mutation(async ({ input }) => {
-        const { getUserByEmail, generatePasswordResetToken } = await import('./auth');
-        
-        const user = await getUserByEmail(input.email);
-        if (!user) {
-          // Don't reveal if user exists or not for security
-          return {
-            success: true,
-            message: 'If an account exists with this email, a password reset link has been sent.',
-          };
-        }
-        
-        // Generate reset token (valid for 1 hour)
-        const resetToken = await generatePasswordResetToken(user.id);
-        
-        // TODO: Send email with reset link
-        // For now, we'll return the token (in production, this should be emailed)
-        console.log(`Password reset token for ${input.email}: ${resetToken}`);
-        
-        return {
-          success: true,
-          message: 'If an account exists with this email, a password reset link has been sent.',
-          // Remove this in production - only for development
-          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined,
-        };
-      }),
-
-    // Reset Password - Validate token and update password
-    resetPassword: publicProcedure
-      .input(z.object({
-        token: z.string(),
-        newPassword: z.string().min(8),
-      }))
-      .mutation(async ({ input }) => {
-        const { validatePasswordResetToken, updatePassword } = await import('./auth');
-        
-        const userId = await validatePasswordResetToken(input.token);
-        if (!userId) {
-          throw new Error('Invalid or expired reset token');
-        }
-        
-        await updatePassword(userId, input.newPassword);
-        
-        return {
-          success: true,
-          message: 'Password updated successfully. Please log in with your new password.',
-        };
-      }),
   }),
 
   geocoding: router({
@@ -226,6 +133,7 @@ export const appRouter = router({
         projectId: z.string().optional(),
         createNewSite: z.boolean().optional(),
         selectedProjectSiteId: z.number().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         console.log('🎫 [CreateRequest] New service request received');
@@ -350,6 +258,10 @@ export const appRouter = router({
         projectId: z.string().optional(),
         createNewSite: z.boolean().optional(),
         selectedProjectSiteId: z.number().optional(),
+        engineerName: z.string().optional(),
+        engineerEmail: z.string().email().optional(),
+        sendEmailToEngineer: z.boolean().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         // Create new site if requested
@@ -375,13 +287,56 @@ export const appRouter = router({
         
         const jobToken = randomBytes(32).toString('hex');
         
-        await createJob({
+        const job = await createJob({
           ...input,
           jobToken,
           organizationId: ctx.user.organizationId,
-          status: "created",
+          status: input.sendEmailToEngineer ? "sent_to_engineer" : "created",
+          engineerName: input.engineerName,
+          engineerEmail: input.engineerEmail,
           createdBy: ctx.user.id,
         });
+        
+        // Add initial status history
+        await addJobStatusHistory({
+          jobId: job.id,
+          status: "created",
+          notes: "Job created by admin",
+        });
+        
+        // Send email to engineer if requested
+        if (input.sendEmailToEngineer && input.engineerEmail && input.engineerName) {
+          let emailSent = false;
+          try {
+            const baseUrl = getBaseUrl(ctx.req);
+            const { sendJobAssignmentNotification } = await import('./email');
+            await sendJobAssignmentNotification({
+              engineerEmail: input.engineerEmail,
+              engineerName: input.engineerName,
+              siteName: input.siteName,
+              siteAddress: input.siteAddress || 'N/A',
+              scheduledDateTime: input.scheduledDateTime,
+              incidentDetails: input.incidentDetails || 'N/A',
+              jobToken,
+              baseUrl,
+            });
+            console.log('[Email] Job assignment email sent to:', input.engineerEmail);
+            emailSent = true;
+          } catch (error) {
+            console.error('[Email] Failed to send job assignment email:', error);
+            // Don't fail the job creation if email fails
+          }
+          
+          // Add status history for sent_to_engineer
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'sent_to_engineer',
+            engineerName: input.engineerName,
+            engineerEmail: input.engineerEmail,
+            emailSent: emailSent,
+            notes: emailSent ? 'Job assignment email sent to engineer' : 'Job sent to engineer (email failed)',
+          });
+        }
         
         return { 
           success: true, 
@@ -521,11 +476,8 @@ export const appRouter = router({
       }),
 
     // Get all jobs (admin only)
-    list: protectedProcedure.query(async ({ ctx }) => {
-      if (!ctx.user) throw new Error("Unauthorized");
-      
-      const { getJobsByOrganization } = await import('./db');
-      return await getJobsByOrganization(ctx.user.organizationId);
+    list: protectedProcedure.query(async () => {
+      return await getAllJobs();
     }),
 
     // Get filtered jobs (admin only)
@@ -533,19 +485,13 @@ export const appRouter = router({
       .input(z.object({
         filter: z.enum(["today", "urgent", "overdue", "pending", "in_progress"])
       }))
-      .query(async ({ input, ctx }) => {
-        if (!ctx.user) throw new Error("Unauthorized");
-        
-        const { getFilteredJobsByOrganization } = await import('./db');
-        return await getFilteredJobsByOrganization(input.filter, ctx.user.organizationId);
+      .query(async ({ input }) => {
+        return await getFilteredJobs(input.filter);
       }),
 
     // Get filter counts (admin only)
-    getFilterCounts: protectedProcedure.query(async ({ ctx }) => {
-      if (!ctx.user) throw new Error("Unauthorized");
-      
-      const { getJobFilterCountsByOrganization } = await import('./db');
-      return await getJobFilterCountsByOrganization(ctx.user.organizationId);
+    getFilterCounts: protectedProcedure.query(async () => {
+      return await getJobFilterCounts();
     }),
 
     // Get job by token (public - for engineer and client access)
@@ -672,10 +618,14 @@ export const appRouter = router({
     updateStatus: publicProcedure
       .input(z.object({
         token: z.string(),
-        status: z.enum(["approved", "rejected", "created", "en_route", "on_site", "completed", "cancelled"]),
+        status: z.enum(["approved", "rejected", "created", "sent_to_engineer", "en_route", "on_site", "completed", "cancelled"]),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         notes: z.string().optional(),
+        engineerName: z.string().optional(),
+        engineerEmail: z.string().email().optional(),
+        sendEmailToEngineer: z.boolean().optional(),
+        timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
         const baseUrl = getBaseUrl(ctx.req);
@@ -700,7 +650,49 @@ export const appRouter = router({
           latitude: input.latitude,
           longitude: input.longitude,
           notes: input.notes,
+          engineerName: input.status === 'sent_to_engineer' ? input.engineerName : undefined,
+          engineerEmail: input.status === 'sent_to_engineer' ? input.engineerEmail : undefined,
+          emailSent: input.status === 'sent_to_engineer' ? input.sendEmailToEngineer : undefined,
         });
+
+        // Send email to engineer when request is approved
+        if (input.status === 'approved' && input.sendEmailToEngineer && input.engineerEmail && input.engineerName) {
+          // Update job with engineer details and change status to sent_to_engineer
+          await updateJobStatus(job.id, 'sent_to_engineer', {
+            engineerName: input.engineerName,
+            engineerEmail: input.engineerEmail,
+          });
+          
+          let emailSent = false;
+          try {
+            const { sendJobAssignmentNotification } = await import('./email');
+            await sendJobAssignmentNotification({
+              engineerEmail: input.engineerEmail,
+              engineerName: input.engineerName,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress || 'N/A',
+              scheduledDateTime: job.scheduledDateTime,
+              incidentDetails: job.incidentDetails || 'N/A',
+              jobToken: job.jobToken,
+              baseUrl,
+            });
+            console.log('[Email] Job assignment email sent to:', input.engineerEmail);
+            emailSent = true;
+          } catch (error) {
+            console.error('[Email] Failed to send job assignment email:', error);
+            // Don't fail the approval if email fails
+          }
+          
+          // Add status history for sent_to_engineer
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'sent_to_engineer',
+            engineerName: input.engineerName,
+            engineerEmail: input.engineerEmail,
+            emailSent: emailSent,
+            notes: emailSent ? 'Job assignment email sent to engineer' : 'Job sent to engineer (email failed)',
+          });
+        }
 
         // Send email notification to client for status changes
         if (job.clientEmail && ['en_route', 'on_site', 'completed'].includes(input.status)) {
@@ -720,6 +712,62 @@ export const appRouter = router({
         }
 
         return { success: true };
+      }),
+
+    // Resend engineer assignment email
+    resendEngineerEmail: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const job = await getJobById(input.jobId);
+        if (!job) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Job not found' });
+        }
+
+        if (!job.engineerEmail || !job.engineerName) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'Job does not have engineer assigned' 
+          });
+        }
+
+        const baseUrl = getBaseUrl(ctx.req);
+        let emailSent = false;
+
+        try {
+          const { sendJobAssignmentNotification } = await import('./email');
+          await sendJobAssignmentNotification({
+            engineerEmail: job.engineerEmail,
+            engineerName: job.engineerName,
+            siteName: job.siteName,
+            siteAddress: job.siteAddress || 'N/A',
+            scheduledDateTime: job.scheduledDateTime,
+            incidentDetails: job.incidentDetails || 'N/A',
+            jobToken: job.jobToken,
+            baseUrl,
+          });
+          console.log('[Email] Job assignment email resent to:', job.engineerEmail);
+          emailSent = true;
+        } catch (error) {
+          console.error('[Email] Failed to resend job assignment email:', error);
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Failed to send email' 
+          });
+        }
+
+        // Add status history for resend
+        await addJobStatusHistory({
+          jobId: job.id,
+          status: 'sent_to_engineer',
+          engineerName: job.engineerName,
+          engineerEmail: job.engineerEmail,
+          emailSent: emailSent,
+          notes: 'Job assignment email resent to engineer',
+        });
+
+        return { success: true, emailSent };
       }),
 
     // Add comment (from engineer, client, or admin)
@@ -1008,6 +1056,103 @@ export const appRouter = router({
         const { removeScheduledExport } = await import('./scheduled-exports');
         const success = removeScheduledExport(input.id);
         return { success };
+      }),
+
+    // Upload document to job
+    uploadDocument: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        fileName: z.string(),
+        fileType: z.string(),
+        mimeType: z.string(),
+        fileData: z.string(), // base64 encoded
+        documentType: z.enum(['instruction_guide', 'task_list', 'reference', 'other']).optional(),
+        description: z.string().optional(),
+        uploadedBy: z.string(),
+        uploaderType: z.enum(['admin', 'client', 'system']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+
+        // Upload to S3
+        const { storagePut } = await import('./storage');
+        const fileBuffer = Buffer.from(input.fileData, 'base64');
+        const fileKey = `job-${job.id}/documents/${Date.now()}-${input.fileName}`;
+        
+        const { url } = await storagePut(fileKey, fileBuffer, input.mimeType);
+
+        // Save to database
+        const { createJobDocument } = await import('./job-documents-db');
+        await createJobDocument({
+          jobId: job.id,
+          fileKey,
+          fileUrl: url,
+          fileName: input.fileName,
+          fileType: input.fileType,
+          mimeType: input.mimeType,
+          fileSize: fileBuffer.length,
+          documentType: input.documentType || 'other',
+          description: input.description || null,
+          uploadedBy: input.uploadedBy,
+          uploaderType: input.uploaderType,
+        });
+
+        // Create audit log
+        const { createAuditLog } = await import('./audit-logs-db');
+        await createAuditLog({
+          organizationId: job.organizationId,
+          action: 'document_uploaded',
+          entityType: 'job',
+          entityId: job.id,
+          actorName: input.uploadedBy,
+          actorType: input.uploaderType === 'admin' ? 'admin' : 'client',
+          changes: JSON.stringify({ fileName: input.fileName, documentType: input.documentType }),
+          metadata: JSON.stringify({ fileSize: fileBuffer.length, mimeType: input.mimeType }),
+        });
+
+        return { success: true, url };
+      }),
+
+    // Get documents for a job
+    getDocuments: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const job = await getJobByToken(input.token);
+        if (!job) throw new Error("Job not found");
+
+        const { getJobDocuments } = await import('./job-documents-db');
+        return await getJobDocuments(job.id);
+      }),
+
+    // Delete document
+    deleteDocument: protectedProcedure
+      .input(z.object({ documentId: z.number(), jobId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const { deleteJobDocument } = await import('./job-documents-db');
+        await deleteJobDocument(input.documentId);
+
+        // Create audit log
+        const { createAuditLog } = await import('./audit-logs-db');
+        await createAuditLog({
+          organizationId: ctx.user.organizationId,
+          action: 'document_deleted',
+          entityType: 'job',
+          entityId: input.jobId,
+          actorName: ctx.user.name,
+          actorType: 'admin',
+          actorId: ctx.user.id,
+        });
+
+        return { success: true };
+      }),
+
+    // Get audit logs for a job
+    getAuditLogs: protectedProcedure
+      .input(z.object({ jobId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const { getJobAuditLogs } = await import('./audit-logs-db');
+        return await getJobAuditLogs(input.jobId, ctx.user.organizationId);
       }),
   }),
 

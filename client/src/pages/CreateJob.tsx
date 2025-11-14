@@ -12,6 +12,7 @@ import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
+import { estimateTimezoneFromLongitude, getTimezoneAbbreviation, getTimezoneOffset, formatInUTC, convertLocalTimeToUTC, getUTCPreviewText } from "@/lib/timezone";
 
 export default function CreateJob() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -29,6 +30,8 @@ export default function CreateJob() {
   const [projectValid, setProjectValid] = useState<boolean | null>(null);
   const [siteSelectionMode, setSiteSelectionMode] = useState<'existing' | 'new' | null>(null);
   const [selectedProjectSite, setSelectedProjectSite] = useState<any | null>(null);
+  const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>("");
   
   // Fetch project sites after verification
   const { data: projectSites } = trpc.projects.getSites.useQuery(
@@ -125,7 +128,7 @@ export default function CreateJob() {
       incidentNumber: formData.get("incidentNumber") as string || undefined,
       projectName: formData.get("projectName") as string || undefined,
       downTime: formData.get("downTime") === "on",
-      scheduledDateTime: scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined,
+      scheduledDateTime: scheduledDateTimeStr && detectedTimezone ? convertLocalTimeToUTC(scheduledDateTimeStr, detectedTimezone) : (scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined),
       hoursRequired: formData.get("hoursRequired") as string || undefined,
       toolsRequired: formData.get("toolsRequired") as string || undefined,
       deviceDetails: formData.get("deviceDetails") as string || undefined,
@@ -140,6 +143,7 @@ export default function CreateJob() {
       engineerName: formData.get("engineerName") as string || undefined,
       engineerEmail: (formData.get("engineerEmail") as string)?.trim() || undefined,
       sendEmailToEngineer: formData.get("sendEmailToEngineer") === "on",
+      timezone: siteCoordinates?.lng ? estimateTimezoneFromLongitude(siteCoordinates.lng) : undefined, // Determine timezone from site location
     });
   };
 
@@ -158,8 +162,12 @@ export default function CreateJob() {
 
   const handleSelectAddress = (suggestion: any) => {
     setSelectedAddress(suggestion.displayName);
-    setSiteCoordinates({ lat: suggestion.latitude, lng: suggestion.longitude });
+    const coords = { lat: suggestion.latitude, lng: suggestion.longitude };
+    setSiteCoordinates(coords);
     setAddressSuggestions([]);
+    // Detect and set timezone
+    const tz = estimateTimezoneFromLongitude(coords.lng);
+    setDetectedTimezone(tz);
     toast.success("Address selected and coordinates captured!");
   };
 
@@ -381,10 +389,16 @@ export default function CreateJob() {
                                   setSelectedProjectSite(site);
                                   // Auto-populate address fields
                                   setSelectedAddress(site.siteAddress || '');
-                                  setSiteCoordinates({
+                                  const coords = {
                                     lat: site.latitude || '',
                                     lng: site.longitude || ''
-                                  });
+                                  };
+                                  setSiteCoordinates(coords);
+                                  // Detect and set timezone
+                                  if (coords.lng) {
+                                    const tz = estimateTimezoneFromLongitude(coords.lng);
+                                    setDetectedTimezone(tz);
+                                  }
                                 }
                               }}
                             >
@@ -579,9 +593,25 @@ export default function CreateJob() {
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="scheduledDateTime">Scheduled Date & Time</Label>
-                    <Input id="scheduledDateTime" name="scheduledDateTime" type="datetime-local" />
+                    {detectedTimezone && (
+                      <p className="text-sm text-muted-foreground">
+                        Enter time in <span className="font-medium">{getTimezoneAbbreviation(detectedTimezone)}</span> {getTimezoneOffset(detectedTimezone)}
+                      </p>
+                    )}
+                    <Input 
+                      id="scheduledDateTime" 
+                      name="scheduledDateTime" 
+                      type="datetime-local"
+                      value={scheduledDateTime}
+                      onChange={(e) => setScheduledDateTime(e.target.value)}
+                    />
+                    {scheduledDateTime && detectedTimezone && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        UTC equivalent: {getUTCPreviewText(scheduledDateTime, detectedTimezone)}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2 pt-8">
                     <Checkbox id="downTime" name="downTime" defaultChecked={duplicateJob?.downTime || false} />

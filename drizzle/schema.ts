@@ -177,6 +177,9 @@ export const jobs = mysqlTable("jobs", {
   engineerEmail: varchar("engineerEmail", { length: 320 }),
   engineerPhone: varchar("engineerPhone", { length: 50 }),
   
+  // Timezone - IANA timezone identifier (e.g., 'America/New_York', 'Asia/Dubai')
+  timezone: varchar("timezone", { length: 100 }),
+  
   // Timestamps
   acceptedAt: timestamp("acceptedAt"),
   enRouteAt: timestamp("enRouteAt"),
