@@ -7,8 +7,13 @@ import ProjectRequestForm from "./ProjectRequestForm";
 
 export default function ProjectRequest() {
   // Extract projectId from URL
-  const [, params] = useRoute("/project-request/:projectId");
-  const projectId = params?.projectId || null;
+  const [, params] = useRoute<{ projectId: string }>("/project-request/:projectId");
+  
+  if (!params || !params.projectId) {
+    return <div className="min-h-screen flex items-center justify-center">Invalid project link</div>;
+  }
+  
+  const projectId = params.projectId;
 
   // Load project details
   const { data: project, isLoading, error } = trpc.projects.getByProjectIdPublic.useQuery(

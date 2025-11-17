@@ -49,7 +49,7 @@ export function estimateTimezoneFromLongitude(lng: string | number): string {
   const offsetHours = Math.round(longitude / 15);
   
   // Map common offsets to IANA timezones
-  const timezoneMap: Record<number, string> = {
+  const timezoneMap: Record<string, string> = {
     '-12': 'Pacific/Wake',
     '-11': 'Pacific/Midway',
     '-10': 'Pacific/Honolulu',

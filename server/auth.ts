@@ -99,13 +99,10 @@ export async function authenticateUser(email: string, password: string): Promise
 }
 
 /**
- * Create a new user (overloaded for backward compatibility)
+ * Create a new user
  */
 export async function createUser(
-  emailOrData: string | { email: string; passwordHash: string; name: string; role: 'super_admin' | 'admin'; organizationId: number },
-  password?: string,
-  name?: string,
-  role?: 'super_admin' | 'admin'
+  data: { email: string; passwordHash: string; name: string; role: 'super_admin' | 'admin'; organizationId: number; isPrimaryAdmin?: boolean }
 ): Promise<User | null> {
   const db = await getDb();
   if (!db) {
@@ -114,29 +111,15 @@ export async function createUser(
   }
 
   try {
-    let userData;
-    
-    if (typeof emailOrData === 'object') {
-      // New signature: createUser({ email, passwordHash, name, role, organizationId })
-      userData = {
-        email: emailOrData.email,
-        passwordHash: emailOrData.passwordHash,
-        name: emailOrData.name,
-        role: emailOrData.role,
-        organizationId: emailOrData.organizationId,
-        isActive: true,
-      };
-    } else {
-      // Old signature: createUser(email, password, name, role)
-      const passwordHash = await hashPassword(password!);
-      userData = {
-        email: emailOrData,
-        passwordHash,
-        name: name!,
-        role: role || 'admin',
-        isActive: true,
-      };
-    }
+    const userData = {
+      email: data.email,
+      passwordHash: data.passwordHash,
+      name: data.name,
+      role: data.role,
+      organizationId: data.organizationId,
+      isPrimaryAdmin: data.isPrimaryAdmin || false,
+      isActive: true,
+    };
 
     const result = await db.insert(users).values(userData);
 
@@ -242,11 +225,29 @@ export async function initializeSuperAdmin(): Promise<void> {
     const existingUsers = await db.select().from(users).limit(1);
     
     if (existingUsers.length === 0) {
+      // Create system organization for super admin
+      const { createOrganization } = await import('./organizations-db');
+      const systemOrg = await createOrganization({
+        name: 'System Administration',
+      });
+      
+      if (!systemOrg) {
+        throw new Error('Failed to create system organization');
+      }
+      
       // Create default super admin
       const defaultEmail = ENV.superAdminEmail || 'admin@transputec.com';
       const defaultPassword = ENV.superAdminPassword || 'Admin@123';
+      const passwordHash = await hashPassword(defaultPassword);
       
-      await createUser(defaultEmail, defaultPassword, 'Super Admin', 'super_admin');
+      await createUser({
+        email: defaultEmail,
+        passwordHash,
+        name: 'Super Admin',
+        role: 'super_admin',
+        organizationId: systemOrg.id,
+        isPrimaryAdmin: true,
+      });
       
       console.log('[Auth] Super admin created:', defaultEmail);
       console.log('[Auth] IMPORTANT: Change the default password immediately!');

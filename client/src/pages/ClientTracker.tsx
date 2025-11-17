@@ -16,8 +16,13 @@ import "../print.css";
 
 
 export default function ClientTracker() {
-  const [match, params] = useRoute("/track/:token");
-  const token = params?.token || "";
+  const [match, params] = useRoute<{ token: string }>("/track/:token");
+  
+  if (!params || !params.token) {
+    return <div className="min-h-screen flex items-center justify-center">Invalid tracking link</div>;
+  }
+  
+  const token = params.token;
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
@@ -291,7 +296,7 @@ export default function ClientTracker() {
                   {job.scheduledDateTime && (
                     <div>
                       <div className="text-sm font-medium text-gray-500 mb-1">Scheduled Date & Time</div>
-                      <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
+                      <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone ?? undefined} showIcon={false} />
                     </div>
                   )}
                 </div>
@@ -360,25 +365,9 @@ export default function ClientTracker() {
                           <div className="flex-1 pb-4">
                             <div className="font-semibold text-foreground">{historyStatusInfo.label}</div>
                             <div className="text-sm">
-                              <CompactDualTime date={history.timestamp} timezone={job.timezone} />
+                              <CompactDualTime date={history.timestamp} timezone={job.timezone ?? undefined} />
                             </div>
-                            {history.engineerName && (
-                              <div className="text-sm text-foreground mt-1">
-                                <span className="font-medium">Engineer:</span> {history.engineerName}
-                                {history.engineerEmail && (
-                                  <span className="text-muted-foreground"> ({history.engineerEmail})</span>
-                                )}
-                                {history.emailSent !== undefined && (
-                                  <span className="ml-2">
-                                    {history.emailSent ? (
-                                      <span className="text-green-600">✓ Email sent</span>
-                                    ) : (
-                                      <span className="text-orange-600">⚠ Email failed</span>
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            )}
+
                             {history.notes && (
                               <div className="text-sm text-foreground mt-1">{history.notes}</div>
                             )}
@@ -407,7 +396,7 @@ export default function ClientTracker() {
                   <div className="text-lg font-semibold text-foreground">{job.engineerName}</div>
                   {job.acceptedAt && (
                     <div className="text-sm text-muted-foreground mt-1">
-                      Accepted {formatDateTime(job.acceptedAt)}
+                      Accepted <CompactDualTime date={job.acceptedAt} timezone={job.timezone ?? undefined} />
                     </div>
                   )}
                 </CardContent>
@@ -487,30 +476,30 @@ export default function ClientTracker() {
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <div className="font-medium text-gray-500">Submitted</div>
-                  <CompactDualTime date={job.createdAt} timezone={job.timezone} />
+                  <CompactDualTime date={job.createdAt} timezone={job.timezone ?? undefined} />
                 </div>
                 {job.acceptedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Accepted</div>
-                    <CompactDualTime date={job.acceptedAt} timezone={job.timezone} />
+                    <CompactDualTime date={job.acceptedAt} timezone={job.timezone ?? undefined} />
                   </div>
                 )}
                 {job.enRouteAt && (
                   <div>
                     <div className="font-medium text-gray-500">En Route</div>
-                    <CompactDualTime date={job.enRouteAt} timezone={job.timezone} />
+                    <CompactDualTime date={job.enRouteAt} timezone={job.timezone ?? undefined} />
                   </div>
                 )}
                 {job.arrivedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Arrived On Site</div>
-                    <CompactDualTime date={job.arrivedAt} timezone={job.timezone} />
+                    <CompactDualTime date={job.arrivedAt} timezone={job.timezone ?? undefined} />
                   </div>
                 )}
                 {job.completedAt && (
                   <div>
                     <div className="font-medium text-gray-500">Completed</div>
-                    <CompactDualTime date={job.completedAt} timezone={job.timezone} />
+                    <CompactDualTime date={job.completedAt} timezone={job.timezone ?? undefined} />
                   </div>
                 )}
               </CardContent>

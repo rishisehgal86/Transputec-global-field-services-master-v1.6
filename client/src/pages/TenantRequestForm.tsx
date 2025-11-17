@@ -8,7 +8,7 @@ import RequestService from "./RequestService";
  * Extracts organization slug from URL and passes organizationId to RequestService
  */
 export default function TenantRequestForm() {
-  const params = useParams();
+  const params = useParams<{ orgSlug: string }>();
   const orgSlug = params.orgSlug;
   
   // Fetch organization by slug to get organizationId

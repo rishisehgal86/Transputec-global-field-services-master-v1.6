@@ -14,8 +14,13 @@ import { SiteVisitReportForm, type SiteVisitReportData } from "@/components/Site
 import { JobComments } from "@/components/JobComments";
 
 export default function EngineerView() {
-  const [match, params] = useRoute("/engineer/:token");
-  const token = params?.token || "";
+  const [match, params] = useRoute<{ token: string }>("/engineer/:token");
+  
+  if (!params || !params.token) {
+    return <div className="min-h-screen flex items-center justify-center">Invalid engineer link</div>;
+  }
+  
+  const token = params.token;
   const [engineerName, setEngineerName] = useState("");
   const [engineerEmail, setEngineerEmail] = useState("");
   const [engineerPhone, setEngineerPhone] = useState("");
@@ -392,7 +397,7 @@ export default function EngineerView() {
               {/* Last Location Update */}
               {latestLocation && (
                 <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-                  Last location update: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone} />
+                  Last location update: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone ?? undefined} />
                 </div>
               )}
             </CardContent>
@@ -503,7 +508,7 @@ export default function EngineerView() {
                 {job.scheduledDateTime && (
                   <div>
                     <p className="text-muted-foreground">Scheduled Date & Time</p>
-                    <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
+                    <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone ?? undefined} showIcon={false} />
                   </div>
                 )}
                 {job.hoursRequired && (

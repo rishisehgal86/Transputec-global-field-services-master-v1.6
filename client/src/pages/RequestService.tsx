@@ -496,8 +496,8 @@ export default function RequestService({ projectId, project, organizationId }: {
                           setSelectedSiteId(siteId);
                           setSelectedAddress(site.siteAddress);
                           setSiteCoordinates({
-                            lat: site.latitude,
-                            lng: site.longitude,
+                            lat: site.latitude ?? '',
+                            lng: site.longitude ?? '',
                           });
                         }
                       }}

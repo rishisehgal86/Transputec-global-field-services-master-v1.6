@@ -125,19 +125,21 @@ export const appRouter = router({
         });
         
         // Send welcome email (don't block on failure)
-        try {
-          const { sendWelcomeEmail } = await import('./auth-emails');
-          const baseUrl = getBaseUrl(ctx.req);
-          await sendWelcomeEmail({
-            email: user.email,
-            name: user.name,
-            organizationName: organization.name,
-            baseUrl,
-          });
-          console.log(`[Auth] Welcome email sent to: ${user.email}`);
-        } catch (error) {
-          console.error('[Auth] Failed to send welcome email:', error);
-          // Continue despite email failure
+        if (user) {
+          try {
+            const { sendWelcomeEmail } = await import('./auth-emails');
+            const baseUrl = getBaseUrl(ctx.req);
+            await sendWelcomeEmail({
+              email: user.email,
+              name: user.name,
+              organizationName: organization.name,
+              baseUrl,
+            });
+            console.log(`[Auth] Welcome email sent to: ${user.email}`);
+          } catch (error) {
+            console.error('[Auth] Failed to send welcome email:', error);
+            // Continue despite email failure
+          }
         }
         
         return {
@@ -1780,7 +1782,7 @@ export const appRouter = router({
         if (!ctx.user) throw new Error("Unauthorized");
         
         const sites = await getProjectSites(input.projectId);
-        const uniqueProjectIds = [...new Set(sites.map(s => s.projectId))];
+        const uniqueProjectIds = Array.from(new Set(sites.map(s => s.projectId)));
         
         return {
           requestedProjectId: input.projectId,

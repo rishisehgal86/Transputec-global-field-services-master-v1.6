@@ -57,6 +57,7 @@ export function SiteLocationMap({
         // Initialize map
         // Use zoom 15 if we have real coordinates, zoom 12 for default location
         const hasRealCoordinates = initialLat !== null && initialLat !== undefined;
+        if (!mapRef.current) return;
         const map = L.map(mapRef.current).setView([currentLat, currentLng], hasRealCoordinates ? 15 : 12);
         mapInstanceRef.current = map;
 

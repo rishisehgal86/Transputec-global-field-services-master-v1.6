@@ -23,8 +23,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 export default function JobDetail() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [match, params] = useRoute("/admin/job/:id");
-  const jobId = params?.id ? parseInt(params.id) : 0;
+  const [match, params] = useRoute<{ id: string }>("/admin/job/:id");
+  
+  if (!params || !params.id) {
+    return <div className="min-h-screen flex items-center justify-center">Invalid job ID</div>;
+  }
+  
+  const jobId = parseInt(params.id);
   const [eta, setEta] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
@@ -285,7 +290,7 @@ export default function JobDetail() {
                   Accuracy: ±{latestLocation.accuracy ? `${Math.round(parseFloat(latestLocation.accuracy))}m` : "N/A"}
                 </p>
                 <p>
-                  Last Updated: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone} />
+                  Last Updated: <InlineDualTime date={latestLocation.timestamp} timezone={job.timezone ?? undefined} />
                 </p>
               </div>
             </CardContent>
@@ -564,7 +569,7 @@ export default function JobDetail() {
                     {job.scheduledDateTime && (
                       <div>
                         <p className="text-muted-foreground">Scheduled Date & Time</p>
-                        <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone} showIcon={false} />
+                        <DualTimeDisplay date={job.scheduledDateTime} timezone={job.timezone ?? undefined} showIcon={false} />
                       </div>
                     )}
                     <div>
@@ -708,25 +713,9 @@ export default function JobDetail() {
                           {history.status.replace(/_/g, ' ')}
                         </div>
                         <div className="text-xs">
-                          <CompactDualTime date={history.timestamp} timezone={job.timezone} />
+                          <CompactDualTime date={history.timestamp} timezone={job.timezone ?? undefined} />
                         </div>
-                        {history.engineerName && (
-                          <div className="text-sm text-foreground mt-1">
-                            <span className="font-medium">Engineer:</span> {history.engineerName}
-                            {history.engineerEmail && (
-                              <span className="text-muted-foreground"> ({history.engineerEmail})</span>
-                            )}
-                            {history.emailSent !== undefined && (
-                              <span className="ml-2">
-                                {history.emailSent ? (
-                                  <span className="text-green-600">✓ Email sent</span>
-                                ) : (
-                                  <span className="text-orange-600">⚠ Email failed</span>
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        )}
+
                         {history.notes && (
                           <div className="text-sm text-muted-foreground mt-1">{history.notes}</div>
                         )}
@@ -736,7 +725,7 @@ export default function JobDetail() {
                 ) : (
                   <div>
                     <p className="text-muted-foreground">Created</p>
-                    <CompactDualTime date={job.createdAt} timezone={job.timezone} />
+                    <CompactDualTime date={job.createdAt} timezone={job.timezone ?? undefined} />
                   </div>
                 )}
               </CardContent>

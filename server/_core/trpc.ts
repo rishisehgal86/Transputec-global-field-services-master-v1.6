@@ -1,10 +1,10 @@
 import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
 import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
+import SuperJSON from "superjson";
 import type { TrpcContext } from "./context";
 
 const t = initTRPC.context<TrpcContext>().create({
-  transformer: superjson,
+  transformer: SuperJSON,
 });
 
 export const router = t.router;
@@ -18,10 +18,11 @@ const requireUser = t.middleware(async opts => {
   }
 
   // Update organization's lastUsedAt timestamp in background
-  if (ctx.user.organizationId) {
+  if (ctx.user?.organizationId) {
     // Fire and forget - don't await to avoid slowing down requests
+    const orgId = ctx.user.organizationId;
     import('../organizations-db').then(({ updateOrganizationLastUsed }) => {
-      updateOrganizationLastUsed(ctx.user.organizationId).catch(err => {
+      updateOrganizationLastUsed(orgId).catch(err => {
         console.error('[Middleware] Failed to update organization lastUsedAt:', err);
       });
     }).catch(() => {});

@@ -17,9 +17,6 @@ export default function ForgotPassword() {
   const forgotPasswordMutation = trpc.auth.forgotPassword.useMutation({
     onSuccess: (data) => {
       setSuccess(true);
-      if (data.resetToken) {
-        setResetToken(data.resetToken);
-      }
     },
     onError: (err) => {
       setError(err.message || "Failed to send reset email");

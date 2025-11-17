@@ -117,7 +117,11 @@ export default function AddressSelectionDialog({
                         ? "border-primary bg-primary/10"
                         : "hover:bg-accent"
                     }`}
-                    onClick={() => setSelectedAddress(suggestion)}
+                    onClick={() => setSelectedAddress({
+                      latitude: suggestion.latitude || '',
+                      longitude: suggestion.longitude || '',
+                      displayName: suggestion.displayName || ''
+                    })}
                   >
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />

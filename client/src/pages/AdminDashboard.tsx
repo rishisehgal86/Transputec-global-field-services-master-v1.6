@@ -302,7 +302,7 @@ export default function AdminDashboard() {
                           {job.scheduledDateTime && (
                             <div className="flex items-start gap-2">
                               <strong>Scheduled:</strong>
-                              <CompactDualTime date={job.scheduledDateTime} timezone={job.timezone} />
+                              <CompactDualTime date={job.scheduledDateTime} timezone={job.timezone ?? undefined} />
                             </div>
                           )}
                         </div>
@@ -342,13 +342,13 @@ export default function AdminDashboard() {
                     {job.acceptedAt && (
                       <div>
                         <p className="text-muted-foreground">Accepted At</p>
-                        <CompactDualTime date={job.acceptedAt} timezone={job.timezone} />
+                        <CompactDualTime date={job.acceptedAt} timezone={job.timezone ?? undefined} />
                       </div>
                     )}
                     {job.completedAt && (
                       <div>
                         <p className="text-muted-foreground">Completed At</p>
-                        <CompactDualTime date={job.completedAt} timezone={job.timezone} />
+                        <CompactDualTime date={job.completedAt} timezone={job.timezone ?? undefined} />
                       </div>
                     )}
                   </div>
