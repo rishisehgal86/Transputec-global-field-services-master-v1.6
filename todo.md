@@ -1561,3 +1561,10 @@ ns
 - [x] Fix missing jobs.getJobByToken procedure in router (changed to jobs.getByToken)
 - [x] Verify media upload works without errors
 
+
+
+## Change Page Title
+- [ ] Update VITE_APP_TITLE environment variable to "FieldPulse Go"
+- [ ] Update HTML title tag in index.html
+- [ ] Verify title appears correctly in browser tab
+
