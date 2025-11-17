@@ -994,3 +994,349 @@ ns
 - [ ] Verify jobs created through tenant URL are assigned to correct organization
 - [ ] Verify jobs are filtered by organizationId in admin dashboard
 
+
+
+## Multi-Tenant Job Creation Testing (Nov 14, 2025)
+- [x] Create test job for Test Company 2 (organizationId: 120003)
+- [x] Create test job for Test Organization (organizationId: 120002)
+- [x] Verify jobs in database have correct organizationId - CONFIRMED
+- [x] Implement organizationId filtering in jobs.list query - ALREADY IMPLEMENTED
+- [x] Test admin dashboard shows only jobs for logged-in tenant - WORKING!
+- [x] Verify cross-tenant isolation (Tenant A cannot see Tenant B's jobs) - CONFIRMED!
+
+**Test Results:**
+- Test Company 2 admin dashboard shows ONLY "Test Site A" (org 120003)
+- "Test Site B" (org 120002) correctly hidden from Test Company 2
+- Multi-tenant data isolation working perfectly ✅
+
+
+
+## Production Email Service Integration (Nov 14, 2025)
+- [x] Found existing Gmail SMTP configuration in server/email.ts
+- [x] Update auth-emails.ts to use sendEmail function via Gmail SMTP
+- [x] Integrated nodemailer with Gmail App Password (admin@field-pulse.io)
+- [ ] Test welcome email delivery to real email address (ysthhzzmssfesqmnrv@nespf.com)
+- [ ] Test password reset email delivery
+- [ ] Verify email HTML rendering in email clients
+
+
+
+## Login Page Navigation Improvements (Nov 14, 2025)
+- [x] Add "Sign up" link to login page for new users
+- [x] Add "Forgot password?" link to login page
+- [x] Ensure links are prominently displayed and easy to find
+- [ ] Test navigation flow between login, signup, and forgot password pages
+
+
+
+## Automatic Login After Signup (Nov 14, 2025)
+- [x] Update signup backend to create session cookie after account creation
+- [x] Update signup frontend to redirect to /admin instead of /login (window.location.replace)
+- [ ] Test automatic login flow after signup
+- [ ] Verify session is properly created and user is authenticated
+
+
+
+## Logout Security Fix (Nov 14, 2025)
+- [x] Fix logout button to call logout mutation (was only redirecting without clearing session)
+- [x] Logout mutation properly clears session cookie with clearCookie
+- [x] Admin dashboard already redirects to login when not authenticated
+- [ ] Test that accessing /admin after logout requires re-authentication
+- [x] Protected routes check authentication status via useAuth hook
+
+
+
+## Rollback Auto-Login Feature (Nov 14, 2025)
+- [x] Remove session creation from signup backend
+- [x] Update success message to indicate user needs to log in
+- [x] Change signup frontend to redirect to /login instead of /admin
+- [ ] Test signup flow redirects to login page
+
+
+
+## Admin Header Redesign (Nov 15, 2025)
+- [x] Change "Job Creation Form" to "Public Job Creation Form"
+- [x] Make Public Job Creation Form a clickable button link
+- [x] Add separate quick copy button beside the form link (copy icon)
+- [x] Improve header layout and visual hierarchy (two-row design)
+- [x] Better spacing and grouping of action buttons (primary/secondary groups)
+- [x] Organization badge styled with orange theme
+- [x] Buttons properly sized and grouped with visual separators
+
+
+
+## Header Button Reordering (Nov 15, 2025)
+- [x] Move Projects button to primary actions group (after Public Job Creation Form)
+- [x] Rename "Projects" to "Manage Projects"
+- [x] Update button grouping and separators
+
+
+
+## Multi-Tenant Project Isolation (Nov 15, 2025)
+- [x] Add organizationId column to projects table (already exists)
+- [x] Add organizationId column to project_sites table (via projectId FK)
+- [x] Update database schema with foreign key constraints (already exists)
+- [x] Push database migration for organizationId fields (already done)
+- [x] Update projects.list query to filter by organizationId (already implemented)
+- [x] Update projects.create to include organizationId from user context (already implemented)
+- [x] Add organizationId verification to projects.getByProjectId
+- [x] Add organizationId verification to projects.update
+- [x] Add organizationId verification to projects.toggleStatus
+- [x] Add organizationId verification to projects.delete
+- [ ] Update project_sites queries to filter by organizationId
+- [ ] Update job creation to only show projects from user's organization
+
+
+
+## Projects Page UI Redesign (Nov 15, 2025)
+- [x] Keep "What Are Projects?" summary permanently visible
+- [x] Create info dialog with detailed use cases and examples
+- [x] Add info button to trigger detailed help dialog
+- [x] Ensure dialog is accessible and responsive
+
+
+
+## Projects Page Dialog Overflow Fix (Nov 15, 2025)
+- [x] Fix text overflow outside dialog boundaries
+- [x] Ensure dialog content is properly contained and scrollable
+
+
+
+## Project Sites Multi-Tenant Security (Nov 15, 2025) - CRITICAL
+- [x] Add organizationId verification to getSites query
+- [x] Add organizationId verification to uploadSites mutation
+- [x] Add organizationId verification to addSite mutation
+- [x] Add organizationId verification to deleteSite mutation
+- [x] Add organizationId verification to updateSite mutation
+- [x] Add organizationId verification to updateSiteLocation mutation
+
+
+
+## Public Job Creation Security Fix (Nov 15, 2025) - CRITICAL
+- [x] Fix verifyPublic endpoint - currently accepts projects from any tenant
+- [x] Determine correct behavior: admin form should only accept projects from user's organization
+- [x] Update admin job creation (CreateJob) to use protected verify endpoint instead of verifyPublic
+
+
+
+## Public Request Form Security Fix (Nov 15, 2025) - CRITICAL
+- [x] Update verifyPublic endpoint to accept organizationId parameter
+- [x] Verify project belongs to organization specified in URL slug
+- [x] Update RequestService to pass organizationId to verifyPublic
+- [x] Add better error message when project not found in organization
+
+
+
+## Admin Request Form Verification Issue (Nov 15, 2025) - CRITICAL
+- [x] Debug why admin form is not verifying projects from correct tenant
+- [x] Fixed: verify endpoint was defined as .query() but frontend used .useMutation()
+- [x] Changed verify endpoint to .mutation() to match frontend usage
+
+
+
+## Add Site Error Fix (Nov 15, 2025)
+- [x] Fix "desc is not defined" error when adding site to project
+- [x] Found: desc() used in project-sites-db.ts line 72 but not imported
+- [x] Added desc to imports from drizzle-orm
+
+
+
+## Project Request Link Fix (Nov 15, 2025)
+- [x] Fix project-specific request link generating wrong URL
+- [x] Changed from /request/:projectId to /project-request/:projectId
+- [x] Updated all 4 occurrences in Projects.tsx (copyProjectLink, dialog example, display, open button)
+
+
+
+## ProjectRequest URL Parameter Fix (Nov 15, 2025)
+- [x] Fix "No project ID specified in the URL" error
+- [x] Fixed ProjectRequest useRoute pattern from /request/:projectId to /project-request/:projectId
+- [x] Created getByProjectIdPublic public query for loading project without auth
+- [x] Simplified ProjectRequest to load project directly instead of separate verification
+
+
+
+## Project Request Form Site Filtering (Nov 15, 2025)
+- [x] Revert RequestService.tsx changes (reverted to working version)
+- [x] Create new simple ProjectRequestForm component
+- [x] Show only sites from the specific project
+- [x] Allow adding new sites to the project
+- [x] Update ProjectRequest.tsx to use new form
+
+
+
+## Project Sites Not Loading (Nov 15, 2025)
+- [x] Debug why getSites query returns 0 sites in ProjectRequestForm
+- [x] Found: getSites is protectedProcedure but form is public (no auth)
+- [x] Created getSitesPublic public endpoint for unauthenticated access
+- [x] Updated ProjectRequestForm to use getSitesPublic
+
+
+
+## Project Sites Not Loading Despite Existing (Nov 15, 2025)
+- [ ] Query database to check if sites exist for TRANSTEST project
+- [ ] Check getProjectSites function to see how it queries sites
+- [ ] Verify projectId matching between project and project_sites tables
+- [ ] Fix the query or data issue
+
+
+
+
+## Project Sites Loading Fix (Nov 15, 2025) - RESOLVED
+- [x] Fixed frontend calling wrong endpoint path (projectSites.getSitesPublic → projects.getSitesPublic)
+- [x] Updated database sites to set isActive = true
+- [x] Sites now loading correctly showing 2 sites available in project request form
+
+
+## Form Consistency Fix (Nov 15, 2025)
+- [x] Remove Priority Level field from ProjectRequestForm (clients shouldn't set priority)
+- [x] Verify form submission works without priority field
+- [x] Ensure consistency between tenant and project request forms
+
+## Fix createPublic Endpoint Error (Nov 15, 2025)
+- [ ] Identify correct tRPC endpoint for public job creation
+- [ ] Update ProjectRequestForm to use correct endpoint
+- [ ] Test form submission end-to-end
+
+## Fix Field Validation Errors in Project Request Form (Nov 15, 2025)
+- [ ] Analyze jobs.createRequest endpoint schema
+- [ ] Fix field mapping (siteLatitude, siteLongitude, siteContactName, siteContactNumber, incidentDetails, scheduledDateTime)
+- [ ] Ensure data types match (strings, dates)
+- [ ] Test form submission
+
+## Add UTC Timezone Display to Project Request Form (Nov 15, 2025)
+- [x] Import DualTimeDisplay component
+- [x] Add UTC preview below scheduled date/time field
+- [ ] Test timezone conversion display
+
+## Debug DualTimeDisplay Not Showing (Nov 15, 2025)
+- [ ] Check if DualTimeDisplay component exists
+- [ ] Verify scheduledDateTime and detectedTimezone states
+- [ ] Fix rendering issue
+
+## Implement Site-Based Timezone Detection in Project Form (Nov 15, 2025)
+- [x] Check timezone detection logic in TenantRequestForm and CreateJob
+- [x] Add timezone detection from selected site coordinates
+- [ ] Add geocoding for new site addresses to get coordinates and timezone
+- [x] Update DualTimeDisplay to use site timezone instead of user timezone
+
+## Fix Time Conversion to Use Site Local Time (Nov 15, 2025)
+- [x] Check convertLocalTimeToUTC usage in CreateJob
+- [x] Import convertLocalTimeToUTC function
+- [x] Update form submission to convert site local time to UTC
+- [ ] Test with different site timezones
+
+## Debug Timezone Conversion Not Working (Nov 15, 2025)
+- [x] Check convertLocalTimeToUTC function implementation
+- [ ] Verify timezone is being passed correctly
+- [ ] Test actual conversion with site data
+- [x] Fix conversion logic
+
+## Fix Datetime Input to Use Site Timezone (Nov 15, 2025)
+- [x] Research datetime-local timezone handling
+- [x] Implement offset adjustment so user input is interpreted as site local time
+- [ ] Test with NY site from different browser timezones
+- [ ] Verify 09:00 input = 09:00 site time, not browser time
+
+## Fix Site Import Duplicate Detection (Nov 15, 2025)
+- [x] Find site import logic and duplicate detection - Sites ARE in DB but not showing in UI
+- [ ] Fix duplicate check to scope by projectId only
+- [ ] Allow same sites to exist in different projects
+- [ ] Test importing sites from Project 1 into Project 3
+
+## Fix Sites Not Displaying in UI (Nov 15, 2025)
+- [ ] Investigate getSites endpoint for TRANSTEST5
+- [ ] Check why 7 sites in DB don't show in UI
+- [ ] Fix display bug
+- [ ] Verify sites load correctly
+
+## Fix Frontend Site Deduplication Bug (Nov 15, 2025)
+- [ ] Find deduplication logic in Projects page
+- [ ] Fix to scope deduplication by projectId only
+- [ ] Test sites display in all projects
+- [ ] Verify uploaded sites now show correctly
+
+
+
+## Bug Fix - Site Upload ProjectId Issue
+- [x] Fix React closure bug where all upload buttons used first project's ID
+- [x] Add useRef to track current projectId in ProjectSites component
+- [x] Add useEffect to update ref when projectId changes
+- [x] Make file input IDs unique per project
+- [x] Verify uploads now go to correct project
+
+
+
+## UI Polish - Site Upload Messages
+- [x] Fix success message showing "0 sites" when sites are actually imported
+- [x] Remove "Project ID length" debug info from confirmation dialog
+
+
+
+## Geo-location Management Improvements
+- [x] Show clear visual indicator for sites missing geo-coordinates
+- [x] Add backend endpoint for geocoding individual site
+- [x] Add "Geocode" button for individual sites missing coordinates
+- [x] Auto-geocode when site address is edited
+
+
+
+## Address Selection Dialog for Failed Geocoding
+- [x] Add backend endpoint for address search suggestions
+- [x] Create address selection dialog component
+- [x] Show dialog when manual geocode button fails
+- [x] Show dialog when auto-geocode on edit fails
+- [x] Allow user to search and select correct address
+- [x] Update site with selected coordinates
+
+
+
+## UI Polish - Geocode Button Icon
+- [x] Change geocode button icon to be distinct from map button
+
+
+
+## Improve Geocoding Search Coverage
+- [x] Increase search result limit from 5 to 15
+- [x] Add Google Places API key environment variable
+- [x] Create Google Places geocoding functions with OSM fallback
+- [x] Verify public service request form uses new geocoding
+- [x] Verify admin job creation form uses new geocoding
+- [x] Document API key setup in GOOGLE_PLACES_SETUP.md
+
+
+
+## User Management Access Control Fix
+- [x] Fix user list endpoint to filter by organization for tenant admins
+- [x] Create separate tenant management page for super admin
+- [x] Add tenant management navigation (super admin only)
+- [ ] Test access control for tenant admin and super admin
+
+
+
+## User Creation Fixes
+- [x] Fix user creation to assign to admin's organization (not create new org)
+- [x] Send email notification with credentials when user is created
+- [ ] Test user creation from tenant admin account
+
+
+
+## Tenant Management Page Fix
+- [x] Verify organizations exist in database (13 organizations found)
+- [x] Check organizations.list endpoint returns data
+- [x] Fix query or permissions issue preventing display (added missing endpoints)
+
+
+
+## Tenant Management Page Improvements
+- [x] Add "Last Used" date/time column showing when organization was last active
+- [x] Fix edit button 404 error (removed edit button)
+
+
+
+## Tenant Management Enhancements
+- [x] Add lastUsedAt column to organizations schema
+- [x] Run database migration to add lastUsedAt column
+- [x] Add primary admin email column to tenant management table
+- [x] Update organizations.list endpoint to include admin email
+

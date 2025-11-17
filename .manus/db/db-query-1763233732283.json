@@ -1,0 +1,70 @@
+{
+  "query": "SELECT projectId, siteName, isActive FROM project_sites WHERE siteName IN ('buckingham pa;ace', 'transputec', 'RISHI HOUSE', 'burj', 'ranjeev') ORDER BY projectId, siteName;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT projectId, siteName, isActive FROM project_sites WHERE siteName IN ('buckingham pa;ace', 'transputec', 'RISHI HOUSE', 'burj', 'ranjeev') ORDER BY projectId, siteName;",
+  "rows": [
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "buckingham pa;ace",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "burj",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "ranjeev",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "isActive": "0"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "RISHI HOUSE",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "buckingham pa;ace",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "burj",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "ranjeev",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "transputec",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tsiteName\tisActive\nDIAGEO\tRISHI HOUSE\t1\nDIAGEO\tRISHI HOUSE\t0\nDIAGEO\tbuckingham pa;ace\t0\nDIAGEO\tburj\t1\nDIAGEO\tranjeev\t1\nDIAGEO\ttransputec\t1\nDIAGEO\ttransputec\t0\nTRANSTEST\tRISHI HOUSE\t1\nTRANSTEST\tbuckingham pa;ace\t1\nTRANSTEST\tburj\t1\nTRANSTEST\tranjeev\t1\nTRANSTEST\ttransputec\t1\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

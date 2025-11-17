@@ -1493,20 +1493,42 @@ export const appRouter = router({
         return await getProjectsByOrganization(ctx.user.organizationId);
       }),
 
-    // Get project by ID
+    // Get project by ID (with organization verification)
     getByProjectId: protectedProcedure
       .input(z.object({ projectId: z.string() }))
       .query(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
         const { getProjectByProjectId } = await import('./projects-db');
-        return await getProjectByProjectId(input.projectId);
+        const project = await getProjectByProjectId(input.projectId);
+        
+        // Verify project belongs to user's organization
+        if (project && project.organizationId !== ctx.user.organizationId) {
+          throw new Error("Project not found or access denied");
+        }
+        
+        return project;
+      }),
+
+    // Get project by ID (public - for project request pages)
+    getByProjectIdPublic: publicProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input }) => {
+        const { getProjectByProjectId } = await import('./projects-db');
+        const project = await getProjectByProjectId(input.projectId);
+        
+        // Only return active projects
+        if (project && !project.isActive) {
+          return null;
+        }
+        
+        return project;
       }),
 
     // Verify project exists and belongs to organization
     verify: protectedProcedure
       .input(z.object({ projectId: z.string() }))
-      .query(async ({ input, ctx }) => {
+      .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
         const { verifyProject } = await import('./projects-db');
@@ -1527,6 +1549,13 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        
         const { projectId, ...updates } = input;
         const { updateProject } = await import('./projects-db');
         return await updateProject(projectId, updates);
@@ -1538,7 +1567,16 @@ export const appRouter = router({
         projectId: z.string(),
         isActive: z.boolean(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        
         const { toggleProjectStatus } = await import('./projects-db');
         return await toggleProjectStatus(input.projectId, input.isActive);
       }),
@@ -1546,7 +1584,16 @@ export const appRouter = router({
     // Delete project
     delete: protectedProcedure
       .input(z.object({ projectId: z.string() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        
         const { deleteProject } = await import('./projects-db');
         return await deleteProject(input.projectId);
       }),
@@ -1575,6 +1622,20 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
+        
+        console.log('[uploadSites] ===== START UPLOAD =====');
+        console.log('[uploadSites] ProjectId received:', input.projectId);
+        console.log('[uploadSites] ProjectId length:', input.projectId.length);
+        console.log('[uploadSites] ProjectId charCodes:', Array.from(input.projectId).map(c => c.charCodeAt(0)).join(','));
+        console.log('[uploadSites] User organizationId:', ctx.user.organizationId);
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        console.log('[uploadSites] Project verified successfully');
         
         const { parseSiteUpload } = await import('./site-template');
         const { geocodeAddress } = await import('./geocoding');
@@ -1634,7 +1695,10 @@ export const appRouter = router({
         }
         
         // Check for duplicates
+        console.log('[ImportSites] Checking for duplicates in project:', input.projectId);
         const existingSites = await getProjectSites(input.projectId);
+        console.log('[ImportSites] Found existing sites in target project:', existingSites.length);
+        console.log('[ImportSites] Existing site names:', existingSites.map(s => s.siteName).join(', '));
         const existingMap = new Map(
           existingSites.map(site => [
             `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`,
@@ -1674,13 +1738,74 @@ export const appRouter = router({
         };
       }),
 
-    // Get sites for a project
+    // Get sites for a project (protected - requires auth)
     getSites: protectedProcedure
       .input(z.object({ projectId: z.string() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        
         console.log('[getSites endpoint] Called with projectId:', input.projectId);
+        console.log('[getSites endpoint] ProjectId length:', input.projectId.length);
+        console.log('[getSites endpoint] ProjectId charCodes:', Array.from(input.projectId).map(c => c.charCodeAt(0)).join(','));
+        console.log('[getSites endpoint] User organizationId:', ctx.user.organizationId);
         const sites = await getProjectSites(input.projectId);
         console.log('[getSites endpoint] Returning sites:', sites.length);
+        if (sites.length > 0) {
+          console.log('[getSites endpoint] First site:', sites[0].siteName);
+        }
+        return sites;
+      }),
+
+    // DIAGNOSTIC: Show what Drizzle actually returns
+    debugSites: protectedProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        const sites = await getProjectSites(input.projectId);
+        const uniqueProjectIds = [...new Set(sites.map(s => s.projectId))];
+        
+        return {
+          requestedProjectId: input.projectId,
+          totalSitesReturned: sites.length,
+          uniqueProjectIdsInResults: uniqueProjectIds,
+          sitesGroupedByProjectId: uniqueProjectIds.map(pid => ({
+            projectId: pid,
+            count: sites.filter(s => s.projectId === pid).length,
+            siteNames: sites.filter(s => s.projectId === pid).map(s => s.siteName)
+          })),
+          allSites: sites.map(s => ({
+            siteName: s.siteName,
+            projectId: s.projectId,
+            siteAddress: s.siteAddress
+          }))
+        };
+      }),
+
+    // Get sites for a project (public - no auth required)
+    getSitesPublic: publicProcedure
+      .input(z.object({ projectId: z.string() }))
+      .query(async ({ input }) => {
+        console.log('[getSitesPublic] Called with projectId:', input.projectId);
+        
+        // Verify project exists and is active
+        const { getProjectByProjectId } = await import('./projects-db');
+        const project = await getProjectByProjectId(input.projectId);
+        console.log('[getSitesPublic] Project found:', project ? `${project.name} (active: ${project.isActive})` : 'null');
+        
+        if (!project || !project.isActive) {
+          throw new Error("Project not found or inactive");
+        }
+        
+        const sites = await getProjectSites(input.projectId);
+        console.log('[getSitesPublic] Returning', sites.length, 'sites');
         return sites;
       }),
 
@@ -1700,7 +1825,16 @@ export const appRouter = router({
         contactEmail: z.string().optional(),
         notes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Project not found or access denied");
+        }
+        
         const { geocodeAddress } = await import('./geocoding');
         
         let lat = input.latitude;
@@ -1734,7 +1868,23 @@ export const appRouter = router({
     // Delete site
     deleteSite: protectedProcedure
       .input(z.object({ siteId: z.number() }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Get site to verify project ownership
+        const { getProjectSiteById } = await import('./project-sites-db');
+        const site = await getProjectSiteById(input.siteId);
+        if (!site) {
+          throw new Error("Site not found");
+        }
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(site.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Site not found or access denied");
+        }
+        
         return await deleteProjectSite(input.siteId);
       }),
 
@@ -1745,17 +1895,99 @@ export const appRouter = router({
         latitude: z.number(),
         longitude: z.number(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Get site to verify project ownership
+        const { getProjectSiteById } = await import('./project-sites-db');
+        const site = await getProjectSiteById(input.siteId);
+        if (!site) {
+          throw new Error("Site not found");
+        }
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(site.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Site not found or access denied");
+        }
+        
         return await updateProjectSiteLocation(input.siteId, input.latitude, input.longitude);
       }),
 
-    // Verify project ID exists (public endpoint for service request form)
+    // Geocode a single site
+    geocodeSite: protectedProcedure
+      .input(z.object({ siteId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Get site to verify project ownership and get address
+        const { getProjectSiteById, updateProjectSiteLocation } = await import('./project-sites-db');
+        const site = await getProjectSiteById(input.siteId);
+        if (!site) {
+          throw new Error("Site not found");
+        }
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(site.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Site not found or access denied");
+        }
+        
+        // Geocode the address
+        const { geocodeAddress } = await import('./geocoding');
+        const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''} ${site.country || ''}`.trim();
+        const result = await geocodeAddress(fullAddress);
+        
+        if (!result.success || !result.latitude || !result.longitude) {
+          throw new Error(result.error || "Failed to geocode address");
+        }
+        
+        // Update site with new coordinates
+        const updated = await updateProjectSiteLocation(
+          input.siteId,
+          parseFloat(result.latitude),
+          parseFloat(result.longitude)
+        );
+        
+        return {
+          success: updated,
+          latitude: result.latitude,
+          longitude: result.longitude,
+        };
+      }),
+
+    // Search for address suggestions
+    searchAddresses: protectedProcedure
+      .input(z.object({ 
+        address: z.string(),
+        limit: z.number().optional().default(5),
+      }))
+      .query(async ({ input }) => {
+        const { searchAddresses } = await import('./geocoding');
+        return await searchAddresses(input.address, input.limit);
+      }),
+
+    // Verify project ID exists and belongs to organization (public endpoint for service request form)
     verifyPublic: publicProcedure
       .input(z.object({
         projectId: z.string(),
+        organizationId: z.number().optional(), // Optional for backward compatibility
       }))
       .mutation(async ({ input }) => {
         const project = await getProjectByProjectId(input.projectId);
+        
+        // If organizationId is provided, verify project belongs to that organization
+        if (input.organizationId && project) {
+          const isValid = project.organizationId === input.organizationId;
+          return {
+            isValid,
+            projectName: isValid ? project.name : undefined,
+          };
+        }
+        
+        // Fallback: just check if project exists (for backward compatibility)
         return {
           isValid: !!project,
           projectName: project?.name,
@@ -1776,7 +2008,22 @@ export const appRouter = router({
         contactEmail: z.string().optional(),
         notes: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("Unauthorized");
+        
+        // Get site to verify project ownership
+        const { getProjectSiteById } = await import('./project-sites-db');
+        const site = await getProjectSiteById(input.siteId);
+        if (!site) {
+          throw new Error("Site not found");
+        }
+        
+        // Verify project belongs to user's organization
+        const { verifyProject } = await import('./projects-db');
+        const isValid = await verifyProject(site.projectId, ctx.user.organizationId);
+        if (!isValid) {
+          throw new Error("Site not found or access denied");
+        }
 
         const { siteId, ...updates } = input;
         
@@ -1793,6 +2040,15 @@ export const appRouter = router({
   }),
 
   organizations: router({
+    // List all organizations (super admin only)
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'super_admin') {
+        throw new Error('Unauthorized: Super admin access required');
+      }
+      const { getAllOrganizationsWithAdmins } = await import('./organizations-db');
+      return await getAllOrganizationsWithAdmins();
+    }),
+    
     // Get current user's organization
     getMy: protectedProcedure.query(async ({ ctx }) => {
       if (!ctx.user?.organizationId) {
@@ -1809,13 +2065,45 @@ export const appRouter = router({
         const { getOrganizationBySlug } = await import('./organizations-db');
         return await getOrganizationBySlug(input.slug);
       }),
+    
+    // Create organization (super admin only)
+    create: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        slug: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'super_admin') {
+          throw new Error('Unauthorized: Super admin access required');
+        }
+        const { createOrganization } = await import('./organizations-db');
+        return await createOrganization({ name: input.name });
+      }),
+    
+    // Delete organization (super admin only)
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'super_admin') {
+          throw new Error('Unauthorized: Super admin access required');
+        }
+        const { deleteOrganization } = await import('./organizations-db');
+        return await deleteOrganization(input.id);
+      }),
   }),
 
   users: router({
-    // List all users (admin only)
-    list: protectedProcedure.query(async () => {
-      const { getAllUsers } = await import('./auth');
-      return await getAllUsers();
+    // List users (filtered by organization for tenant admins, all users for super admin)
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const { getAllUsers, getUsersByOrganization } = await import('./auth');
+      
+      // Super admin sees all users
+      if (ctx.user.role === 'super_admin') {
+        return await getAllUsers();
+      }
+      
+      // Tenant admin sees only users from their organization
+      return await getUsersByOrganization(ctx.user.organizationId);
     }),
 
     // Create a new user (admin only)
@@ -1826,8 +2114,8 @@ export const appRouter = router({
         password: z.string().min(8),
         role: z.enum(['super_admin', 'admin']).default('admin'),
       }))
-      .mutation(async ({ input }) => {
-        const { createUser, getUserByEmail } = await import('./auth');
+      .mutation(async ({ input, ctx }) => {
+        const { createUserInOrganization, getUserByEmail } = await import('./auth');
         
         // Check if user already exists
         const existingUser = await getUserByEmail(input.email);
@@ -1835,9 +2123,31 @@ export const appRouter = router({
           throw new Error('User with this email already exists');
         }
         
-        const user = await createUser(input.email, input.password, input.name, input.role);
+        // Create user in the same organization as the admin creating them
+        const user = await createUserInOrganization(
+          input.email,
+          input.password,
+          input.name,
+          input.role,
+          ctx.user.organizationId
+        );
+        
         if (!user) {
           throw new Error('Failed to create user');
+        }
+        
+        // Send email notification with credentials
+        try {
+          const { sendNewUserEmail } = await import('./email');
+          await sendNewUserEmail({
+            recipientEmail: input.email,
+            recipientName: input.name,
+            password: input.password,
+            organizationId: ctx.user.organizationId,
+          });
+        } catch (error) {
+          console.error('[User Creation] Failed to send email notification:', error);
+          // Don't fail user creation if email fails
         }
         
         return {
@@ -1847,6 +2157,7 @@ export const appRouter = router({
             email: user.email,
             name: user.name,
             role: user.role,
+            organizationId: user.organizationId,
           },
         };
       }),

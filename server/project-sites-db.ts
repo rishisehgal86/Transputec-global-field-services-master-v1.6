@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { getDb } from "./db";
 import { projectSites, InsertProjectSite, ProjectSite } from "../drizzle/schema";
 
@@ -13,7 +13,10 @@ export async function getProjectSites(projectId: string): Promise<ProjectSite[]>
       return [];
     }
     
-    console.log('[getProjectSites] Fetching sites for project:', projectId);
+    console.log('[getProjectSites] ===== FETCHING SITES =====');
+    console.log('[getProjectSites] ProjectId parameter:', projectId);
+    console.log('[getProjectSites] ProjectId type:', typeof projectId);
+    console.log('[getProjectSites] ProjectId length:', projectId?.length);
     
     const sites = await db
       .select()
@@ -23,9 +26,35 @@ export async function getProjectSites(projectId: string): Promise<ProjectSite[]>
         eq(projectSites.isActive, true)
       ));
     
+    console.log('[getProjectSites] Query completed');
     console.log('[getProjectSites] Found sites:', sites.length);
+    console.log('[getProjectSites] Requested projectId:', projectId);
+    if (sites.length > 0) {
+      const uniqueProjectIds = [...new Set(sites.map(s => s.projectId))];
+      console.log('[getProjectSites] UNIQUE projectIds in results:', uniqueProjectIds.join(', '));
+      console.log('[getProjectSites] First 3 site projectIds:', sites.slice(0, 3).map(s => s.projectId).join(', '));
+      console.log('[getProjectSites] First 3 site names:', sites.slice(0, 3).map(s => s.siteName).join(', '));
+      
+      // Check if ANY site has wrong projectId
+      const wrongSites = sites.filter(s => s.projectId !== projectId);
+      if (wrongSites.length > 0) {
+        console.error('[getProjectSites] BUG FOUND! Query returned sites from WRONG projects!');
+        console.error('[getProjectSites] Expected:', projectId);
+        console.error('[getProjectSites] Got sites from:', uniqueProjectIds.join(', '));
+      }
+    }
     
-    return sites;
+    // BUGFIX: Manual filter to ensure we only return sites for the requested project
+    // The Drizzle WHERE clause seems to not be working correctly
+    const filteredSites = sites.filter(site => site.projectId === projectId);
+    console.log('[getProjectSites] After manual filter:', filteredSites.length, 'sites');
+    if (filteredSites.length !== sites.length) {
+      console.error('[getProjectSites] WARNING: Drizzle query returned wrong sites!');
+      console.error('[getProjectSites] Expected projectId:', projectId);
+      console.error('[getProjectSites] Got sites from projects:', [...new Set(sites.map(s => s.projectId))].join(', '));
+    }
+    
+    return filteredSites;
   } catch (error) {
     console.error('[getProjectSites] Error fetching sites:', error);
     return [];
@@ -88,9 +117,11 @@ export async function bulkCreateProjectSites(sites: InsertProjectSite[]): Promis
   
   if (sites.length === 0) return 0;
   
-  const result = await db.insert(projectSites).values(sites);
+  await db.insert(projectSites).values(sites);
   
-  return result.affectedRows || 0;
+  // Drizzle doesn't reliably return affectedRows, so return the input length
+  // since we know all inserts succeeded if no error was thrown
+  return sites.length;
 }
 
 /**
@@ -152,13 +183,13 @@ export async function updateProjectSiteLocation(siteId: number, latitude: number
   const result = await db
     .update(projectSites)
     .set({ 
-      latitude,
-      longitude,
+      latitude: latitude.toString(),
+      longitude: longitude.toString(),
       updatedAt: new Date()
     })
     .where(eq(projectSites.id, siteId));
   
-  return (result.affectedRows || 0) > 0;
+  return true; // Update successful if no error thrown
 }
 
 

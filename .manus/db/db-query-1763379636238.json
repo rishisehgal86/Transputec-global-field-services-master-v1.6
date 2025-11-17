@@ -1,0 +1,30 @@
+{
+  "query": "SELECT p.projectId, p.name, COUNT(ps.id) as site_count FROM projects p LEFT JOIN project_sites ps ON p.projectId = ps.projectId AND ps.isActive = 1 WHERE p.projectId LIKE 'TRANSTEST%' GROUP BY p.projectId, p.name ORDER BY p.projectId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT p.projectId, p.name, COUNT(ps.id) as site_count FROM projects p LEFT JOIN project_sites ps ON p.projectId = ps.projectId AND ps.isActive = 1 WHERE p.projectId LIKE 'TRANSTEST%' GROUP BY p.projectId, p.name ORDER BY p.projectId;",
+  "rows": [
+    {
+      "projectId": "TRANSTEST",
+      "name": "transtestname",
+      "site_count": "9"
+    },
+    {
+      "projectId": "TRANSTEST3",
+      "name": "transtest3name",
+      "site_count": "0"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "name": "transtest4name",
+      "site_count": "3"
+    },
+    {
+      "projectId": "TRANSTEST5",
+      "name": "asds",
+      "site_count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tname\tsite_count\nTRANSTEST\ttranstestname\t9\nTRANSTEST3\ttranstest3name\t0\nTRANSTEST4\ttranstest4name\t3\nTRANSTEST5\tasds\t1\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

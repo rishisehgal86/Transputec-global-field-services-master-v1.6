@@ -1,0 +1,50 @@
+{
+  "query": "SELECT projectId, siteName FROM project_sites WHERE siteName LIKE '%buckingham%' OR siteName LIKE '%transputec%' OR siteName LIKE '%RISHI%' LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT projectId, siteName FROM project_sites WHERE siteName LIKE '%buckingham%' OR siteName LIKE '%transputec%' OR siteName LIKE '%RISHI%' LIMIT 20;",
+  "rows": [
+    {
+      "projectId": "DIAGEO",
+      "siteName": "buckingham palace"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "buckingham pa;ace"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "siteName": "buckingham palace"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "buckingham pa;ace"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "transputec"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "RISHI HOUSE"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tsiteName\nDIAGEO\tbuckingham palace\nDIAGEO\ttransputec\nDIAGEO\tRISHI HOUSE\nDIAGEO\tbuckingham pa;ace\nDIAGEO\ttransputec\nDIAGEO\tRISHI HOUSE\nTRANSTEST4\tbuckingham palace\nTRANSTEST\tbuckingham pa;ace\nTRANSTEST\ttransputec\nTRANSTEST\tRISHI HOUSE\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

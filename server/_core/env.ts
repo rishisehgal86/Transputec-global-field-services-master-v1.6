@@ -10,4 +10,5 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL ?? "admin@transputec.com",
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD ?? "Admin@123",
+  googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY ?? "", // Optional: for better geocoding accuracy
 };

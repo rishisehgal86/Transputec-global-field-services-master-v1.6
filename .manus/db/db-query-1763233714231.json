@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, projectId, siteName, isActive, createdAt FROM project_sites WHERE projectId = 'TRANSTEST5' ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, projectId, siteName, isActive, createdAt FROM project_sites WHERE projectId = 'TRANSTEST5' ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "120008",
+      "projectId": "TRANSTEST5",
+      "siteName": "jpjjijij",
+      "isActive": "1",
+      "createdAt": "2025-11-15 19:07:20"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprojectId\tsiteName\tisActive\tcreatedAt\n120008\tTRANSTEST5\tjpjjijij\t1\t2025-11-15 19:07:20\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

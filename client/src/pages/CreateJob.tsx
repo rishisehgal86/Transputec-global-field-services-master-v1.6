@@ -49,14 +49,14 @@ export default function CreateJob() {
     { enabled: !!duplicateJobId && isAuthenticated }
   );
 
-  const verifyProjectMutation = trpc.projects.verifyPublic.useMutation({
+  const verifyProjectMutation = trpc.projects.verify.useMutation({
     onSuccess: (data) => {
       setProjectValid(data.isValid);
       setVerifyingProject(false);
       if (data.isValid) {
         toast.success("Project ID verified");
       } else {
-        toast.error("Invalid project ID");
+        toast.error("Invalid project ID - not found in your organization");
       }
     },
     onError: () => {

@@ -1,0 +1,110 @@
+{
+  "query": "SELECT projectId, siteName, isActive FROM project_sites ORDER BY projectId, siteName LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT projectId, siteName, isActive FROM project_sites ORDER BY projectId, siteName LIMIT 20;",
+  "rows": [
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "RISHI HOUSE",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "buckingham pa;ace",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "buckingham palace",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "burj",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "japan",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "japan",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "japan",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "japan",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "ranjeev",
+      "isActive": "1"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "isActive": "0"
+    },
+    {
+      "projectId": "DIAGEO",
+      "siteName": "transputec",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "RISHI HOUSE",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "buckingham pa;ace",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "burj",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "ranjeev",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "transputec",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "siteName": "buckingham palace",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tsiteName\tisActive\nDIAGEO\tRISHI HOUSE\t1\nDIAGEO\tRISHI HOUSE\t0\nDIAGEO\tbuckingham pa;ace\t0\nDIAGEO\tbuckingham palace\t1\nDIAGEO\tburj\t1\nDIAGEO\tjapan\t0\nDIAGEO\tjapan\t1\nDIAGEO\tjapan\t0\nDIAGEO\tjapan\t0\nDIAGEO\tranjeev\t1\nDIAGEO\ttransputec\t0\nDIAGEO\ttransputec\t1\nTRANSTEST\t1 times sq\t1\nTRANSTEST\t1 times sq\t1\nTRANSTEST\tRISHI HOUSE\t1\nTRANSTEST\tbuckingham pa;ace\t1\nTRANSTEST\tburj\t1\nTRANSTEST\tranjeev\t1\nTRANSTEST\ttransputec\t1\nTRANSTEST4\tbuckingham palace\t1\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -1,0 +1,26 @@
+{
+  "query": "\nSELECT id, jobToken, clientName, siteName, organizationId, status \nFROM jobs \nWHERE jobToken IN ('test-job-tenant-1', 'test-job-tenant-2')\nORDER BY organizationId;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute \nSELECT id, jobToken, clientName, siteName, organizationId, status \nFROM jobs \nWHERE jobToken IN ('test-job-tenant-1', 'test-job-tenant-2')\nORDER BY organizationId;\n",
+  "rows": [
+    {
+      "id": "270002",
+      "jobToken": "test-job-tenant-2",
+      "clientName": "Test Client B",
+      "siteName": "Test Site B",
+      "organizationId": "120002",
+      "status": "pending_approval"
+    },
+    {
+      "id": "270001",
+      "jobToken": "test-job-tenant-1",
+      "clientName": "Test Client A",
+      "siteName": "Test Site A",
+      "organizationId": "120003",
+      "status": "pending_approval"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tjobToken\tclientName\tsiteName\torganizationId\tstatus\n270002\ttest-job-tenant-2\tTest Client B\tTest Site B\t120002\tpending_approval\n270001\ttest-job-tenant-1\tTest Client A\tTest Site A\t120003\tpending_approval\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

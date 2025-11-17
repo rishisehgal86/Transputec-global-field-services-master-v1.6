@@ -1,0 +1,38 @@
+{
+  "query": "SELECT projectId, name, organizationId, isActive, CHAR_LENGTH(projectId) as id_length FROM projects WHERE projectId LIKE '%TRANSTEST%' ORDER BY projectId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT projectId, name, organizationId, isActive, CHAR_LENGTH(projectId) as id_length FROM projects WHERE projectId LIKE '%TRANSTEST%' ORDER BY projectId;",
+  "rows": [
+    {
+      "projectId": "TRANSTEST",
+      "name": "transtestname",
+      "organizationId": "180001",
+      "isActive": "1",
+      "id_length": "9"
+    },
+    {
+      "projectId": "TRANSTEST3",
+      "name": "transtest3name",
+      "organizationId": "180001",
+      "isActive": "1",
+      "id_length": "10"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "name": "transtest4name",
+      "organizationId": "180001",
+      "isActive": "1",
+      "id_length": "10"
+    },
+    {
+      "projectId": "TRANSTEST5",
+      "name": "asds",
+      "organizationId": "180001",
+      "isActive": "1",
+      "id_length": "10"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tname\torganizationId\tisActive\tid_length\nTRANSTEST\ttranstestname\t180001\t1\t9\nTRANSTEST3\ttranstest3name\t180001\t1\t10\nTRANSTEST4\ttranstest4name\t180001\t1\t10\nTRANSTEST5\tasds\t180001\t1\t10\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

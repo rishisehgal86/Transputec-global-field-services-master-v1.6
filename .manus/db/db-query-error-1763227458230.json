@@ -1,0 +1,8 @@
+{
+  "query": "SELECT ps.*, p.projectName, p.projectId FROM project_sites ps JOIN projects p ON ps.projectId = p.projectId WHERE p.projectId = 'TRANSTEST' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT ps.*, p.projectName, p.projectId FROM project_sites ps JOIN projects p ON ps.projectId = p.projectId WHERE p.projectId = 'TRANSTEST' LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'p.projectname' in 'field list'"
+  ]
+}

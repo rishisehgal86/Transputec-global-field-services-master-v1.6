@@ -1,88 +1,78 @@
 import { useRoute } from "wouter";
-import RequestService from "./RequestService";
 import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import ProjectRequestForm from "./ProjectRequestForm";
 
-/**
- * Project-specific job request page
- * URL: /request/:projectId
- * Automatically assigns jobs to the specified project
- */
 export default function ProjectRequest() {
-  const [, params] = useRoute("/request/:projectId");
-  const projectId = params?.projectId;
+  // Extract projectId from URL
+  const [, params] = useRoute("/project-request/:projectId");
+  const projectId = params?.projectId || null;
 
-  // Verify project exists and is active
-  const { data: verificationResult, isLoading, error } = trpc.projects.verify.useQuery(
-    { projectId: projectId || "" },
+  // Load project details
+  const { data: project, isLoading, error } = trpc.projects.getByProjectIdPublic.useQuery(
+    { projectId: projectId! },
     { enabled: !!projectId }
   );
 
-  const { data: project } = trpc.projects.getByProjectId.useQuery(
-    { projectId: projectId || "" },
-    { enabled: !!projectId && verificationResult?.isValid }
-  );
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading project details...</p>
+        </div>
+      </div>
+    );
+  }
 
+  // Error state - invalid project ID
   if (!projectId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="max-w-md">
-          <CardContent className="py-12 text-center">
-            <h2 className="text-xl font-bold mb-2">Invalid Project Link</h2>
-            <p className="text-gray-600 mb-4">No project ID specified in the URL</p>
-            <Link href="/request">
-              <Button>Go to General Request Form</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Project Link</h1>
+          <p className="text-gray-600 mb-6">No project ID specified in the URL</p>
+          <Link href="/">
+            <Button>Go to General Request Form</Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error || !verificationResult?.isValid) {
+  // Error state - project not found or inactive
+  if (error || !project) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="max-w-md">
-          <CardContent className="py-12 text-center">
-            <h2 className="text-xl font-bold mb-2">Project Not Found</h2>
-            <p className="text-gray-600 mb-4">
-              The project "{projectId}" does not exist or is no longer active
-            </p>
-            <Link href="/request">
-              <Button>Go to General Request Form</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Project Not Found</h1>
+          <p className="text-gray-600 mb-6">
+            {error?.message || "This project does not exist or is no longer active"}
+          </p>
+          <Link href="/">
+            <Button>Go to General Request Form</Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
-  // Render the request service form with project context
+  // Success - render the project request form
   return (
-    <div>
-      {project && (
-        <div className="bg-blue-50 border-b border-blue-200 py-3">
-          <div className="container mx-auto px-4">
-            <p className="text-sm text-blue-900">
-              <strong>Project:</strong> {project.name} ({project.projectId})
-              {project.clientName && ` • Client: ${project.clientName}`}
-            </p>
-          </div>
-        </div>
-      )}
-      <RequestService projectId={projectId} project={project} />
-    </div>
+    <ProjectRequestForm 
+      projectId={projectId} 
+      project={project} 
+      organizationId={project.organizationId}
+    />
   );
 }
 

@@ -1,4 +1,4 @@
-import { ENV } from './_core/env';
+import { sendEmail } from './email';
 
 interface PasswordResetEmailParams {
   email: string;
@@ -62,18 +62,23 @@ export async function sendPasswordResetEmail(params: PasswordResetEmailParams): 
   `.trim();
 
   try {
-    // TODO: Integrate with actual email service (SendGrid, AWS SES, etc.)
-    // For now, log the email content for development/testing
-    console.log('[AuthEmail] Password reset email would be sent to:', email);
+    console.log('[AuthEmail] Sending password reset email to:', email);
     console.log('[AuthEmail] Reset link:', resetLink);
-    console.log('[AuthEmail] Email content prepared (HTML):', emailContent.substring(0, 200) + '...');
     
-    // In production, you would send via email service:
-    // const response = await fetch('YOUR_EMAIL_SERVICE_URL', { ... });
+    const success = await sendEmail({
+      to: email,
+      subject: 'Password Reset Request - FieldPulse Go',
+      html: emailContent,
+      text: `Hello ${name},\n\nWe received a request to reset your password.\n\nReset your password here: ${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.`
+    });
     
-    return; // Success - email "sent" (logged)
+    if (success) {
+      console.log('[AuthEmail] ✅ Password reset email sent successfully');
+    } else {
+      console.error('[AuthEmail] ❌ Failed to send password reset email');
+    }
   } catch (error) {
-    console.error('[AuthEmail] Failed to prepare password reset email:', error);
+    console.error('[AuthEmail] Failed to send password reset email:', error);
     // Don't throw - allow the flow to continue even if email fails
   }
 }
@@ -149,19 +154,24 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<void
   `.trim();
 
   try {
-    // TODO: Integrate with actual email service (SendGrid, AWS SES, etc.)
-    // For now, log the email content for development/testing
-    console.log('[AuthEmail] Welcome email would be sent to:', email);
+    console.log('[AuthEmail] Sending welcome email to:', email);
     console.log('[AuthEmail] Organization:', organizationName);
     console.log('[AuthEmail] User:', name);
-    console.log('[AuthEmail] Email content prepared (HTML):', emailContent.substring(0, 200) + '...');
     
-    // In production, you would send via email service:
-    // const response = await fetch('YOUR_EMAIL_SERVICE_URL', { ... });
+    const success = await sendEmail({
+      to: email,
+      subject: 'Welcome to FieldPulse Go!',
+      html: emailContent,
+      text: `Hello ${name},\n\nWelcome to FieldPulse Go! Your account for ${organizationName} has been successfully created.\n\nLogin here: ${loginLink}\n\nGet started by logging into your admin dashboard and creating your first job request!`
+    });
     
-    console.log('[AuthEmail] Welcome email logged successfully');
+    if (success) {
+      console.log('[AuthEmail] ✅ Welcome email sent successfully');
+    } else {
+      console.error('[AuthEmail] ❌ Failed to send welcome email');
+    }
   } catch (error) {
-    console.error('[AuthEmail] Failed to prepare welcome email:', error);
+    console.error('[AuthEmail] Failed to send welcome email:', error);
     console.log('[AuthEmail] Continuing despite email failure');
     // Don't throw - allow signup to complete even if email fails
   }

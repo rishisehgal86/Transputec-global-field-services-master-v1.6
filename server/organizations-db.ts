@@ -116,3 +116,60 @@ export async function getProjectsByOrganization(organizationId: number) {
   }
 }
 
+
+/**
+ * Delete organization (super admin only)
+ */
+export async function deleteOrganization(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    await db.delete(organizations).where(eq(organizations.id, id));
+    return { success: true };
+  } catch (error) {
+    console.error('[Organizations] Delete organization error:', error);
+    throw new Error('Failed to delete organization');
+  }
+}
+
+
+
+/**
+ * Get all organizations with primary admin email
+ */
+export async function getAllOrganizationsWithAdmins() {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    const { users } = await import('../drizzle/schema');
+    const orgs = await db.select().from(organizations);
+    
+    // For each organization, find the first admin user
+    const orgsWithAdmins = await Promise.all(
+      orgs.map(async (org) => {
+        const adminUsers = await db
+          .select({ email: users.email })
+          .from(users)
+          .where(eq(users.organizationId, org.id))
+          .limit(1);
+        
+        return {
+          ...org,
+          primaryAdminEmail: adminUsers[0]?.email || null,
+        };
+      })
+    );
+    
+    return orgsWithAdmins;
+  } catch (error) {
+    console.error('[Organizations] Get all organizations with admins error:', error);
+    return [];
+  }
+}
+

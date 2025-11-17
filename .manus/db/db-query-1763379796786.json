@@ -1,0 +1,75 @@
+{
+  "query": "SELECT projectId, siteName, isActive FROM project_sites WHERE projectId LIKE 'TRANSTEST%' ORDER BY projectId, isActive, siteName LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT projectId, siteName, isActive FROM project_sites WHERE projectId LIKE 'TRANSTEST%' ORDER BY projectId, isActive, siteName LIMIT 30;",
+  "rows": [
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "RISHI HOUSE",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "buckingham pa;ace",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "burj",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "cedar house",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "cedar house",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "ranjeev",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST",
+      "siteName": "transputec",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "siteName": "buckingham palace",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "siteName": "cedar ",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST4",
+      "siteName": "cedar house",
+      "isActive": "1"
+    },
+    {
+      "projectId": "TRANSTEST5",
+      "siteName": "jpjjijij",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "projectId\tsiteName\tisActive\nTRANSTEST\t1 times sq\t1\nTRANSTEST\t1 times sq\t1\nTRANSTEST\tRISHI HOUSE\t1\nTRANSTEST\tbuckingham pa;ace\t1\nTRANSTEST\tburj\t1\nTRANSTEST\tcedar house\t1\nTRANSTEST\tcedar house\t1\nTRANSTEST\tranjeev\t1\nTRANSTEST\ttransputec\t1\nTRANSTEST4\tbuckingham palace\t1\nTRANSTEST4\tcedar \t1\nTRANSTEST4\tcedar house\t1\nTRANSTEST5\tjpjjijij\t1\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

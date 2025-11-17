@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Trash2, FolderOpen, Copy, ExternalLink, Edit, ToggleRight, ToggleLeft } from "lucide-react";
+import { Loader2, Plus, Trash2, FolderOpen, Copy, ExternalLink, Edit, ToggleRight, ToggleLeft, Info, Building2, Link2, MapPin, CheckCircle2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
@@ -111,7 +111,7 @@ export default function Projects() {
   };
 
   const copyProjectLink = (projectId: string) => {
-    const link = `${window.location.origin}/request/${projectId}`;
+    const link = `${window.location.origin}/project-request/${projectId}`;
     navigator.clipboard.writeText(link);
     toast.success("Project link copied to clipboard");
   };
@@ -229,6 +229,217 @@ export default function Projects() {
 
       {/* Content */}
       <main className="container mx-auto p-6">
+        {/* Permanent Summary Section - Always Visible */}
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <FolderOpen className="h-5 w-5 text-primary" />
+                  What Are Projects?
+                </CardTitle>
+                <CardDescription className="text-sm mt-1">
+                  Projects help you organize jobs and create dedicated client portals
+                </CardDescription>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Info className="h-4 w-4" />
+                    Learn More
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[85vh]">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl flex items-center gap-2">
+                      <FolderOpen className="h-6 w-6 text-primary" />
+                      Complete Guide to Projects
+                    </DialogTitle>
+                    <DialogDescription>
+                      Everything you need to know about organizing jobs with projects
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4 overflow-y-auto max-h-[calc(85vh-120px)] pr-2">
+                    {/* Key Features */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3">Key Features</h3>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Building2 className="h-4 w-4 text-primary" />
+                            </div>
+                            <h4 className="font-semibold">Multi-Client Management</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Create separate projects for each client. Track work, billing, and performance metrics independently.
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                              <Link2 className="h-4 w-4 text-accent" />
+                            </div>
+                            <h4 className="font-semibold">Unique Request Links</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Each project generates a dedicated public URL that clients can bookmark to submit service requests.
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <MapPin className="h-4 w-4 text-primary" />
+                            </div>
+                            <h4 className="font-semibold">Site Library</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Pre-load service locations with GPS coordinates. Bulk upload sites via Excel for easy management.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Real-World Use Cases */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3">Real-World Use Cases</h3>
+                      <div className="space-y-4">
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">1</span>
+                            IT Managed Service Provider (MSP)
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            An MSP manages IT infrastructure for 20 companies. They create 20 projects (one per client), upload each client's office locations, and share unique request links with each IT manager. Clients submit tickets directly, jobs are automatically organized by client, and monthly billing reports are generated per project.
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <span className="h-6 w-6 rounded-full bg-accent/10 text-accent flex items-center justify-center text-sm">2</span>
+                            Facilities Management Company
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            A company maintains HVAC, electrical, and plumbing for a corporate campus. They create separate projects for each service type with the same 30 building sites. Each department gets their own request link, engineers see the contract type, and billing is separated by service category.
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-lg bg-muted border">
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">3</span>
+                            Telecommunications Field Services
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            A telecom provider manages network equipment installations. They create a project "5G Tower Rollout - Region North" with 100 tower sites pre-loaded. Field engineers receive jobs with exact tower locations, GPS tracking shows proximity to sites, and the client portal displays installation progress across all sites.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Key Benefits */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-3">Key Benefits</h3>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">Complete Data Isolation</p>
+                            <p className="text-xs text-muted-foreground">Each project's jobs, sites, and data remain completely separate</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">Branded Client Portals</p>
+                            <p className="text-xs text-muted-foreground">Each client gets their own dedicated request URL to bookmark</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">Bulk Site Management</p>
+                            <p className="text-xs text-muted-foreground">Upload hundreds of sites at once via Excel template</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">Automatic Job Association</p>
+                            <p className="text-xs text-muted-foreground">Jobs submitted via project links auto-tag to correct project</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">Project-Based Reporting</p>
+                            <p className="text-xs text-muted-foreground">Export and analyze data per client or contract</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-medium text-sm">GPS-Validated Sites</p>
+                            <p className="text-xs text-muted-foreground">Automatic geocoding ensures accurate tracking and ETAs</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Getting Started */}
+                    <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        <Info className="h-5 w-5 text-accent" />
+                        Getting Started
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Click <strong>"New Project"</strong> to create your first project. You'll get a unique Project ID that becomes part of your client's request URL (e.g., <code className="text-xs bg-background px-1 py-0.5 rounded">/project-request/PROJ-001</code>).
+                      </p>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Projects are organizational containers that group related jobs together. Each project can represent a <strong>client</strong>, <strong>service contract</strong>, <strong>facility portfolio</strong>, or any logical grouping. Each project gets a unique request URL for client self-service.
+            </p>
+            <div className="grid md:grid-cols-4 gap-4 mt-4 text-sm">
+              <div className="flex items-start gap-2">
+                <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">1</div>
+                <div>
+                  <p className="font-medium text-foreground">Create Project</p>
+                  <p className="text-muted-foreground text-xs">Click "New Project" to get started</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">2</div>
+                <div>
+                  <p className="font-medium text-foreground">Add Sites</p>
+                  <p className="text-muted-foreground text-xs">Upload locations via Excel or add manually</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">3</div>
+                <div>
+                  <p className="font-medium text-foreground">Share Link</p>
+                  <p className="text-muted-foreground text-xs">Copy the request URL and send to clients</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">4</div>
+                <div>
+                  <p className="font-medium text-foreground">Auto-Organize</p>
+                  <p className="text-muted-foreground text-xs">Jobs tag automatically to projects</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Filters */}
         {projects && projects.length > 0 && (
           <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -294,7 +505,7 @@ export default function Projects() {
                       <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                         <span className="font-medium">Project Specific Despatch Request Link:</span>
                         <code className="px-2 py-1 bg-muted rounded text-xs">
-                          {window.location.origin}/request/{project.projectId}
+                          {window.location.origin}/project-request/{project.projectId}
                         </code>
                         <Button
                           variant="ghost"
@@ -319,7 +530,7 @@ export default function Projects() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(`/request/${project.projectId}`, '_blank')}
+                        onClick={() => window.open(`/project-request/${project.projectId}`, '_blank')}
                         title="Open project request page"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -376,7 +587,7 @@ export default function Projects() {
                   
                   {/* Site Management */}
                   <div className="mt-6">
-                    <ProjectSites projectId={project.projectId} />
+                    <ProjectSites key={project.projectId} projectId={project.projectId} />
                   </div>
                 </CardContent>
               </Card>

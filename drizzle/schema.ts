@@ -22,6 +22,7 @@ export const organizations = mysqlTable("organizations", {
   isActive: boolean("isActive").default(true).notNull(),
   projectsEnabled: boolean("projectsEnabled").default(false).notNull(), // Enable/disable multi-project feature
   
+  lastUsedAt: timestamp("lastUsedAt"), // Track when organization was last active
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

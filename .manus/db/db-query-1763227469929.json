@@ -1,0 +1,48 @@
+{
+  "query": "SELECT ps.*, p.name, p.projectId FROM project_sites ps JOIN projects p ON ps.projectId = p.projectId WHERE p.projectId = 'TRANSTEST' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT ps.*, p.name, p.projectId FROM project_sites ps JOIN projects p ON ps.projectId = p.projectId WHERE p.projectId = 'TRANSTEST' LIMIT 10;",
+  "rows": [
+    {
+      "id": "60001",
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "siteAddress": "1 times square new york",
+      "city": "ny",
+      "postalCode": "NULL",
+      "country": "usa",
+      "latitude": "40.7562129",
+      "longitude": "-73.9865339",
+      "contactName": "asdsd",
+      "contactPhone": "weqwe",
+      "contactEmail": "r.sehgal@hotmail.co.uk",
+      "notes": "asd",
+      "isActive": "1",
+      "createdAt": "2025-11-15 16:50:34",
+      "updatedAt": "2025-11-15 16:50:34",
+      "name": "transtestname"
+    },
+    {
+      "id": "60002",
+      "projectId": "TRANSTEST",
+      "siteName": "1 times sq",
+      "siteAddress": "1 times square new york",
+      "city": "ny",
+      "postalCode": "NULL",
+      "country": "usa",
+      "latitude": "40.7562129",
+      "longitude": "-73.9865339",
+      "contactName": "asdsd",
+      "contactPhone": "weqwe",
+      "contactEmail": "r.sehgal@hotmail.co.uk",
+      "notes": "asd",
+      "isActive": "1",
+      "createdAt": "2025-11-15 16:50:41",
+      "updatedAt": "2025-11-15 16:50:41",
+      "name": "transtestname"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tprojectId\tsiteName\tsiteAddress\tcity\tpostalCode\tcountry\tlatitude\tlongitude\tcontactName\tcontactPhone\tcontactEmail\tnotes\tisActive\tcreatedAt\tupdatedAt\tname\tprojectId\n60001\tTRANSTEST\t1 times sq\t1 times square new york\tny\tNULL\tusa\t40.7562129\t-73.9865339\tasdsd\tweqwe\tr.sehgal@hotmail.co.uk\tasd\t1\t2025-11-15 16:50:34\t2025-11-15 16:50:34\ttranstestname\tTRANSTEST\n60002\tTRANSTEST\t1 times sq\t1 times square new york\tny\tNULL\tusa\t40.7562129\t-73.9865339\tasdsd\tweqwe\tr.sehgal@hotmail.co.uk\tasd\t1\t2025-11-15 16:50:41\t2025-11-15 16:50:41\ttranstestname\tTRANSTEST\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

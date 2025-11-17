@@ -1215,3 +1215,102 @@ export async function sendCancellationNotification(data: {
   return results.some(result => result);
 }
 
+
+
+/**
+ * Send email notification to newly created user with their credentials
+ */
+export async function sendNewUserEmail(params: {
+  recipientEmail: string;
+  recipientName: string;
+  password: string;
+  organizationId: number;
+}): Promise<void> {
+  const { recipientEmail, recipientName, password, organizationId } = params;
+  
+  // Get organization details
+  const { getOrganizationById } = await import('./organizations-db');
+  const organization = await getOrganizationById(organizationId);
+  const orgName = organization?.name || 'Your Organization';
+  
+  const baseUrl = getBaseUrl();
+  const loginUrl = `${baseUrl}/login`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to ${orgName}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to ${orgName}!</h1>
+      </div>
+      
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          Hello <strong>${recipientName}</strong>,
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+          An administrator has created an account for you in the <strong>${orgName}</strong> dispatch system.
+        </p>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin: 25px 0;">
+          <h3 style="margin-top: 0; color: #667eea;">Your Login Credentials</h3>
+          <p style="margin: 10px 0;"><strong>Email:</strong> ${recipientEmail}</p>
+          <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background: #f0f0f0; padding: 5px 10px; border-radius: 4px; font-size: 14px;">${password}</code></p>
+        </div>
+        
+        <p style="font-size: 16px; margin: 20px 0;">
+          <strong>⚠️ Important:</strong> Please change your password after your first login for security purposes.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            Login Now
+          </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+          If you have any questions or need assistance, please contact your administrator.
+        </p>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 20px;">
+          <em>This is an automated message. Please do not reply to this email.</em>
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `
+Welcome to ${orgName}!
+
+Hello ${recipientName},
+
+An administrator has created an account for you in the ${orgName} dispatch system.
+
+Your Login Credentials:
+- Email: ${recipientEmail}
+- Temporary Password: ${password}
+
+⚠️ Important: Please change your password after your first login for security purposes.
+
+Login here: ${loginUrl}
+
+If you have any questions or need assistance, please contact your administrator.
+
+This is an automated message. Please do not reply to this email.
+  `;
+
+  await sendEmail({
+    to: recipientEmail,
+    subject: `Welcome to ${orgName} - Your Account Has Been Created`,
+    html: htmlContent,
+    text: textContent,
+  });
+}
+

@@ -22,7 +22,7 @@ export default function Signup() {
   const signupMutation = trpc.auth.signup.useMutation({
     onSuccess: () => {
       setSuccess(true);
-      // Redirect to login after 2 seconds
+      // Redirect to login page after 2 seconds
       setTimeout(() => {
         setLocation("/login");
       }, 2000);

@@ -163,6 +163,46 @@ export async function getUserById(userId: number): Promise<User | null> {
 }
 
 /**
+ * Create a new user in a specific organization
+ */
+export async function createUserInOrganization(
+  email: string,
+  password: string,
+  name: string,
+  role: 'super_admin' | 'admin',
+  organizationId: number
+): Promise<User | null> {
+  const db = await getDb();
+  if (!db) {
+    console.warn('[Auth] Database not available');
+    return null;
+  }
+
+  try {
+    const passwordHash = await hashPassword(password);
+    const userData = {
+      email,
+      passwordHash,
+      name,
+      role,
+      organizationId,
+      isActive: true,
+    };
+
+    const result = await db.insert(users).values(userData);
+
+    // Fetch the created user
+    const userId = Number(result[0].insertId);
+    const createdUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+
+    return createdUser[0] || null;
+  } catch (error) {
+    console.error('[Auth] User creation error:', error);
+    return null;
+  }
+}
+
+/**
  * Get user by email
  */
 export async function getUserByEmail(email: string): Promise<User | null> {
@@ -212,7 +252,7 @@ export async function initializeSuperAdmin(): Promise<void> {
 
 
 /**
- * Get all users
+ * Get all users (super admin only)
  */
 export async function getAllUsers(): Promise<User[]> {
   const db = await getDb();
@@ -225,6 +265,24 @@ export async function getAllUsers(): Promise<User[]> {
     return result;
   } catch (error) {
     console.error('[Auth] Get all users error:', error);
+    return [];
+  }
+}
+
+/**
+ * Get users by organization (tenant admin)
+ */
+export async function getUsersByOrganization(organizationId: number): Promise<User[]> {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  try {
+    const result = await db.select().from(users).where(eq(users.organizationId, organizationId));
+    return result;
+  } catch (error) {
+    console.error('[Auth] Get users by organization error:', error);
     return [];
   }
 }

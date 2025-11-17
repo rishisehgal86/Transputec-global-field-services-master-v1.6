@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen } from "lucide-react";
+import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen, Building2 } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { CompactDualTime } from "@/components/DualTimeDisplay";
 import { Link, useLocation } from "wouter";
@@ -18,6 +18,14 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeFilter, setActiveFilter] = useState<"all" | "today" | "urgent" | "overdue" | "pending" | "in_progress">("all");
   const [selectedProject, setSelectedProject] = useState<string>("all");
+  
+  // Logout mutation
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => {
+      // Force full page reload to clear all client state
+      window.location.replace('/');
+    },
+  });
   
   // Fetch organization for display
   const { data: organization } = trpc.organizations.getMy.useQuery(undefined, {
@@ -82,82 +90,113 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-4 py-4">
+          {/* Top Row: Logo, Title, Organization */}
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-4">
               <Link href="/">
-                <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
+                <LogoImage className="h-12 cursor-pointer hover:opacity-80 transition-opacity" />
               </Link>
               <div className="hidden md:block border-l border-border pl-4">
-                <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+                <p className="text-base font-semibold text-foreground">On-Demand Despatch Field Services Platform</p>
                 <p className="text-xs text-muted-foreground">Admin Dashboard</p>
               </div>
-              
-              {/* Organization Display - Visible on all devices */}
-              {organization && (
-                <div className="flex items-center border-l border-border pl-4">
-                  <div className="text-sm">
-                    <p className="text-xs text-muted-foreground">Organization:</p>
-                    <p className="font-semibold text-foreground">{organization.name}</p>
-                  </div>
-                </div>
-              )}
             </div>
             
-            <div className="flex gap-2 flex-wrap">
-              {/* Primary Job Creation Actions */}
+            {/* Organization Display */}
+            {organization && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
+                <span className="text-xs font-medium text-orange-700">Organization:</span>
+                <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Bottom Row: Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Primary Actions Group */}
+            <div className="flex items-center gap-2 pr-3 border-r border-border">
               <Link href="/admin/create">
-                <Button size="default" className="bg-primary hover:bg-primary/90">
+                <Button size="default" className="bg-orange-600 hover:bg-orange-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Admin Job Creation
                 </Button>
               </Link>
               
-              <div className="flex gap-1">
+              {/* Public Job Creation Form - Link + Copy */}
+              <div className="flex items-center">
+                <Link href={organization?.slug ? `/request/${organization.slug}` : "#"}>
+                  <Button 
+                    variant="outline"
+                    disabled={!organization?.slug}
+                    className="rounded-r-none border-r-0"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Public Job Creation Form
+                  </Button>
+                </Link>
                 <Button 
                   variant="outline"
+                  size="icon"
+                  className="rounded-l-none"
                   onClick={() => {
-                    if (!organization?.slug) {
-                      toast.error('Organization slug not available');
-                      return;
+                    if (organization?.slug) {
+                      const url = `${window.location.origin}/request/${organization.slug}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success('Public form URL copied!');
                     }
-                    const url = `${window.location.origin}/request/${organization.slug}`;
-                    navigator.clipboard.writeText(url);
-                    toast.success('Tenant-specific request form link copied!');
                   }}
-                  title="Copy tenant-specific request form URL"
                   disabled={!organization?.slug}
+                  title="Copy public form URL"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Job Creation Form
-                  <ExternalLink className="h-3 w-3 ml-2" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
                 </Button>
               </div>
               
-              {/* Secondary Actions */}
-              <ExportJobsDialog />
+              {/* Manage Projects */}
               <Link href="/projects">
                 <Button variant="outline">
                   <FolderOpen className="h-4 w-4 mr-2" />
-                  Projects
+                  Manage Projects
                 </Button>
               </Link>
+            </div>
+            
+            {/* Secondary Actions Group */}
+            <div className="flex items-center gap-2">
+              <ExportJobsDialog />
               <Link href="/admin/users">
-                <Button variant="outline">
+                <Button variant="outline" size="sm">
                   <Users className="h-4 w-4 mr-2" />
                   User Management
                 </Button>
               </Link>
               
+              {/* Tenant Management (Super Admin Only) */}
+              {user?.role === 'super_admin' && (
+                <Link href="/admin/tenants">
+                  <Button variant="outline" size="sm">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Tenant Management
+                  </Button>
+                </Link>
+              )}
+              
               {/* Logout Button */}
               <Button 
                 variant="outline"
-                onClick={() => {
-                  // Logout logic
-                  window.location.href = '/';
-                }}
+                size="sm"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
               >
-                <LogOut className="h-4 w-4 mr-2" />
+                {logoutMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <LogOut className="h-4 w-4 mr-2" />
+                )}
                 Logout
               </Button>
             </div>

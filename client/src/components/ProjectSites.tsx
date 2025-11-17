@@ -1,30 +1,51 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload, Download, MapPin, Trash2, Plus, Pencil } from "lucide-react";
+import { Loader2, Upload, Download, MapPin, Trash2, Plus, Pencil, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SiteLocationMap } from "@/components/SiteLocationMap";
 import AddSiteForm from "@/components/AddSiteForm";
 import EditSiteForm from "@/components/EditSiteForm";
+import AddressSelectionDialog from "@/components/AddressSelectionDialog";
 
 interface ProjectSitesProps {
   projectId: string;
 }
 
 export default function ProjectSites({ projectId }: ProjectSitesProps) {
+  // DEBUG: Log projectId to verify it's correct
+  console.log('[ProjectSites] Component mounted/updated with projectId:', projectId);
+  console.log('[ProjectSites] ProjectId type:', typeof projectId);
+  console.log('[ProjectSites] ProjectId length:', projectId?.length);
+  
+  // Use ref to always have the current projectId value (fixes closure bug)
+  const projectIdRef = useRef(projectId);
+  useEffect(() => {
+    projectIdRef.current = projectId;
+    console.log('[ProjectSites] Updated projectIdRef.current to:', projectId);
+  }, [projectId]);
+  
   const [uploading, setUploading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingLocationSiteId, setEditingLocationSiteId] = useState<number | null>(null);
   const [editingSite, setEditingSite] = useState<any>(null);
+  const [showAddressDialog, setShowAddressDialog] = useState(false);
+  const [addressDialogSite, setAddressDialogSite] = useState<any>(null);
   
   // Fetch sites
   const utils = trpc.useUtils();
   const { data: sites, isLoading, refetch } = trpc.projects.getSites.useQuery({ projectId });
+  
+  // Debug logging
+  console.log('[ProjectSites] Component rendered for projectId:', projectId);
+  console.log('[ProjectSites] isLoading:', isLoading);
+  console.log('[ProjectSites] sites data:', sites);
+  console.log('[ProjectSites] sites length:', sites?.length);
   
   // Download template mutation
   const downloadTemplateMutation = trpc.projects.downloadSiteTemplate.useMutation({
@@ -58,7 +79,7 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
   const uploadSitesMutation = trpc.projects.uploadSites.useMutation({
     onSuccess: (result) => {
       if (result.success) {
-        let message = `Successfully imported ${result.imported} site${result.imported !== 1 ? 's' : ''}`;
+        let message = 'Import successful';
         if (result.skipped && result.skipped > 0) {
           message += ` (${result.skipped} duplicate${result.skipped !== 1 ? 's' : ''} skipped)`;
         }
@@ -87,6 +108,21 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
     },
     onError: (error) => {
       toast.error(`Failed to delete site: ${error.message}`);
+    },
+  });
+  
+  // Geocode site mutation
+  const geocodeSiteMutation = trpc.projects.geocodeSite.useMutation({
+    onSuccess: () => {
+      toast.success("Site geocoded successfully");
+      utils.projects.getSites.invalidate({ projectId });
+    },
+    onError: (error) => {
+      toast.error(`Automatic geocoding failed: ${error.message}`);
+      // Show address selection dialog
+      if (addressDialogSite) {
+        setShowAddressDialog(true);
+      }
     },
   });
   
@@ -128,10 +164,30 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
         }
         
         const fileData = base64.split(',')[1]; // Remove data:... prefix
-        console.log('Uploading file, size:', fileData.length, 'bytes');
+        
+        // BUGFIX: Use projectIdRef.current to get the CURRENT projectId value
+        // This fixes the closure bug where projectId was stuck on the first value
+        const currentProjectId = projectIdRef.current;
+        
+        console.log('[ProjectSites Upload] ===== FRONTEND UPLOAD START =====');
+        console.log('[ProjectSites Upload] ProjectId from ref:', currentProjectId);
+        console.log('[ProjectSites Upload] ProjectId length:', currentProjectId.length);
+        console.log('[ProjectSites Upload] ProjectId type:', typeof currentProjectId);
+        console.log('[ProjectSites Upload] File size:', fileData.length, 'bytes');
+        
+        // Show alert to user so they can see which project is being uploaded to
+        const confirmUpload = window.confirm(
+          `You are about to upload sites to project: "${currentProjectId}"\n\n` +
+          `Click OK to proceed with upload.`
+        );
+        
+        if (!confirmUpload) {
+          setUploading(false);
+          return;
+        }
         
         uploadSitesMutation.mutate({
-          projectId,
+          projectId: currentProjectId,
           fileData,
         });
       } catch (error) {
@@ -179,7 +235,7 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
             Add Site Manually
           </Button>
           
-          <Label htmlFor="site-upload" className="cursor-pointer">
+          <Label htmlFor={`site-upload-${projectId}`} className="cursor-pointer">
             <Button
               variant="outline"
               disabled={uploading}
@@ -196,7 +252,7 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
             </Button>
           </Label>
           <Input
-            id="site-upload"
+            id={`site-upload-${projectId}`}
             type="file"
             accept=".xlsx,.xls"
             className="hidden"
@@ -223,9 +279,13 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <h4 className="font-medium">{site.siteName}</h4>
-                      {site.latitude && site.longitude && (
+                      {site.latitude && site.longitude ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                           ✓ Geo-located
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          ⚠ Missing coordinates
                         </span>
                       )}
                     </div>
@@ -243,6 +303,21 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                     )}
                   </div>
                   <div className="flex gap-1">
+                    {/* Show Geocode button only if coordinates are missing */}
+                    {(!site.latitude || !site.longitude) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setAddressDialogSite(site);
+                          geocodeSiteMutation.mutate({ siteId: site.id });
+                        }}
+                        disabled={geocodeSiteMutation.isPending}
+                        title="Geocode address to get coordinates"
+                      >
+                        <Navigation className="h-4 w-4 text-yellow-600" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -367,10 +442,38 @@ export default function ProjectSites({ projectId }: ProjectSitesProps) {
                 setShowEditDialog(false);
                 setEditingSite(null);
               }}
+              onGeocodeFailure={() => {
+                // Show address selection dialog
+                setAddressDialogSite(editingSite);
+                setShowAddressDialog(true);
+                setShowEditDialog(false);
+              }}
             />
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Address Selection Dialog */}
+      {addressDialogSite && (
+        <AddressSelectionDialog
+          open={showAddressDialog}
+          onClose={() => {
+            setShowAddressDialog(false);
+            setAddressDialogSite(null);
+          }}
+          initialAddress={`${addressDialogSite.siteAddress}, ${addressDialogSite.city || ''} ${addressDialogSite.postalCode || ''} ${addressDialogSite.country || ''}`.trim()}
+          siteName={addressDialogSite.siteName}
+          onAddressSelected={(latitude, longitude, displayName) => {
+            updateLocationMutation.mutate({
+              siteId: addressDialogSite.id,
+              latitude,
+              longitude,
+            });
+            setShowAddressDialog(false);
+            setAddressDialogSite(null);
+          }}
+        />
+      )}
     </Card>
   );
 }

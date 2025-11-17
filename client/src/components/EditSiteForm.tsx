@@ -12,9 +12,10 @@ interface EditSiteFormProps {
   site: ProjectSite;
   onSuccess: () => void;
   onCancel: () => void;
+  onGeocodeFailure?: () => void;
 }
 
-export default function EditSiteForm({ site, onSuccess, onCancel }: EditSiteFormProps) {
+export default function EditSiteForm({ site, onSuccess, onCancel, onGeocodeFailure }: EditSiteFormProps) {
   const [formData, setFormData] = useState({
     siteName: site.siteName || "",
     siteAddress: site.siteAddress || "",
@@ -26,11 +27,41 @@ export default function EditSiteForm({ site, onSuccess, onCancel }: EditSiteForm
     contactEmail: site.contactEmail || "",
     notes: site.notes || "",
   });
+  
+  // Track if address fields have changed
+  const addressChanged = 
+    formData.siteAddress !== (site.siteAddress || "") ||
+    formData.city !== (site.city || "") ||
+    formData.postalCode !== (site.postalCode || "") ||
+    formData.country !== (site.country || "");
+
+  const geocodeSiteMutation = trpc.projects.geocodeSite.useMutation({
+    onSuccess: () => {
+      toast.success("Site geocoded successfully");
+      onSuccess();
+    },
+    onError: (error) => {
+      console.error("Error geocoding site:", error);
+      toast.warning(`Site updated but automatic geocoding failed`);
+      // Call the geocode failure callback to show address selection dialog
+      if (onGeocodeFailure) {
+        onGeocodeFailure();
+      } else {
+        onSuccess(); // Fallback: close dialog if no callback provided
+      }
+    },
+  });
 
   const updateSiteMutation = trpc.projects.updateSite.useMutation({
     onSuccess: () => {
       toast.success("Site updated successfully");
-      onSuccess();
+      // If address changed, automatically geocode
+      if (addressChanged) {
+        toast.info("Geocoding updated address...");
+        geocodeSiteMutation.mutate({ siteId: site.id });
+      } else {
+        onSuccess();
+      }
     },
     onError: (error) => {
       console.error("Error updating site:", error);
