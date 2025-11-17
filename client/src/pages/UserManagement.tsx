@@ -135,29 +135,23 @@ export default function UserManagement() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center gap-4">
               <Link href="/admin">
-                <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" />
+                <Button variant="ghost" size="sm">← Back to Dashboard</Button>
               </Link>
-              <div className="hidden md:block border-l border-border pl-4">
-                <p className="text-sm font-medium text-muted-foreground">On-Demand Despatch Field Services Platform</p>
+              <div>
+                <h1 className="text-xl font-bold">User Management</h1>
+                <p className="text-sm text-gray-600">Manage admin users and change your password</p>
               </div>
             </div>
-            <Link href="/admin">
-              <Button variant="outline">Back to Dashboard</Button>
-            </Link>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-foreground mb-2">User Management</h2>
-          <p className="text-muted-foreground">Manage admin users and change your password</p>
-        </div>
 
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           {/* Change Password Card */}

@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 import { Building2, Plus, Users, Trash2, Edit, Ban, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 /**
  * Tenant Management Page - Super Admin Only
@@ -128,22 +128,76 @@ export default function TenantManagement() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Building2 className="h-8 w-8" />
-            Tenant Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage all organizations and their settings
-          </p>
+    <div className="min-h-screen bg-background">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="flex items-center gap-4">
+              <Link href="/admin">
+                <Button variant="ghost" size="sm">← Back to Dashboard</Button>
+              </Link>
+              <div>
+                <h1 className="text-xl font-bold">Tenant Management</h1>
+                <p className="text-sm text-gray-600">Manage all organizations and their settings</p>
+              </div>
+            </div>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Tenant
+            </Button>
+          </div>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Tenant
-        </Button>
-      </div>
+      </header>
+
+      <main className="container mx-auto py-8">
+
+      {/* Explainer Section */}
+      <Card className="mb-6 bg-orange-50 border-orange-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-orange-900">
+            <Building2 className="h-5 w-5" />
+            What is Tenant Management?
+          </CardTitle>
+          <CardDescription className="text-orange-800">
+            Control and monitor all organizations using your platform
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-sm text-orange-900 space-y-4">
+          <p>
+            Each <strong>tenant</strong> represents an independent organization with isolated data, users, and settings. Tenant management gives you complete control over all organizations on your platform.
+          </p>
+          <div className="grid md:grid-cols-4 gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-orange-600 font-bold text-lg">1</span>
+                <strong>Create Tenants</strong>
+              </div>
+              <p className="text-xs text-orange-700">Add new organizations with unique slugs</p>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-orange-600 font-bold text-lg">2</span>
+                <strong>Suspend Access</strong>
+              </div>
+              <p className="text-xs text-orange-700">Block login for payment or policy issues</p>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-orange-600 font-bold text-lg">3</span>
+                <strong>Monitor Activity</strong>
+              </div>
+              <p className="text-xs text-orange-700">Track last used date and subscription status</p>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-orange-600 font-bold text-lg">4</span>
+                <strong>Manage Admins</strong>
+              </div>
+              <p className="text-xs text-orange-700">View primary admins and contact information</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -243,6 +297,7 @@ export default function TenantManagement() {
           </Table>
         </CardContent>
       </Card>
+      </main>
 
       {/* Create Tenant Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

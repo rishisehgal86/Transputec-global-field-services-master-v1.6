@@ -30,7 +30,7 @@ export async function getProjectSites(projectId: string): Promise<ProjectSite[]>
     console.log('[getProjectSites] Found sites:', sites.length);
     console.log('[getProjectSites] Requested projectId:', projectId);
     if (sites.length > 0) {
-      const uniqueProjectIds = [...new Set(sites.map(s => s.projectId))];
+      const uniqueProjectIds = Array.from(new Set(sites.map(s => s.projectId)));
       console.log('[getProjectSites] UNIQUE projectIds in results:', uniqueProjectIds.join(', '));
       console.log('[getProjectSites] First 3 site projectIds:', sites.slice(0, 3).map(s => s.projectId).join(', '));
       console.log('[getProjectSites] First 3 site names:', sites.slice(0, 3).map(s => s.siteName).join(', '));
@@ -51,7 +51,7 @@ export async function getProjectSites(projectId: string): Promise<ProjectSite[]>
     if (filteredSites.length !== sites.length) {
       console.error('[getProjectSites] WARNING: Drizzle query returned wrong sites!');
       console.error('[getProjectSites] Expected projectId:', projectId);
-      console.error('[getProjectSites] Got sites from projects:', [...new Set(sites.map(s => s.projectId))].join(', '));
+      console.error('[getProjectSites] Got sites from projects:', Array.from(new Set(sites.map(s => s.projectId))).join(', '));
     }
     
     return filteredSites;
@@ -136,7 +136,7 @@ export async function deleteProjectSite(siteId: number): Promise<boolean> {
     .set({ isActive: false })
     .where(eq(projectSites.id, siteId));
   
-  return (result.affectedRows || 0) > 0;
+  return (result[0]?.affectedRows || 0) > 0;
 }
 
 /**
@@ -151,7 +151,7 @@ export async function deleteAllProjectSites(projectId: string): Promise<number> 
     .set({ isActive: false })
     .where(eq(projectSites.projectId, projectId));
   
-  return result.affectedRows || 0;
+  return result[0]?.affectedRows || 0;
 }
 
 /**
@@ -184,8 +184,7 @@ export async function updateProjectSiteLocation(siteId: number, latitude: number
     .update(projectSites)
     .set({ 
       latitude: latitude.toString(),
-      longitude: longitude.toString(),
-      updatedAt: new Date()
+      longitude: longitude.toString()
     })
     .where(eq(projectSites.id, siteId));
   

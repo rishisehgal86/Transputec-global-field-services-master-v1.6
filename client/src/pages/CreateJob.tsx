@@ -283,6 +283,54 @@ export default function CreateJob() {
           </Link>
         </div>
 
+        {/* Explainer Section */}
+        <Card className="mb-6 bg-orange-50 border-orange-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-900">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Admin Job Creation
+            </CardTitle>
+            <CardDescription className="text-orange-800">
+              Create and dispatch field service jobs directly from the admin portal
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-orange-900 space-y-4">
+            <p>
+              Use this form to create field service jobs on behalf of clients. Jobs created here bypass client approval and go directly to engineers for dispatch.
+            </p>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-orange-600 font-bold text-lg">1</span>
+                  <strong>Client Details</strong>
+                </div>
+                <p className="text-xs text-orange-700">Enter client name and contact information</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-orange-600 font-bold text-lg">2</span>
+                  <strong>Site Location</strong>
+                </div>
+                <p className="text-xs text-orange-700">Specify job site address and details</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-orange-600 font-bold text-lg">3</span>
+                  <strong>Schedule Time</strong>
+                </div>
+                <p className="text-xs text-orange-700">Set appointment date and timezone</p>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-orange-600 font-bold text-lg">4</span>
+                  <strong>Assign Engineer</strong>
+                </div>
+                <p className="text-xs text-orange-700">Send directly to engineer or leave unassigned</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Create New Field Service Job</CardTitle>

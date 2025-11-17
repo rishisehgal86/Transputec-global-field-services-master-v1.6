@@ -1418,3 +1418,106 @@ ns
 - [x] Database migration for existing primary admins
 - [x] All admin roles properly distinguished (Super Admin, Primary Admin, Admin)
 
+
+
+## UI Improvements - Navigation and Explainers
+- [x] Add "Back to Dashboard" button to all admin pages (User Management, Tenant Management, Admin Job Creation, Job Details)
+- [x] Create explainer section for Admin Job Creation page (similar to Projects page style)
+- [x] Create explainer section for Tenant Management page (explain multi-tenancy, suspension, roles)
+
+
+
+## Fix Back to Dashboard Button Visibility
+- [x] Verify User Management page has visible Back to Dashboard button
+- [x] Verify Tenant Management page has visible Back to Dashboard button  
+- [x] Verify Admin Job Creation page has visible Back to Dashboard button (already had it)
+
+
+
+## Homepage Marketing Redesign - MSP Field Service Platform
+- [x] Fix TenantManagement syntax error
+- [x] Hero: "All-in-One Field Service Management for MSPs" - end-to-end solution positioning
+- [x] End-to-end workflow showcase (Request → Dispatch → Execute → Report)
+- [x] Projects feature highlight - client experience driver with dedicated portals
+- [x] Three-tier value proposition (MSPs, MSP Clients, End Users)
+- [x] Complete feature set (multi-tenant, tracking, projects, reporting, exports)
+- [x] Replace-your-stack section (vs spreadsheets, emails, WhatsApp)
+- [x] Reporting & export capabilities (end-of-month, billing, analytics)
+- [x] Client experience focus - visibility, self-service, real-time updates
+- [x] CTA sections (Start Free Trial, Request Demo)
+- [x] Social proof, testimonials, footer
+
+
+
+## Add SVR Feature to Homepage
+- [x] Add dedicated SVR (Service Verification Report) section to homepage
+- [x] Explain SVR capabilities for clients (proof of service, accountability)
+- [x] Explain SVR benefits for end users (transparency, documentation)
+- [x] Highlight information included in SVR (engineer details, timestamps, location, signatures, photos)
+
+
+
+## Add Live Engineer Tracking Section to Homepage
+- [x] Add dedicated Live Engineer Tracking section with real-time GPS capabilities
+- [x] Highlight what MSPs see (all engineers, live locations, ETAs, job assignments)
+- [x] Highlight what clients see (assigned engineer, live tracking link, ETA, job details)
+- [x] Highlight what engineers receive (job details, address, GPS navigation, contact info)
+- [x] Explain benefits (reduced "where are you" calls, accurate ETAs, route optimization)
+- [x] Show information flow (weblink sharing, address details, job specifications)
+
+
+
+## Update Homepage CTAs for Pre-Payment Launch
+- [x] Replace "Start Free Trial" buttons with "Get Started" links to signup page
+- [x] Remove all free trial messaging until payment system is implemented
+- [x] Update hero CTA to point to /request (signup)
+- [x] Update final CTA section to point to /request (signup)
+- [x] Keep "Request Demo" as secondary CTA option
+
+
+
+## Fix Signup Button Links and Header
+- [x] Change Get Started button links from /request to /signup
+- [x] Update hero CTA link
+- [x] Update final CTA link
+- [x] Change Admin Dashboard button text to "MSP Login"
+
+
+
+## Add Live Communication Channel Section
+- [x] Add dedicated section for real-time messaging feature
+- [x] Highlight three-way communication (MSP ↔ Client ↔ Engineer)
+- [x] Explain features (instant messaging, photo sharing, status updates, notifications)
+- [x] Show client experience benefits (no phone tag, instant updates, transparency)
+- [x] Highlight MSP benefits (reduced calls, documented communication, faster resolution)
+- [x] Show engineer benefits (quick clarifications, photo requests, direct client contact)
+
+
+
+## Remove Specific Cards from Communication Section
+- [x] Remove "Push Notifications" card from Communication Features
+- [x] Remove "No Phone Tag" card from Client Experience Benefits
+- [x] Remove "Complete Transparency" card from Client Experience Benefits
+
+
+
+## Fix Get Started Button Links (Again)
+- [x] Change first Get Started link from /request to /signup (hero section)
+- [x] Change second Get Started link from /request to /signup (final CTA section)
+
+
+
+## Fix TypeScript Errors for Publishing
+- [x] Fix type error in project-sites-db.ts line 156 (number vs string type)
+- [x] Fix type error in project-sites-db.ts line 161 (affectedRows property)
+- [x] Fix Set iteration errors (downlevelIteration)
+- [x] Verify dev server running correctly
+- [ ] Create clean checkpoint for publishing
+
+
+
+## Fix Nested Anchor Tag Error
+- [x] Find nested <a> tags in Home.tsx (footer links wrapping <a> inside <Link>)
+- [x] Remove nested anchor structure (moved className to Link component)
+- [x] Verify error is resolved (no console warnings)
+
