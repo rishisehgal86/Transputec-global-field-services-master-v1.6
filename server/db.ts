@@ -199,6 +199,7 @@ export async function addJobComment(comment: InsertJobComment) {
   if (!db) throw new Error("Database not available");
   
   // Filter out undefined values to prevent "default" string insertion
+  // Keep null values as they are valid for nullable fields
   const cleanedComment = Object.fromEntries(
     Object.entries(comment).filter(([_, value]) => value !== undefined)
   ) as InsertJobComment;

@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
+import { uploadRouter } from "./upload-router";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -35,6 +36,7 @@ function getBaseUrl(req: any): string {
 
 export const appRouter = router({
   system: systemRouter,
+  upload: uploadRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -927,6 +929,13 @@ export const appRouter = router({
         authorName: z.string(),
         authorType: z.enum(['engineer', 'client', 'admin']),
         authorEmail: z.string().optional(),
+        attachments: z.array(z.object({
+          url: z.string(),
+          type: z.enum(['image', 'video']),
+          filename: z.string(),
+          size: z.number(),
+          mimeType: z.string(),
+        })).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const baseUrl = getBaseUrl(ctx.req);
@@ -935,11 +944,14 @@ export const appRouter = router({
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
         
+        const { serializeAttachments } = await import('./media-upload');
+        
         await addJobComment({
           jobId: job.id,
           authorName: input.authorName,
           authorType: input.authorType,
           comment: input.comment,
+          attachments: input.attachments ? serializeAttachments(input.attachments) : null,
         });
         
         // Send email notifications to all relevant parties

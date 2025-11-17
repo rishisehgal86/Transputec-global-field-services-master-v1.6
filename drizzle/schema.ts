@@ -312,6 +312,9 @@ export const jobComments = mysqlTable("jobComments", {
   authorType: mysqlEnum("authorType", ["engineer", "client", "admin"]).notNull(),
   comment: text("comment").notNull(),
   
+  // Media Attachments (JSON array of {url: string, type: 'image'|'video', filename: string, size: number})
+  attachments: text("attachments"),
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

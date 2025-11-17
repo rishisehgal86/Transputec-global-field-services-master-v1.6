@@ -1537,3 +1537,27 @@ ns
 - [x] Re-enable strict mode and fix remaining strict type errors (26 errors fixed)
 - [x] Verify all TypeScript errors are resolved with strict mode (0 errors)
 
+
+
+## Media Upload for Job Comments
+- [x] Update jobComments table schema to add attachments field (JSON array)
+- [x] Create media upload API endpoint with file validation
+- [x] Implement S3 storage for uploaded photos and videos
+- [x] Update JobComments component with file upload UI
+- [x] Add file preview and display in comments
+- [x] Add file size and type validation (images: jpg, png, gif, webp; videos: mp4, mov, avi, webm)
+- [x] Test upload functionality for admin users
+- [x] Test upload functionality for engineers
+- [x] Test upload functionality for clients
+- [x] Add loading states and error handling
+
+
+
+## Fix Media Upload Error
+- [x] Check browser console for error details (file uploads, comment post fails)
+- [x] Check server logs for backend errors
+- [x] Fix handleSubmit to use mutateAsync for proper async handling
+- [x] Fix "Job not found" error by adding proper loading checks
+- [x] Fix missing jobs.getJobByToken procedure in router (changed to jobs.getByToken)
+- [x] Verify media upload works without errors
+
