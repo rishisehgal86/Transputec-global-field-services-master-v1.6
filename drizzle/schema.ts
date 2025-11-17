@@ -108,6 +108,7 @@ export const users = mysqlTable("users", {
   name: text("name").notNull(),
   role: mysqlEnum("role", ["super_admin", "admin"]).default("admin").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
+  isPrimaryAdmin: boolean("isPrimaryAdmin").default(false).notNull(), // First admin who created the organization
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastLogin: timestamp("lastLogin"),

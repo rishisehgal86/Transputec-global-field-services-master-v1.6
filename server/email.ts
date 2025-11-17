@@ -1225,15 +1225,16 @@ export async function sendNewUserEmail(params: {
   recipientName: string;
   password: string;
   organizationId: number;
+  baseUrl?: string;
 }): Promise<void> {
-  const { recipientEmail, recipientName, password, organizationId } = params;
+  const { recipientEmail, recipientName, password, organizationId, baseUrl: providedBaseUrl } = params;
   
   // Get organization details
   const { getOrganizationById } = await import('./organizations-db');
   const organization = await getOrganizationById(organizationId);
   const orgName = organization?.name || 'Your Organization';
   
-  const baseUrl = getBaseUrl();
+  const baseUrl = providedBaseUrl || getBaseUrl();
   const loginUrl = `${baseUrl}/login`;
 
   const htmlContent = `

@@ -17,6 +17,16 @@ const requireUser = t.middleware(async opts => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
+  // Update organization's lastUsedAt timestamp in background
+  if (ctx.user.organizationId) {
+    // Fire and forget - don't await to avoid slowing down requests
+    import('../organizations-db').then(({ updateOrganizationLastUsed }) => {
+      updateOrganizationLastUsed(ctx.user.organizationId).catch(err => {
+        console.error('[Middleware] Failed to update organization lastUsedAt:', err);
+      });
+    }).catch(() => {});
+  }
+
   return next({
     ctx: {
       ...ctx,

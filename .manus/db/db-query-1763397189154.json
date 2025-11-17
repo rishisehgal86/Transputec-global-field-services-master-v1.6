@@ -1,0 +1,146 @@
+{
+  "query": "SELECT o.id as org_id, o.name as org_name, u.id as user_id, u.email, u.name as user_name, u.isPrimaryAdmin \nFROM organizations o \nLEFT JOIN users u ON u.organizationId = o.id \nORDER BY o.id, u.createdAt ASC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT o.id as org_id, o.name as org_name, u.id as user_id, u.email, u.name as user_name, u.isPrimaryAdmin \nFROM organizations o \nLEFT JOIN users u ON u.organizationId = o.id \nORDER BY o.id, u.createdAt ASC;",
+  "rows": [
+    {
+      "org_id": "1",
+      "org_name": "FieldPulse",
+      "user_id": "1",
+      "email": "admin@field-pulse.io",
+      "user_name": "FieldPulse Admin",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "1",
+      "org_name": "FieldPulse",
+      "user_id": "30001",
+      "email": "rishi@karrdservicesuae.com",
+      "user_name": "rishi stes",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "1",
+      "org_name": "FieldPulse",
+      "user_id": "30002",
+      "email": "gghheguyrhimcdwhoe@nespf.com",
+      "user_name": "rishi",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "1",
+      "org_name": "FieldPulse",
+      "user_id": "60001",
+      "email": "tlpqbnaevtrellobhr@nesopf.com",
+      "user_name": "bob",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "30001",
+      "org_name": "jessp's Organization",
+      "user_id": "60002",
+      "email": "yjmsdroganfbkoqpgt@nesopf.com",
+      "user_name": "jessp",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "60001",
+      "org_name": "Test Organization",
+      "user_id": "NULL",
+      "email": "NULL",
+      "user_name": "NULL",
+      "isPrimaryAdmin": "NULL"
+    },
+    {
+      "org_id": "90001",
+      "org_name": "transtest",
+      "user_id": "90001",
+      "email": "cxlbqfefybvajlreyr@nesopf.com",
+      "user_name": "sdok",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "90002",
+      "org_name": "robo",
+      "user_id": "90002",
+      "email": "dlzpbbtkpoevxqmfsf@nespf.com",
+      "user_name": "robbbo",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "120001",
+      "org_name": "Riffj",
+      "user_id": "120001",
+      "email": "rishis@karrdservicesuae.com",
+      "user_name": "Tgujj",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "120002",
+      "org_name": "Test Organization",
+      "user_id": "120002",
+      "email": "testadmin@example.com",
+      "user_name": "Test Admin",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "120003",
+      "org_name": "Test Company 2",
+      "user_id": "120003",
+      "email": "john.doe@testcompany.com",
+      "user_name": "John Doe",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "150001",
+      "org_name": "bob",
+      "user_id": "150001",
+      "email": "ysthhzzmssfesqmnrv@nespf.com",
+      "user_name": "testname",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "180001",
+      "org_name": "asdisjd",
+      "user_id": "180001",
+      "email": "jqzcvmlryhopfacrkf@nespj.com",
+      "user_name": "bob",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "180001",
+      "org_name": "asdisjd",
+      "user_id": "210003",
+      "email": "gbemdadmnxbisvplcm@nespf.com",
+      "user_name": "kkmkkkm",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "180002",
+      "org_name": "test ten 2",
+      "user_id": "180002",
+      "email": "abkparnnlzzrlvnfyp@nespj.com",
+      "user_name": "ten2",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "180003",
+      "org_name": "test ten 3",
+      "user_id": "180003",
+      "email": "jqkvaanuuwylulzhem@nesopf.com",
+      "user_name": "aosdsdo",
+      "isPrimaryAdmin": "0"
+    },
+    {
+      "org_id": "180004",
+      "org_name": "test ten 4",
+      "user_id": "180004",
+      "email": "texfguoicipcetitsz@xfavaj.com",
+      "user_name": "ten4",
+      "isPrimaryAdmin": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "org_id\torg_name\tuser_id\temail\tuser_name\tisPrimaryAdmin\n1\tFieldPulse\t1\tadmin@field-pulse.io\tFieldPulse Admin\t0\n1\tFieldPulse\t30001\trishi@karrdservicesuae.com\trishi stes\t0\n1\tFieldPulse\t30002\tgghheguyrhimcdwhoe@nespf.com\trishi\t0\n1\tFieldPulse\t60001\ttlpqbnaevtrellobhr@nesopf.com\tbob\t0\n30001\tjessp's Organization\t60002\tyjmsdroganfbkoqpgt@nesopf.com\tjessp\t0\n60001\tTest Organization\tNULL\tNULL\tNULL\tNULL\n90001\ttranstest\t90001\tcxlbqfefybvajlreyr@nesopf.com\tsdok\t0\n90002\trobo\t90002\tdlzpbbtkpoevxqmfsf@nespf.com\trobbbo\t0\n120001\tRiffj\t120001\trishis@karrdservicesuae.com\tTgujj\t0\n120002\tTest Organization\t120002\ttestadmin@example.com\tTest Admin\t0\n120003\tTest Company 2\t120003\tjohn.doe@testcompany.com\tJohn Doe\t0\n150001\tbob\t150001\tysthhzzmssfesqmnrv@nespf.com\ttestname\t0\n180001\tasdisjd\t180001\tjqzcvmlryhopfacrkf@nespj.com\tbob\t0\n180001\tasdisjd\t210003\tgbemdadmnxbisvplcm@nespf.com\tkkmkkkm\t0\n180002\ttest ten 2\t180002\tabkparnnlzzrlvnfyp@nespj.com\tten2\t0\n180003\ttest ten 3\t180003\tjqkvaanuuwylulzhem@nesopf.com\taosdsdo\t0\n180004\ttest ten 4\t180004\ttexfguoicipcetitsz@xfavaj.com\tten4\t0\n",
+  "stderr": "",
+  "execution_time_ms": 95
+}

@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE users u\nINNER JOIN (\n  SELECT organizationId, MIN(id) as first_user_id\n  FROM users\n  GROUP BY organizationId\n) first_users ON u.id = first_users.first_user_id\nSET u.isPrimaryAdmin = 1\nWHERE u.isPrimaryAdmin = 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute UPDATE users u\nINNER JOIN (\n  SELECT organizationId, MIN(id) as first_user_id\n  FROM users\n  GROUP BY organizationId\n) first_users ON u.id = first_users.first_user_id\nSET u.isPrimaryAdmin = 1\nWHERE u.isPrimaryAdmin = 0;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 69
+}

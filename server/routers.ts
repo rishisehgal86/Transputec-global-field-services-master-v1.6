@@ -62,6 +62,15 @@ export const appRouter = router({
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         
+        // Update organization's lastUsedAt timestamp
+        try {
+          const { updateOrganizationLastUsed } = await import('./organizations-db');
+          await updateOrganizationLastUsed(user.organizationId);
+        } catch (error) {
+          console.error('[Auth] Failed to update organization lastUsedAt:', error);
+          // Don't block login on failure
+        }
+        
         return {
           success: true,
           user: {
@@ -104,7 +113,7 @@ export const appRouter = router({
           name: input.organizationName,
         });
         
-        // Create admin user
+        // Create admin user (mark as primary admin)
         const passwordHash = await hashPassword(input.password);
         const user = await createUser({
           email: input.email,
@@ -112,6 +121,7 @@ export const appRouter = router({
           passwordHash,
           organizationId: organization.id,
           role: 'admin',
+          isPrimaryAdmin: true, // First admin who created the organization
         });
         
         // Send welcome email (don't block on failure)
@@ -2080,6 +2090,28 @@ export const appRouter = router({
         return await createOrganization({ name: input.name });
       }),
     
+    // Suspend organization (super admin only)
+    suspend: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'super_admin') {
+          throw new Error('Unauthorized: Super admin access required');
+        }
+        const { suspendOrganization } = await import('./organizations-db');
+        return await suspendOrganization(input.id);
+      }),
+    
+    // Unsuspend organization (super admin only)
+    unsuspend: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'super_admin') {
+          throw new Error('Unauthorized: Super admin access required');
+        }
+        const { unsuspendOrganization } = await import('./organizations-db');
+        return await unsuspendOrganization(input.id);
+      }),
+    
     // Delete organization (super admin only)
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -2139,10 +2171,12 @@ export const appRouter = router({
         // Send email notification with credentials
         try {
           const { sendNewUserEmail } = await import('./email');
+          const baseUrl = getBaseUrl(ctx.req);
           await sendNewUserEmail({
             recipientEmail: input.email,
             recipientName: input.name,
             password: input.password,
+            baseUrl,
             organizationId: ctx.user.organizationId,
           });
         } catch (error) {
@@ -2197,11 +2231,17 @@ export const appRouter = router({
         isActive: z.boolean(),
       }))
       .mutation(async ({ input, ctx }) => {
-        const { updateUserStatus } = await import('./auth');
+        const { updateUserStatus, getUserById } = await import('./auth');
         
         // Prevent users from deactivating themselves
         if (ctx.user && input.userId === ctx.user.id) {
           throw new Error('Cannot deactivate your own account');
+        }
+        
+        // Prevent deactivation of primary admin
+        const targetUser = await getUserById(input.userId);
+        if (targetUser?.isPrimaryAdmin && !input.isActive) {
+          throw new Error('Cannot deactivate the primary admin of this organization');
         }
         
         const success = await updateUserStatus(input.userId, input.isActive);
@@ -2210,6 +2250,40 @@ export const appRouter = router({
         }
         
         return { success: true, isActive: input.isActive };
+      }),
+
+    // Resend welcome email to user (admin only)
+    resendWelcomeEmail: protectedProcedure
+      .input(z.object({
+        userId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { getUserById } = await import('./auth');
+        const { getOrganizationById } = await import('./organizations-db');
+        const { sendWelcomeEmail } = await import('./auth-emails');
+        
+        // Get user details
+        const user = await getUserById(input.userId);
+        if (!user) {
+          throw new Error('User not found');
+        }
+        
+        // Get organization details
+        const organization = await getOrganizationById(user.organizationId);
+        if (!organization) {
+          throw new Error('Organization not found');
+        }
+        
+        // Send welcome email
+        const baseUrl = getBaseUrl(ctx.req);
+        await sendWelcomeEmail({
+          email: user.email,
+          name: user.name,
+          organizationName: organization.name,
+          baseUrl,
+        });
+        
+        return { success: true };
       }),
   }),
 });

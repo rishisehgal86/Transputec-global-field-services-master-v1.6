@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Building2, Plus, Users, Trash2, Edit } from "lucide-react";
+import { Building2, Plus, Users, Trash2, Edit, Ban, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 
@@ -68,6 +68,26 @@ export default function TenantManagement() {
     },
   });
 
+  const suspendMutation = trpc.organizations.suspend.useMutation({
+    onSuccess: () => {
+      toast.success("Tenant suspended successfully");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to suspend tenant: ${error.message}`);
+    },
+  });
+
+  const unsuspendMutation = trpc.organizations.unsuspend.useMutation({
+    onSuccess: () => {
+      toast.success("Tenant activated successfully");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to activate tenant: ${error.message}`);
+    },
+  });
+
   const handleCreateTenant = () => {
     if (!newTenantName.trim() || !newTenantSlug.trim()) {
       toast.error("Please fill in all fields");
@@ -83,6 +103,16 @@ export default function TenantManagement() {
   const handleDeleteTenant = (id: number, name: string) => {
     if (confirm(`Are you sure you want to delete tenant "${name}"? This will delete all associated data.`)) {
       deleteMutation.mutate({ id });
+    }
+  };
+
+  const handleToggleSuspension = (id: number, name: string, isActive: boolean) => {
+    if (isActive) {
+      if (confirm(`Suspend tenant "${name}"? Users will not be able to log in until reactivated.`)) {
+        suspendMutation.mutate({ id });
+      }
+    } else {
+      unsuspendMutation.mutate({ id });
     }
   };
 
@@ -131,7 +161,7 @@ export default function TenantManagement() {
                 <TableHead>Primary Admin</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Subscription</TableHead>
-                <TableHead>Projects Enabled</TableHead>
+                <TableHead>Projects</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Last Used</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -162,11 +192,7 @@ export default function TenantManagement() {
                     <Badge variant="outline">{org.subscriptionStatus || "trial"}</Badge>
                   </TableCell>
                   <TableCell>
-                    {org.projectsEnabled ? (
-                      <Badge variant="default">Yes</Badge>
-                    ) : (
-                      <Badge variant="secondary">No</Badge>
-                    )}
+                    <span className="text-sm font-medium">{org.projectCount || 0}</span>
                   </TableCell>
                   <TableCell>
                     {new Date(org.createdAt).toLocaleDateString()}
@@ -181,13 +207,28 @@ export default function TenantManagement() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTenant(org.id, org.name)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleToggleSuspension(org.id, org.name, org.isActive)}
+                        title={org.isActive ? "Suspend tenant" : "Activate tenant"}
+                      >
+                        {org.isActive ? (
+                          <Ban className="h-4 w-4 text-orange-600" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTenant(org.id, org.name)}
+                        title="Delete tenant"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

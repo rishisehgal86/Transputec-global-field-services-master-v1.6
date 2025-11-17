@@ -1,0 +1,18 @@
+{
+  "query": "SHOW COLUMNS FROM users LIKE 'isPrimaryAdmin';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SHOW COLUMNS FROM users LIKE 'isPrimaryAdmin';",
+  "rows": [
+    {
+      "Field": "isPrimaryAdmin",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nisPrimaryAdmin\ttinyint(1)\tNO\t\t0\t\n",
+  "stderr": "",
+  "execution_time_ms": 107
+}

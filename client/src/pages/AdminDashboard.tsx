@@ -103,13 +103,35 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            {/* Organization Display */}
-            {organization && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
-                <span className="text-xs font-medium text-orange-700">Organization:</span>
-                <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
-              </div>
-            )}
+            {/* Organization & Admin Display */}
+            <div className="flex items-center gap-3">
+              {organization && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
+                  <span className="text-xs font-medium text-orange-700">Organization:</span>
+                  <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
+                </div>
+              )}
+              {user && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-md border border-gray-200">
+                  <span className="text-xs text-gray-600">{user.email}</span>
+                  {user.isPrimaryAdmin && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-medium">
+                      Primary Admin
+                    </span>
+                  )}
+                  {user.role === 'super_admin' && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-600 text-white font-medium">
+                      Super Admin
+                    </span>
+                  )}
+                  {user.role === 'admin' && !user.isPrimaryAdmin && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600 text-white font-medium">
+                      Admin
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Bottom Row: Action Buttons */}

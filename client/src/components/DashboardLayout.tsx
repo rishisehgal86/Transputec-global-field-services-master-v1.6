@@ -187,15 +187,35 @@ function DashboardLayoutContent({
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src={APP_LOGO}
-                      className="h-8 w-8 rounded-md object-cover ring-1 ring-border shrink-0"
-                      alt="Logo"
-                    />
-                    <span className="font-semibold tracking-tight truncate">
-                      {APP_TITLE}
-                    </span>
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={APP_LOGO}
+                        className="h-8 w-8 rounded-md object-cover ring-1 ring-border shrink-0"
+                        alt="Logo"
+                      />
+                      <span className="font-semibold tracking-tight truncate">
+                        {APP_TITLE}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 pl-11 text-xs text-muted-foreground">
+                      <span className="truncate">{user?.email}</span>
+                      {user?.isPrimaryAdmin && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-medium shrink-0">
+                          Primary Admin
+                        </span>
+                      )}
+                      {user?.role === 'super_admin' && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-600 text-white font-medium shrink-0">
+                          Super Admin
+                        </span>
+                      )}
+                      {user?.role === 'admin' && !user?.isPrimaryAdmin && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600 text-white font-medium shrink-0">
+                          Admin
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={toggleSidebar}

@@ -1340,3 +1340,81 @@ ns
 - [x] Add primary admin email column to tenant management table
 - [x] Update organizations.list endpoint to include admin email
 
+
+
+## Tenant Management - Show Project Count
+- [x] Update getAllOrganizationsWithAdmins to include project count
+- [x] Replace Projects Enabled column with Project Count in tenant management table
+
+
+
+## Fix Welcome Email and Add Resend Functionality
+- [x] Fix welcome email login link to use correct base URL (currently broken)
+- [x] Add resend welcome email button to user management table
+- [x] Create users.resendWelcomeEmail endpoint
+- [x] Test email sending with correct login URL
+
+
+
+## Primary Admin Protection
+- [x] Add isPrimaryAdmin flag to users table
+- [x] Mark first admin of organization as primary admin during signup
+- [x] Prevent deactivation of primary admin in backend (toggleStatus endpoint)
+- [x] Hide deactivate button for primary admin in User Management UI
+- [ ] Test that sub-admins cannot deactivate primary admin
+
+
+
+## Automatic lastUsedAt Tracking
+- [x] Create updateOrganizationLastUsed function in organizations-db.ts
+- [x] Update lastUsedAt on user login (auth.login endpoint)
+- [x] Add middleware to update lastUsedAt on all protected procedure calls
+- [x] Test that lastUsedAt updates when users perform actions
+- [x] Verify super admin can see accurate last used timestamps
+
+
+
+## Migrate Existing Primary Admins
+- [x] Query all organizations and find their first admin user
+- [x] Update isPrimaryAdmin=true for first admin of each organization
+- [x] Verify all existing organizations have a primary admin marked (12 primary admins found)
+
+
+
+## Organization Suspension Feature
+- [x] Add authentication check to block login for suspended organizations
+- [x] Create organizations.suspend endpoint (super admin only)
+- [x] Create organizations.unsuspend endpoint (super admin only)
+- [x] Add suspend/unsuspend toggle button to tenant management table
+- [x] Add visual indicator (badge/styling) for suspended organizations in UI
+- [x] Show friendly error message when suspended users try to login
+- [x] Test full suspension flow (suspend → login blocked → unsuspend → login works)
+
+
+
+## Admin Profile Display
+- [x] Move admin email and role badge to top header (next to organization name)
+- [x] Remove role badge from sidebar footer (keep just name and email)
+- [x] Display format: "email | Primary Admin" or "email | Super Admin"
+
+
+
+## Fix Admin Profile Display Visibility
+- [x] Verify isPrimaryAdmin field is included in user context/session
+- [x] Add email and role badge to AdminDashboard header (next to organization)
+- [x] Display works for all admin roles (tenant admin, primary admin, super admin)
+- [x] Visible on main dashboard without needing sidebar expansion
+
+
+
+## ✅ Multi-Tenancy Feature Complete
+- [x] Organization-based tenant isolation
+- [x] Super admin tenant management portal
+- [x] Primary admin protection (cannot be deactivated)
+- [x] Organization suspension feature (preserves data, blocks access)
+- [x] Automatic lastUsedAt tracking for organizations
+- [x] Admin profile display with role badges in dashboard header
+- [x] Welcome email system with resend functionality
+- [x] Database migration for existing primary admins
+- [x] All admin roles properly distinguished (Super Admin, Primary Admin, Admin)
+

@@ -73,6 +73,13 @@ export async function authenticateUser(email: string, password: string): Promise
       return null;
     }
 
+    // Check if organization is suspended
+    const { getOrganizationById } = await import('./organizations-db');
+    const organization = await getOrganizationById(user.organizationId);
+    if (!organization || !organization.isActive) {
+      throw new Error('Your organization has been suspended. Please contact support.');
+    }
+
     // Verify password
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {

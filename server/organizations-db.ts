@@ -118,6 +118,46 @@ export async function getProjectsByOrganization(organizationId: number) {
 
 
 /**
+ * Suspend organization (super admin only)
+ */
+export async function suspendOrganization(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    await db.update(organizations)
+      .set({ isActive: false })
+      .where(eq(organizations.id, id));
+    return { success: true };
+  } catch (error) {
+    console.error('[Organizations] Suspend organization error:', error);
+    throw new Error('Failed to suspend organization');
+  }
+}
+
+/**
+ * Unsuspend organization (super admin only)
+ */
+export async function unsuspendOrganization(id: number) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    await db.update(organizations)
+      .set({ isActive: true })
+      .where(eq(organizations.id, id));
+    return { success: true };
+  } catch (error) {
+    console.error('[Organizations] Unsuspend organization error:', error);
+    throw new Error('Failed to unsuspend organization');
+  }
+}
+
+/**
  * Delete organization (super admin only)
  */
 export async function deleteOrganization(id: number) {
@@ -138,7 +178,27 @@ export async function deleteOrganization(id: number) {
 
 
 /**
- * Get all organizations with primary admin email
+ * Update organization's lastUsedAt timestamp
+ */
+export async function updateOrganizationLastUsed(organizationId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    return; // Silently fail - don't block user actions
+  }
+
+  try {
+    await db
+      .update(organizations)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(organizations.id, organizationId));
+  } catch (error) {
+    console.error('[Organizations] Update lastUsedAt error:', error);
+    // Don't throw - this is a background operation
+  }
+}
+
+/**
+ * Get all organizations with primary admin email and project count
  */
 export async function getAllOrganizationsWithAdmins() {
   const db = await getDb();
@@ -147,10 +207,11 @@ export async function getAllOrganizationsWithAdmins() {
   }
 
   try {
-    const { users } = await import('../drizzle/schema');
+    const { users, projects } = await import('../drizzle/schema');
+    const { count } = await import('drizzle-orm');
     const orgs = await db.select().from(organizations);
     
-    // For each organization, find the first admin user
+    // For each organization, find the first admin user and count projects
     const orgsWithAdmins = await Promise.all(
       orgs.map(async (org) => {
         const adminUsers = await db
@@ -159,9 +220,15 @@ export async function getAllOrganizationsWithAdmins() {
           .where(eq(users.organizationId, org.id))
           .limit(1);
         
+        const projectCount = await db
+          .select({ count: count() })
+          .from(projects)
+          .where(eq(projects.organizationId, org.id));
+        
         return {
           ...org,
           primaryAdminEmail: adminUsers[0]?.email || null,
+          projectCount: projectCount[0]?.count || 0,
         };
       })
     );

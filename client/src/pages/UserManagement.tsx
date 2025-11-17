@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, UserPlus, Key, Shield, User, Mail, Trash2, CheckCircle2 } from "lucide-react";
+import { Loader2, UserPlus, Key, Shield, User, Mail, Trash2, CheckCircle2, Send } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -59,6 +59,15 @@ export default function UserManagement() {
     },
     onError: (error) => {
       toast.error(`Failed to update user status: ${error.message}`);
+    },
+  });
+
+  const resendWelcomeEmailMutation = trpc.users.resendWelcomeEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Welcome email sent successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to send email: ${error.message}`);
     },
   });
 
@@ -370,7 +379,13 @@ export default function UserManagement() {
                               Super Admin
                             </Badge>
                           )}
-                          {user.role === "admin" && (
+                          {user.role === "admin" && user.isPrimaryAdmin && (
+                            <Badge variant="default" className="bg-blue-600">
+                              <Shield className="h-3 w-3 mr-1" />
+                              Primary Admin
+                            </Badge>
+                          )}
+                          {user.role === "admin" && !user.isPrimaryAdmin && (
                             <Badge variant="secondary">Admin</Badge>
                           )}
                           {!user.isActive && (
@@ -396,7 +411,17 @@ export default function UserManagement() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      {user.role !== "super_admin" && user.id !== currentUser?.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => resendWelcomeEmailMutation.mutate({ userId: user.id })}
+                        disabled={resendWelcomeEmailMutation.isPending}
+                        title="Resend welcome email with login credentials"
+                      >
+                        <Send className="h-4 w-4 mr-1" />
+                        Resend Email
+                      </Button>
+                      {user.role !== "super_admin" && user.id !== currentUser?.id && !user.isPrimaryAdmin && (
                         <Button
                           variant={user.isActive ? "outline" : "default"}
                           size="sm"
