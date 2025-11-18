@@ -1319,3 +1319,494 @@ This is an automated message. Please do not reply to this email.
   });
 }
 
+
+
+/**
+ * Send engineer acceptance confirmation to admin
+ */
+export async function sendEngineerAcceptanceNotification(adminEmail: string, acceptanceData: {
+  engineerName: string;
+  engineerEmail: string;
+  jobId: number;
+  siteName: string;
+  siteAddress: string;
+  clientName: string;
+  scheduledDateTime?: Date;
+  acceptedAt: Date;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `✅ Job Accepted: ${acceptanceData.engineerName} - ${acceptanceData.siteName}`;
+  
+  const base = acceptanceData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const jobUrl = `${base}/admin/job/${acceptanceData.jobId}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #10b981; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .success-box { background-color: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">✅ Engineer Accepted Job</h2>
+        </div>
+        <div class="content">
+          <div class="success-box">
+            <strong>${acceptanceData.engineerName}</strong> has accepted the job assignment.
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Engineer:</div>
+            <div class="value">${acceptanceData.engineerName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Engineer Email:</div>
+            <div class="value">${acceptanceData.engineerEmail}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${acceptanceData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Address:</div>
+            <div class="value">${acceptanceData.siteAddress}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Client:</div>
+            <div class="value">${acceptanceData.clientName}</div>
+          </div>
+          
+          ${acceptanceData.scheduledDateTime ? `
+          <div class="detail-row">
+            <div class="label">Scheduled Date & Time:</div>
+            <div class="value">${acceptanceData.scheduledDateTime.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          ` : ''}
+          
+          <div class="detail-row">
+            <div class="label">Accepted At:</div>
+            <div class="value">${acceptanceData.acceptedAt.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          
+          <a href="${jobUrl}" class="button">
+            View Job Details →
+          </a>
+          
+          <div class="footer">
+            <p>The engineer is now preparing for the job. The client has been notified of the acceptance.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Engineer Accepted Job
+
+Engineer: ${acceptanceData.engineerName} (${acceptanceData.engineerEmail})
+Site: ${acceptanceData.siteName}
+Address: ${acceptanceData.siteAddress}
+Client: ${acceptanceData.clientName}
+${acceptanceData.scheduledDateTime ? `Scheduled: ${acceptanceData.scheduledDateTime.toLocaleString()}` : ''}
+Accepted At: ${acceptanceData.acceptedAt.toLocaleString()}
+
+View job details: ${jobUrl}
+  `.trim();
+  
+  return await sendEmail({
+    to: adminEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Send engineer decline notification to admin
+ */
+export async function sendEngineerDeclineNotification(adminEmail: string, declineData: {
+  engineerName: string;
+  engineerEmail: string;
+  jobId: number;
+  siteName: string;
+  siteAddress: string;
+  clientName: string;
+  scheduledDateTime?: Date;
+  declinedAt: Date;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `❌ Job Declined: ${declineData.engineerName} - ${declineData.siteName}`;
+  
+  const base = declineData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const jobUrl = `${base}/admin/job/${declineData.jobId}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #ef4444; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .warning-box { background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">❌ Engineer Declined Job</h2>
+        </div>
+        <div class="content">
+          <div class="warning-box">
+            <strong>Action Required:</strong> ${declineData.engineerName} has declined the job assignment. You need to reassign this job to another engineer.
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Engineer Who Declined:</div>
+            <div class="value">${declineData.engineerName} (${declineData.engineerEmail})</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${declineData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Address:</div>
+            <div class="value">${declineData.siteAddress}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Client:</div>
+            <div class="value">${declineData.clientName}</div>
+          </div>
+          
+          ${declineData.scheduledDateTime ? `
+          <div class="detail-row">
+            <div class="label">Scheduled Date & Time:</div>
+            <div class="value">${declineData.scheduledDateTime.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          ` : ''}
+          
+          <div class="detail-row">
+            <div class="label">Declined At:</div>
+            <div class="value">${declineData.declinedAt.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          
+          <a href="${jobUrl}" class="button">
+            Reassign Job →
+          </a>
+          
+          <div class="footer">
+            <p><strong>Next Steps:</strong></p>
+            <ol style="margin: 10px 0; padding-left: 20px;">
+              <li>Review the job details</li>
+              <li>Select another available engineer</li>
+              <li>Reassign the job using the "Reassign to Another Engineer" button</li>
+            </ol>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Engineer Declined Job - Action Required
+
+Engineer Who Declined: ${declineData.engineerName} (${declineData.engineerEmail})
+Site: ${declineData.siteName}
+Address: ${declineData.siteAddress}
+Client: ${declineData.clientName}
+${declineData.scheduledDateTime ? `Scheduled: ${declineData.scheduledDateTime.toLocaleString()}` : ''}
+Declined At: ${declineData.declinedAt.toLocaleString()}
+
+You need to reassign this job to another engineer.
+
+View job details and reassign: ${jobUrl}
+  `.trim();
+  
+  return await sendEmail({
+    to: adminEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Send job approval notification to client
+ */
+export async function sendJobApprovalNotification(clientEmail: string, approvalData: {
+  clientName: string;
+  siteName: string;
+  siteAddress: string;
+  scheduledDateTime?: Date;
+  trackingToken: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `✅ Service Request Approved - ${approvalData.siteName}`;
+  
+  const base = approvalData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${approvalData.trackingToken}`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #10b981; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .success-box { background-color: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">✅ Service Request Approved</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${approvalData.clientName},</p>
+          
+          <div class="success-box">
+            <strong>Good News!</strong> Your service request has been approved and is now being processed.
+          </div>
+          
+          <p>Our team is now assigning an engineer to your job. You will receive another notification once an engineer has been assigned and accepts the job.</p>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${approvalData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Address:</div>
+            <div class="value">${approvalData.siteAddress}</div>
+          </div>
+          
+          ${approvalData.scheduledDateTime ? `
+          <div class="detail-row">
+            <div class="label">Scheduled Date & Time:</div>
+            <div class="value">${approvalData.scheduledDateTime.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          ` : ''}
+          
+          <a href="${trackingUrl}" class="button">
+            Track Your Request →
+          </a>
+          
+          <div class="footer">
+            <p><strong>What happens next?</strong></p>
+            <ol style="margin: 10px 0; padding-left: 20px;">
+              <li>An engineer will be assigned to your job</li>
+              <li>The engineer will review and accept the assignment</li>
+              <li>You'll receive notifications as the job progresses</li>
+              <li>You can track the engineer's location in real-time</li>
+              <li>After completion, you'll receive a Site Visit Report</li>
+            </ol>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+            <p>If you have any questions, please contact our support team.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Service Request Approved
+
+Dear ${approvalData.clientName},
+
+Your service request has been approved and is now being processed.
+
+Site: ${approvalData.siteName}
+Address: ${approvalData.siteAddress}
+${approvalData.scheduledDateTime ? `Scheduled: ${approvalData.scheduledDateTime.toLocaleString()}` : ''}
+
+What happens next:
+1. An engineer will be assigned to your job
+2. The engineer will review and accept the assignment
+3. You'll receive notifications as the job progresses
+4. You can track the engineer's location in real-time
+5. After completion, you'll receive a Site Visit Report
+
+Track your request: ${trackingUrl}
+  `.trim();
+  
+  return await sendEmail({
+    to: clientEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Send job rejection notification to client
+ */
+export async function sendJobRejectionNotification(clientEmail: string, rejectionData: {
+  clientName: string;
+  siteName: string;
+  siteAddress: string;
+  scheduledDateTime?: Date;
+  rejectionReason?: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `Service Request Update - ${rejectionData.siteName}`;
+  
+  const base = rejectionData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const contactUrl = `${base}/request`;
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f59e0b; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .info-box { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">Service Request Update</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${rejectionData.clientName},</p>
+          
+          <div class="info-box">
+            We regret to inform you that we are unable to proceed with your service request at this time.
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${rejectionData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Address:</div>
+            <div class="value">${rejectionData.siteAddress}</div>
+          </div>
+          
+          ${rejectionData.scheduledDateTime ? `
+          <div class="detail-row">
+            <div class="label">Requested Date & Time:</div>
+            <div class="value">${rejectionData.scheduledDateTime.toLocaleString('en-GB', { 
+              dateStyle: 'full', 
+              timeStyle: 'short' 
+            })}</div>
+          </div>
+          ` : ''}
+          
+          ${rejectionData.rejectionReason ? `
+          <div class="detail-row">
+            <div class="label">Reason:</div>
+            <div class="value">${rejectionData.rejectionReason}</div>
+          </div>
+          ` : ''}
+          
+          <p><strong>What you can do:</strong></p>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Contact our support team for more information</li>
+            <li>Submit a new request with updated details</li>
+            <li>Discuss alternative solutions with our team</li>
+          </ul>
+          
+          <a href="${contactUrl}" class="button">
+            Submit New Request →
+          </a>
+          
+          <div class="footer">
+            <p>We apologize for any inconvenience. If you have questions or would like to discuss this further, please contact our support team.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Service Request Update
+
+Dear ${rejectionData.clientName},
+
+We regret to inform you that we are unable to proceed with your service request at this time.
+
+Site: ${rejectionData.siteName}
+Address: ${rejectionData.siteAddress}
+${rejectionData.scheduledDateTime ? `Requested Date: ${rejectionData.scheduledDateTime.toLocaleString()}` : ''}
+${rejectionData.rejectionReason ? `Reason: ${rejectionData.rejectionReason}` : ''}
+
+What you can do:
+- Contact our support team for more information
+- Submit a new request with updated details
+- Discuss alternative solutions with our team
+
+Submit a new request: ${contactUrl}
+  `.trim();
+  
+  return await sendEmail({
+    to: clientEmail,
+    subject,
+    html,
+    text,
+  });
+}
+

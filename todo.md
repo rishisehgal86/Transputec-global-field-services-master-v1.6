@@ -1595,3 +1595,47 @@ ns
 - [x] Changed from soft delete to hard delete (permanently removes projects)
 - [x] Test creating project with same name after deletion
 
+
+
+
+## Pre-Stripe Integration: Critical Improvements
+
+### 1. Email Notifications Audit & Documentation
+- [x] Document all existing email notification triggers and recipients
+- [x] List all email templates currently in use
+- [x] Verify each notification is working correctly
+- [x] Identify any missing notification steps in the workflow
+- [x] Create comprehensive email notification flow diagram
+- [x] Add 4 critical missing email notifications:
+  - [x] Engineer acceptance → Admin notification
+  - [x] Engineer decline → Admin notification
+  - [x] Job approval → Client notification
+  - [x] Job rejection → Client notification
+- [ ] Test all new email notifications end-to-end
+
+### 2. Engineer Booking Process Enhancement
+- [ ] Add day selection option (Full Day / Half Day)
+- [ ] Add time selection/request field for scheduling
+- [ ] Allow engineer to propose alternative time before accepting job
+- [ ] Allow admin to update scheduled time before engineer acceptance
+- [ ] Update database schema for booking duration and time preferences
+- [ ] Add time negotiation workflow to UI
+- [ ] Send email notifications for time change requests/confirmations
+
+### 3. Time On-Site Tracking & Reporting
+- [ ] Calculate accurate time on-site from "Arrived" to "Completed" timestamps
+- [ ] Display time on-site prominently at job completion
+- [ ] Add time on-site to Site Visit Report (SVR)
+- [ ] Show time on-site in admin job detail view
+- [ ] Show time on-site in client tracking portal
+- [ ] Include time on-site in all exported reports
+- [ ] Add time on-site to job completion email notifications
+
+
+
+## Fix Upload Sites 500 Error on Production
+- [x] Investigate uploadSites endpoint error (missing 'and' import)
+- [x] Fix server error causing 500 response (restored 'and' import)
+- [x] Add try-catch error handling to uploadSites endpoint
+- [ ] Redeploy production site to apply fix
+

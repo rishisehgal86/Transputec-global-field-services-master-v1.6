@@ -750,6 +750,26 @@ export const appRouter = router({
           }
         }
 
+        // Send acceptance notification to admin
+        try {
+          const adminEmail = 'admin@field-pulse.io';
+          const { sendEngineerAcceptanceNotification } = await import('./email');
+          await sendEngineerAcceptanceNotification(adminEmail, {
+            engineerName: input.engineerName,
+            engineerEmail: input.engineerEmail || 'Not provided',
+            jobId: job.id,
+            siteName: job.siteName,
+            siteAddress: job.siteAddress,
+            clientName: job.clientName,
+            scheduledDateTime: job.scheduledDateTime || undefined,
+            acceptedAt: new Date(),
+            baseUrl,
+          });
+          console.log('[Email] Engineer acceptance notification sent to admin');
+        } catch (error) {
+          console.error('[Email] Failed to send acceptance notification to admin:', error);
+        }
+
         return { success: true };
       }),
 
@@ -759,7 +779,8 @@ export const appRouter = router({
         token: z.string(),
         reason: z.string().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
         const job = await getJobByToken(input.token);
         if (!job) throw new Error("Job not found");
 
@@ -770,6 +791,26 @@ export const appRouter = router({
           status: "declined",
           notes: input.reason || "Declined by engineer",
         });
+
+        // Send decline notification to admin
+        try {
+          const adminEmail = 'admin@field-pulse.io';
+          const { sendEngineerDeclineNotification } = await import('./email');
+          await sendEngineerDeclineNotification(adminEmail, {
+            engineerName: job.engineerName || 'Unknown Engineer',
+            engineerEmail: job.engineerEmail || 'Not provided',
+            jobId: job.id,
+            siteName: job.siteName,
+            siteAddress: job.siteAddress,
+            clientName: job.clientName,
+            scheduledDateTime: job.scheduledDateTime || undefined,
+            declinedAt: new Date(),
+            baseUrl,
+          });
+          console.log('[Email] Engineer decline notification sent to admin');
+        } catch (error) {
+          console.error('[Email] Failed to send decline notification to admin:', error);
+        }
 
         return { success: true };
       }),
@@ -811,6 +852,42 @@ export const appRouter = router({
           longitude: input.longitude,
           notes: input.notes || (input.status === 'sent_to_engineer' && input.engineerName ? `Assigned to ${input.engineerName} (${input.engineerEmail})` : undefined),
         });
+
+        // Send approval notification to client
+        if (input.status === 'approved' && job.clientEmail) {
+          try {
+            const { sendJobApprovalNotification } = await import('./email');
+            await sendJobApprovalNotification(job.clientEmail, {
+              clientName: job.clientName,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress,
+              scheduledDateTime: job.scheduledDateTime || undefined,
+              trackingToken: job.jobToken,
+              baseUrl,
+            });
+            console.log('[Email] Job approval notification sent to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send approval notification to client:', error);
+          }
+        }
+
+        // Send rejection notification to client
+        if (input.status === 'rejected' && job.clientEmail) {
+          try {
+            const { sendJobRejectionNotification } = await import('./email');
+            await sendJobRejectionNotification(job.clientEmail, {
+              clientName: job.clientName,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress,
+              scheduledDateTime: job.scheduledDateTime || undefined,
+              rejectionReason: input.notes,
+              baseUrl,
+            });
+            console.log('[Email] Job rejection notification sent to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send rejection notification to client:', error);
+          }
+        }
 
         // Send email to engineer when request is approved
         if (input.status === 'approved' && input.sendEmailToEngineer && input.engineerEmail && input.engineerName) {
@@ -1645,121 +1722,131 @@ export const appRouter = router({
         fileData: z.string(), // Base64 encoded file
       }))
       .mutation(async ({ input, ctx }) => {
-        if (!ctx.user) throw new Error("Unauthorized");
-        
-        console.log('[uploadSites] ===== START UPLOAD =====');
-        console.log('[uploadSites] ProjectId received:', input.projectId);
-        console.log('[uploadSites] ProjectId length:', input.projectId.length);
-        console.log('[uploadSites] ProjectId charCodes:', Array.from(input.projectId).map(c => c.charCodeAt(0)).join(','));
-        console.log('[uploadSites] User organizationId:', ctx.user.organizationId);
-        
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
-        }
-        console.log('[uploadSites] Project verified successfully');
-        
-        const { parseSiteUpload } = await import('./site-template');
-        const { geocodeAddress } = await import('./geocoding');
-        
-        // Decode base64 file
-        const fileBuffer = Buffer.from(input.fileData, 'base64');
-        
-        // Parse Excel file
-        const { sites, errors } = parseSiteUpload(fileBuffer);
-        
-        if (errors.length > 0) {
-          return { success: false, errors, imported: 0 };
-        }
-        
-        // Geocode sites that don't have coordinates
-        const sitesWithCoords = await Promise.all(
-          sites.map(async (site) => {
-            let lat = site.latitude;
-            let lng = site.longitude;
-            
-            // If coordinates not provided, geocode the address
-            if (!lat || !lng) {
-              try {
-                const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''} ${site.country || ''}`.trim();
-                const coords = await geocodeAddress(fullAddress);
-                lat = coords.latitude;
-                lng = coords.longitude;
-              } catch (error) {
-                errors.push(`Failed to geocode address for "${site.siteName}": ${error instanceof Error ? error.message : 'Unknown error'}`);
-                return null;
-              }
-            }
-            
-            return {
-              projectId: input.projectId,
-              siteName: site.siteName,
-              siteAddress: site.siteAddress,
-              city: site.city || null,
-              postalCode: site.postalCode || null,
-              country: site.country || null,
-              latitude: lat,
-              longitude: lng,
-              contactName: site.contactName || null,
-              contactPhone: site.contactPhone || null,
-              contactEmail: site.contactEmail || null,
-              notes: site.notes || null,
-              isActive: true,
-            };
-          })
-        );
-        
-        // Filter out failed geocoding
-        const validSites = sitesWithCoords.filter(site => site !== null);
-        
-        if (validSites.length === 0) {
-          return { success: false, errors, imported: 0 };
-        }
-        
-        // Check for duplicates
-        console.log('[ImportSites] Checking for duplicates in project:', input.projectId);
-        const existingSites = await getProjectSites(input.projectId);
-        console.log('[ImportSites] Found existing sites in target project:', existingSites.length);
-        console.log('[ImportSites] Existing site names:', existingSites.map(s => s.siteName).join(', '));
-        const existingMap = new Map(
-          existingSites.map(site => [
-            `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`,
-            site
-          ])
-        );
-        
-        // Filter out duplicates
-        const newSites = validSites.filter(site => {
-          const key = `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`;
-          const isDuplicate = existingMap.has(key);
-          if (isDuplicate) {
-            errors.push(`Skipped duplicate: "${site.siteName}" at "${site.siteAddress}"`);
+        try {
+          if (!ctx.user) throw new Error("Unauthorized");
+          
+          console.log('[uploadSites] ===== START UPLOAD =====');
+          console.log('[uploadSites] ProjectId received:', input.projectId);
+          console.log('[uploadSites] ProjectId length:', input.projectId.length);
+          console.log('[uploadSites] ProjectId charCodes:', Array.from(input.projectId).map(c => c.charCodeAt(0)).join(','));
+          console.log('[uploadSites] User organizationId:', ctx.user.organizationId);
+          
+          // Verify project belongs to user's organization
+          const { verifyProject } = await import('./projects-db');
+          const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
+          if (!isValid) {
+            throw new Error("Project not found or access denied");
           }
-          return !isDuplicate;
-        });
-        
-        const skipped = validSites.length - newSites.length;
-        
-        if (newSites.length === 0) {
-          return { 
-            success: false, 
-            errors: [`All ${validSites.length} sites already exist in this project`, ...errors], 
-            imported: 0,
-            skipped 
+          console.log('[uploadSites] Project verified successfully');
+          
+          const { parseSiteUpload } = await import('./site-template');
+          const { geocodeAddress } = await import('./geocoding');
+          
+          // Decode base64 file
+          const fileBuffer = Buffer.from(input.fileData, 'base64');
+          
+          // Parse Excel file
+          const { sites, errors } = parseSiteUpload(fileBuffer);
+          
+          if (errors.length > 0) {
+            return { success: false, errors, imported: 0 };
+          }
+          
+          // Geocode sites that don't have coordinates
+          const sitesWithCoords = await Promise.all(
+            sites.map(async (site) => {
+              let lat = site.latitude;
+              let lng = site.longitude;
+              
+              // If coordinates not provided, geocode the address
+              if (!lat || !lng) {
+                try {
+                  const fullAddress = `${site.siteAddress}, ${site.city || ''} ${site.postalCode || ''} ${site.country || ''}`.trim();
+                  const coords = await geocodeAddress(fullAddress);
+                  lat = coords.latitude;
+                  lng = coords.longitude;
+                } catch (error) {
+                  errors.push(`Failed to geocode address for "${site.siteName}": ${error instanceof Error ? error.message : 'Unknown error'}`);
+                  return null;
+                }
+              }
+              
+              return {
+                projectId: input.projectId,
+                siteName: site.siteName,
+                siteAddress: site.siteAddress,
+                city: site.city || null,
+                postalCode: site.postalCode || null,
+                country: site.country || null,
+                latitude: lat,
+                longitude: lng,
+                contactName: site.contactName || null,
+                contactPhone: site.contactPhone || null,
+                contactEmail: site.contactEmail || null,
+                notes: site.notes || null,
+                isActive: true,
+              };
+            })
+          );
+          
+          // Filter out failed geocoding
+          const validSites = sitesWithCoords.filter(site => site !== null);
+          
+          if (validSites.length === 0) {
+            return { success: false, errors, imported: 0 };
+          }
+          
+          // Check for duplicates
+          console.log('[ImportSites] Checking for duplicates in project:', input.projectId);
+          const existingSites = await getProjectSites(input.projectId);
+          console.log('[ImportSites] Found existing sites in target project:', existingSites.length);
+          console.log('[ImportSites] Existing site names:', existingSites.map(s => s.siteName).join(', '));
+          const existingMap = new Map(
+            existingSites.map(site => [
+              `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`,
+              site
+            ])
+          );
+          
+          // Filter out duplicates
+          const newSites = validSites.filter(site => {
+            const key = `${site.siteName.toLowerCase().trim()}|${site.siteAddress.toLowerCase().trim()}`;
+            const isDuplicate = existingMap.has(key);
+            if (isDuplicate) {
+              errors.push(`Skipped duplicate: "${site.siteName}" at "${site.siteAddress}"`);
+            }
+            return !isDuplicate;
+          });
+          
+          const skipped = validSites.length - newSites.length;
+          
+          if (newSites.length === 0) {
+            return { 
+              success: false, 
+              errors: [`All ${validSites.length} sites already exist in this project`, ...errors], 
+              imported: 0,
+              skipped 
+            };
+          }
+          
+          // Bulk insert only new sites
+          const imported = await bulkCreateProjectSites(newSites as any[]);
+          
+          return {
+            success: true,
+            imported,
+            skipped,
+            errors,
           };
+        } catch (error) {
+          console.error('[uploadSites] ERROR:', error);
+          console.error('[uploadSites] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Failed to upload sites',
+            cause: error,
+          });
         }
-        
-        // Bulk insert only new sites
-        const imported = await bulkCreateProjectSites(newSites as any[]);
-        
-        return {
-          success: true,
-          imported,
-          skipped,
-          errors,
-        };
       }),
 
     // Get sites for a project (protected - requires auth)
