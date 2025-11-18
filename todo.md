@@ -1580,3 +1580,18 @@ ns
 - [x] Verify Google API is being used (not OpenStreetMap)
 - [x] Geolocation now working with Google Places API
 
+
+
+## Verify Super Admin Account Configuration
+- [x] Check super admin initialization in auth.ts
+- [x] Verify OWNER_OPEN_ID and OWNER_NAME environment variables
+- [x] Confirm super admin account works in production
+- [x] Update credentials if needed (using environment variables with fallback defaults)
+
+
+
+## Allow Project Name Reuse After Deletion
+- [x] Check database schema for unique constraints on project names
+- [x] Changed from soft delete to hard delete (permanently removes projects)
+- [x] Test creating project with same name after deletion
+

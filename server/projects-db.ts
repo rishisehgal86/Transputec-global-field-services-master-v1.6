@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getDb } from "./db";
 import { projects, type InsertProject, type Project } from "../drizzle/schema";
 
@@ -92,10 +92,16 @@ export async function toggleProjectStatus(projectId: string, isActive: boolean):
 }
 
 /**
- * Delete project (soft delete by setting isActive to false)
+ * Delete project (hard delete - permanently removes from database)
  */
 export async function deleteProject(projectId: string): Promise<boolean> {
-  return await toggleProjectStatus(projectId, false);
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(projects)
+    .where(eq(projects.projectId, projectId));
+  
+  return true;
 }
 
 /**
