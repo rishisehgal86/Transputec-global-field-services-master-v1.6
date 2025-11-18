@@ -1576,6 +1576,7 @@ ns
 - [x] Test address geocoding functionality (Google works, OSM fails on typos)
 - [x] Fix: API key not being loaded in production environment (key is loaded)
 - [x] Add logging to track which geocoding service is used
-- [ ] Test geocoding in production and check server logs
-- [ ] Verify Google API is being used (not OpenStreetMap)
+- [x] Test geocoding in production and check server logs
+- [x] Verify Google API is being used (not OpenStreetMap)
+- [x] Geolocation now working with Google Places API
 
