@@ -136,16 +136,22 @@ async function searchAddressesOSM(address: string, limit: number): Promise<Addre
 export async function geocodeAddress(address: string): Promise<GeocodingResult> {
   // Try Google Places API first if API key is available
   if (ENV.googlePlacesApiKey) {
+    console.log('[Geocoding] Using Google Places API for address:', address.substring(0, 50));
     try {
-      return await geocodeAddressGoogle(address);
+      const result = await geocodeAddressGoogle(address);
+      console.log('[Geocoding] Google API success:', result.success);
+      return result;
     } catch (error) {
-      console.warn('Google Places API failed, falling back to OpenStreetMap:', error);
+      console.warn('[Geocoding] Google Places API failed, falling back to OpenStreetMap:', error);
       // Fall through to OpenStreetMap fallback
     }
   }
   
   // Fallback to OpenStreetMap
-  return await geocodeAddressOSM(address);
+  console.log('[Geocoding] No Google API key, using OpenStreetMap fallback for address:', address.substring(0, 50));
+  const result = await geocodeAddressOSM(address);
+  console.log('[Geocoding] OpenStreetMap result:', result.success);
+  return result;
 }
 
 /**

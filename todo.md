@@ -1568,3 +1568,14 @@ ns
 - [ ] Update HTML title tag in index.html
 - [ ] Verify title appears correctly in browser tab
 
+
+
+## Fix Address Geolocation Accuracy
+- [x] Check if GOOGLE_PLACES_API_KEY is configured (added to secrets)
+- [x] Verify Google Places API is enabled in Google Cloud Console (31 APIs enabled)
+- [x] Test address geocoding functionality (Google works, OSM fails on typos)
+- [x] Fix: API key not being loaded in production environment (key is loaded)
+- [x] Add logging to track which geocoding service is used
+- [ ] Test geocoding in production and check server logs
+- [ ] Verify Google API is being used (not OpenStreetMap)
+
