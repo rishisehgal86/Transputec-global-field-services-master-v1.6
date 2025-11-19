@@ -52,8 +52,7 @@ export async function verifyProject(projectId: string, organizationId: number): 
   const [project] = await db.select().from(projects)
     .where(and(
       eq(projects.projectId, projectId),
-      eq(projects.organizationId, organizationId),
-      eq(projects.isActive, true)
+      eq(projects.organizationId, organizationId)
     ))
     .limit(1);
   

@@ -1640,3 +1640,10 @@ ns
 - [x] Add try-catch error handling to uploadSites endpoint
 - [ ] Publish new checkpoint to apply fix
 
+
+
+## Fix Project Verification Error in Upload Sites
+- [x] Investigate verifyProject function failing (was checking isActive field)
+- [x] Fix "Project not found or access denied" error (removed isActive check for hard delete)
+- [ ] Test upload sites functionality on published site
+
