@@ -1922,3 +1922,15 @@ ns
 - [x] Show time string directly without conversion: "Feb 20, 2026 at 16:00"
 - [x] No Date object creation for time, no timezone manipulation
 
+
+
+
+## Time Change Notifications (When Admin Approves Engineer Counter-Proposal)
+
+- [x] Create email template for client time change notification
+- [x] Create email template for engineer time change approval notification
+- [x] Add sendClientTimeChangeNotification function to email.ts
+- [x] Add sendEngineerTimeChangeApprovalNotification function to email.ts
+- [x] Integrate both notifications into approveTimeChange mutation
+- [x] Test email notifications with different timezone scenarios
+

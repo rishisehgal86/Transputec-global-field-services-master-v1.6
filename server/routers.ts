@@ -24,7 +24,7 @@ import { getProjectSites, bulkCreateProjectSites, deleteProjectSite, updateProje
 import { getProjectByProjectId } from "./projects-db";
 import { randomBytes } from "crypto";
 import { geocodeAddress, calculateDistance, calculateETA, searchAddresses } from "./geocoding";
-import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification } from "./email";
+import { sendNewTicketNotification, sendClientConfirmation, sendSVREmail, sendCancellationNotification, sendClientTimeChangeNotification, sendEngineerTimeChangeApprovalNotification } from "./email";
 import { createSiteVisitReport, getSiteVisitReportByJobId } from "./svr";
 
 // Helper function to get base URL from request
@@ -1133,21 +1133,46 @@ export const appRouter = router({
           });
         }
 
-        // Send notification to engineer
-        if (job.engineerEmail) {
+        // Send notification to engineer if approved
+        if (input.approved && job.engineerEmail && job.engineerName) {
           try {
-            // TODO: Create email template for time approval/rejection
-            console.log(`[Email] Time change ${input.approved ? 'approved' : 'rejected'} notification to engineer:`, job.engineerEmail);
+            await sendEngineerTimeChangeApprovalNotification(job.engineerEmail, {
+              engineerName: job.engineerName,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress || 'Address not specified',
+              clientName: job.clientName,
+              confirmedStartDate: job.confirmedStartDate!,
+              confirmedStartTime: job.confirmedStartTime || undefined,
+              jobToken: job.jobToken,
+              baseUrl,
+            });
+            console.log(`[Email] ✅ Time change approval notification sent to engineer:`, job.engineerEmail);
           } catch (error) {
-            console.error('[Email] Failed to send time change notification:', error);
+            console.error('[Email] ❌ Failed to send time change approval notification to engineer:', error);
           }
         }
 
         // Send notification to client if approved
         if (input.approved && job.clientEmail) {
           try {
-            // TODO: Notify client of final confirmed time
-            console.log('[Email] Final time confirmation to client:', job.clientEmail);
+            // Get the original scheduled time before the change
+            const originalStartDate = job.proposedStartDate || job.requestedStartDate;
+            const originalStartTime = job.proposedStartTime || job.requestedStartTime;
+            
+            await sendClientTimeChangeNotification(job.clientEmail, {
+              clientName: job.clientName,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress || 'Address not specified',
+              engineerName: job.engineerName || 'Assigned Engineer',
+              originalStartDate: originalStartDate || undefined,
+              originalStartTime: originalStartTime || undefined,
+              newStartDate: job.confirmedStartDate!,
+              newStartTime: job.confirmedStartTime || undefined,
+              counterProposalNotes: job.timeNegotiationNotes || undefined,
+              trackingToken: job.jobToken,
+              baseUrl,
+            });
+            console.log('[Email] ✅ Time change notification sent to client:', job.clientEmail);
           } catch (error) {
             console.error('[Email] Failed to send time confirmation:', error);
           }

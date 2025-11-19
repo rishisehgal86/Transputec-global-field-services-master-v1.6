@@ -2078,3 +2078,250 @@ If this new time doesn't work for you, please contact us immediately to discuss 
   });
 }
 
+
+
+/**
+ * Send notification to client when admin approves engineer's time counter-proposal
+ */
+export async function sendClientTimeChangeNotification(clientEmail: string, timeChangeData: {
+  clientName: string;
+  siteName: string;
+  siteAddress: string;
+  engineerName: string;
+  originalStartDate?: Date;
+  originalStartTime?: string;
+  newStartDate: Date;
+  newStartTime?: string;
+  counterProposalNotes?: string;
+  trackingToken: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `Job Schedule Updated - ${timeChangeData.siteName}`;
+  
+  const base = timeChangeData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${timeChangeData.trackingToken}`;
+  
+  const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { dateStyle: 'full' });
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f59e0b; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .warning-box { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+        .comparison-box { background-color: #f0fdf4; border: 1px solid #22c55e; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .time-row { padding: 8px 0; }
+        .old-time { color: #dc2626; text-decoration: line-through; }
+        .new-time { color: #16a34a; font-weight: bold; font-size: 1.1em; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">⏰ Job Schedule Updated</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${timeChangeData.clientName},</p>
+          
+          <div class="warning-box">
+            Your scheduled service for <strong>${timeChangeData.siteName}</strong> has been updated based on engineer availability.
+          </div>
+          
+          <div class="comparison-box">
+            <h3 style="margin-top: 0; color: #16a34a;">Updated Schedule</h3>
+            
+            ${timeChangeData.originalStartDate ? `
+            <div class="time-row">
+              <div class="label">Original Time:</div>
+              <div class="old-time">${formatDate(timeChangeData.originalStartDate)} ${timeChangeData.originalStartTime || ''}</div>
+            </div>
+            ` : ''}
+            
+            <div class="time-row">
+              <div class="label">New Time:</div>
+              <div class="new-time">${formatDate(timeChangeData.newStartDate)} ${timeChangeData.newStartTime || ''}</div>
+            </div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Engineer:</div>
+            <div class="value">${timeChangeData.engineerName}</div>
+          </div>
+          
+          ${timeChangeData.counterProposalNotes ? `
+          <div class="detail-row">
+            <div class="label">Reason for Change:</div>
+            <div class="value" style="font-style: italic;">"${timeChangeData.counterProposalNotes}"</div>
+          </div>
+          ` : ''}
+          
+          <div class="detail-row">
+            <div class="label">Site Location:</div>
+            <div class="value">${timeChangeData.siteAddress}</div>
+          </div>
+          
+          <a href="${trackingUrl}" class="button">
+            Track Your Job →
+          </a>
+          
+          <div class="footer">
+            <p><strong>Important:</strong> The engineer has been assigned and will arrive at the new scheduled time.</p>
+            <p>If this new time doesn't work for you, please contact us immediately to discuss alternatives.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Job Schedule Updated
+
+Dear ${timeChangeData.clientName},
+
+Your scheduled service for ${timeChangeData.siteName} has been updated.
+
+${timeChangeData.originalStartDate ? `Original Time: ${formatDate(timeChangeData.originalStartDate)} ${timeChangeData.originalStartTime || ''}` : ''}
+New Time: ${formatDate(timeChangeData.newStartDate)} ${timeChangeData.newStartTime || ''}
+
+Engineer: ${timeChangeData.engineerName}
+${timeChangeData.counterProposalNotes ? `Reason: "${timeChangeData.counterProposalNotes}"` : ''}
+
+Site Location: ${timeChangeData.siteAddress}
+
+Track your job: ${trackingUrl}
+
+If this new time doesn't work for you, please contact us immediately to discuss alternatives.
+  `.trim();
+  
+  return await sendEmail({
+    to: clientEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Send notification to engineer when admin approves their time counter-proposal
+ */
+export async function sendEngineerTimeChangeApprovalNotification(engineerEmail: string, approvalData: {
+  engineerName: string;
+  siteName: string;
+  siteAddress: string;
+  clientName: string;
+  confirmedStartDate: Date;
+  confirmedStartTime?: string;
+  jobToken: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `Time Change Approved - ${approvalData.siteName}`;
+  
+  const base = approvalData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const jobUrl = `${base}/job/${approvalData.jobToken}`;
+  
+  const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { dateStyle: 'full' });
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #10b981; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .success-box { background-color: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .time-box { background-color: #f0fdf4; border: 1px solid #22c55e; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: center; }
+        .confirmed-time { color: #16a34a; font-weight: bold; font-size: 1.3em; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">✅ Time Change Approved</h2>
+        </div>
+        <div class="content">
+          <p>Hi ${approvalData.engineerName},</p>
+          
+          <div class="success-box">
+            Your proposed time change has been <strong>approved</strong> by the admin.
+          </div>
+          
+          <div class="time-box">
+            <div class="label" style="margin-bottom: 10px;">Confirmed Time:</div>
+            <div class="confirmed-time">${formatDate(approvalData.confirmedStartDate)} ${approvalData.confirmedStartTime || ''}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${approvalData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Address:</div>
+            <div class="value">${approvalData.siteAddress}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Client:</div>
+            <div class="value">${approvalData.clientName}</div>
+          </div>
+          
+          <a href="${jobUrl}" class="button">
+            View Job Details →
+          </a>
+          
+          <div class="footer">
+            <p><strong>Important:</strong> Please ensure you arrive at the confirmed time.</p>
+            <p>The client has been notified of the schedule change.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Time Change Approved
+
+Hi ${approvalData.engineerName},
+
+Your proposed time change has been approved by the admin.
+
+Confirmed Time: ${formatDate(approvalData.confirmedStartDate)} ${approvalData.confirmedStartTime || ''}
+
+Site Name: ${approvalData.siteName}
+Site Address: ${approvalData.siteAddress}
+Client: ${approvalData.clientName}
+
+View job details: ${jobUrl}
+
+Important: Please ensure you arrive at the confirmed time.
+The client has been notified of the schedule change.
+  `.trim();
+  
+  return await sendEmail({
+    to: engineerEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
