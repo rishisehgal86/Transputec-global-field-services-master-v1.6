@@ -1635,7 +1635,8 @@ ns
 
 ## Fix Upload Sites 500 Error on Production
 - [x] Investigate uploadSites endpoint error (missing 'and' import)
-- [x] Fix server error causing 500 response (restored 'and' import)
+- [x] Fix server error causing 500 response (restored 'and' import in project-sites-db.ts)
+- [x] Fix missing 'and' import in projects-db.ts (second occurrence)
 - [x] Add try-catch error handling to uploadSites endpoint
-- [ ] Redeploy production site to apply fix
+- [ ] Publish new checkpoint to apply fix
 

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getDb } from "./db";
 import { projects, type InsertProject, type Project } from "../drizzle/schema";
 
