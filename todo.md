@@ -1640,3 +1640,12 @@ ns
 - [x] Add try-catch error handling to uploadSites endpoint
 - [ ] Publish new checkpoint to apply fix
 
+
+
+## Improve Error Handling for Inactive Projects
+- [x] Update verifyProject to return detailed error information
+- [x] Add user-friendly error messages explaining inactive projects
+- [x] Update upload sites endpoint with better error handling
+- [x] Update all project endpoints (getSites, updateProject, deleteProject) with better errors
+- [ ] Test error messages in UI after publishing
+

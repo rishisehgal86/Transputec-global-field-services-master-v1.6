@@ -1650,11 +1650,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
+        // Verify project belongs to user's organization with detailed validation
+        const { getProjectForValidation } = await import('./projects-db');
+        const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+        
+        if (!project) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+          });
+        }
+        
+        if (!project.isActive) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
+          });
         }
         
         const { projectId, ...updates } = input;
@@ -1671,11 +1682,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
+        // Verify project belongs to user's organization with detailed validation
+        const { getProjectForValidation } = await import('./projects-db');
+        const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+        
+        if (!project) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+          });
+        }
+        
+        if (!project.isActive) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
+          });
         }
         
         const { toggleProjectStatus } = await import('./projects-db');
@@ -1688,11 +1710,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
+        // Verify project belongs to user's organization with detailed validation
+        const { getProjectForValidation } = await import('./projects-db');
+        const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+        
+        if (!project) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+          });
+        }
+        
+        if (!project.isActive) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
+          });
         }
         
         const { deleteProject } = await import('./projects-db');
@@ -1731,13 +1764,25 @@ export const appRouter = router({
           console.log('[uploadSites] ProjectId charCodes:', Array.from(input.projectId).map(c => c.charCodeAt(0)).join(','));
           console.log('[uploadSites] User organizationId:', ctx.user.organizationId);
           
-          // Verify project belongs to user's organization
-          const { verifyProject } = await import('./projects-db');
-          const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-          if (!isValid) {
-            throw new Error("Project not found or access denied");
+          // Verify project belongs to user's organization with detailed validation
+          const { getProjectForValidation } = await import('./projects-db');
+          const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+          
+          if (!project) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+            });
           }
-          console.log('[uploadSites] Project verified successfully');
+          
+          if (!project.isActive) {
+            throw new TRPCError({
+              code: 'FORBIDDEN',
+              message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project before uploading sites.`
+            });
+          }
+          
+          console.log('[uploadSites] Project verified successfully:', project.name);
           
           const { parseSiteUpload } = await import('./site-template');
           const { geocodeAddress } = await import('./geocoding');
@@ -1855,11 +1900,22 @@ export const appRouter = router({
       .query(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
+        // Verify project belongs to user's organization with detailed validation
+        const { getProjectForValidation } = await import('./projects-db');
+        const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+        
+        if (!project) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+          });
+        }
+        
+        if (!project.isActive) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
+          });
         }
         
         console.log('[getSites endpoint] Called with projectId:', input.projectId);
@@ -1939,11 +1995,22 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization
-        const { verifyProject } = await import('./projects-db');
-        const isValid = await verifyProject(input.projectId, ctx.user.organizationId);
-        if (!isValid) {
-          throw new Error("Project not found or access denied");
+        // Verify project belongs to user's organization with detailed validation
+        const { getProjectForValidation } = await import('./projects-db');
+        const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
+        
+        if (!project) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Project not found or you do not have access to this project. Please check the Project ID and try again.'
+          });
+        }
+        
+        if (!project.isActive) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
+          });
         }
         
         const { geocodeAddress } = await import('./geocoding');

@@ -52,12 +52,28 @@ export async function verifyProject(projectId: string, organizationId: number): 
   const [project] = await db.select().from(projects)
     .where(and(
       eq(projects.projectId, projectId),
-      eq(projects.organizationId, organizationId),
-      eq(projects.isActive, true)
+      eq(projects.organizationId, organizationId)
     ))
     .limit(1);
   
   return !!project;
+}
+
+/**
+ * Get project with full details for validation
+ */
+export async function getProjectForValidation(projectId: string, organizationId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [project] = await db.select().from(projects)
+    .where(and(
+      eq(projects.projectId, projectId),
+      eq(projects.organizationId, organizationId)
+    ))
+    .limit(1);
+  
+  return project;
 }
 
 /**
