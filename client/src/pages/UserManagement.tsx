@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { InlineDualTime } from "@/components/DualTimeDisplay";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -399,7 +400,7 @@ export default function UserManagement() {
                         </div>
                         {user.lastLogin && (
                           <p className="text-xs text-gray-500 mt-1">
-                            Last login: {new Date(user.lastLogin).toLocaleString()}
+                            Last login: <InlineDualTime date={user.lastLogin} />
                           </p>
                         )}
                       </div>

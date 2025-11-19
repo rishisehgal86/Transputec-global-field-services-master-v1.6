@@ -1810,3 +1810,271 @@ Submit a new request: ${contactUrl}
   });
 }
 
+
+
+/**
+ * Send notification to admin when engineer proposes a different time
+ */
+export async function sendTimeCounterProposalNotification(adminEmail: string, proposalData: {
+  engineerName: string;
+  engineerEmail: string;
+  jobId: number;
+  siteName: string;
+  siteAddress: string;
+  clientName: string;
+  requestedStartDate?: Date;
+  requestedStartTime?: string;
+  proposedStartDate?: Date;
+  proposedStartTime?: string;
+  counterProposedDate: Date;
+  counterProposedTime?: string;
+  counterProposalNotes?: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `⏰ Time Change Request: ${proposalData.engineerName} - ${proposalData.siteName}`;
+  
+  const base = proposalData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const jobUrl = `${base}/admin/job/${proposalData.jobId}`;
+  
+  const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { dateStyle: 'full' });
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f59e0b; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .warning-box { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+        .comparison-box { background-color: #e0f2fe; border: 1px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .time-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .time-label { font-weight: bold; color: #0369a1; }
+        .old-time { color: #dc2626; text-decoration: line-through; }
+        .new-time { color: #16a34a; font-weight: bold; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">⏰ Engineer Proposed Different Time</h2>
+        </div>
+        <div class="content">
+          <div class="warning-box">
+            <strong>${proposalData.engineerName}</strong> has accepted the job but proposed a different start time.
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Engineer:</div>
+            <div class="value">${proposalData.engineerName} (${proposalData.engineerEmail})</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Site Name:</div>
+            <div class="value">${proposalData.siteName}</div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="label">Client:</div>
+            <div class="value">${proposalData.clientName}</div>
+          </div>
+          
+          <div class="comparison-box">
+            <h3 style="margin-top: 0; color: #0369a1;">Time Comparison</h3>
+            
+            <div class="time-row">
+              <span class="time-label">Client Requested:</span>
+              <span>${proposalData.requestedStartDate ? formatDate(proposalData.requestedStartDate) : 'Not specified'} ${proposalData.requestedStartTime || ''}</span>
+            </div>
+            
+            ${proposalData.proposedStartDate ? `
+            <div class="time-row">
+              <span class="time-label">Admin Proposed:</span>
+              <span>${formatDate(proposalData.proposedStartDate)} ${proposalData.proposedStartTime || ''}</span>
+            </div>
+            ` : ''}
+            
+            <div class="time-row" style="border-bottom: none;">
+              <span class="time-label">Engineer Counter-Proposal:</span>
+              <span class="new-time">${formatDate(proposalData.counterProposedDate)} ${proposalData.counterProposedTime || ''}</span>
+            </div>
+          </div>
+          
+          ${proposalData.counterProposalNotes ? `
+          <div class="detail-row">
+            <div class="label">Engineer's Reason:</div>
+            <div class="value" style="font-style: italic;">"${proposalData.counterProposalNotes}"</div>
+          </div>
+          ` : ''}
+          
+          <a href="${jobUrl}" class="button">
+            Review & Approve Time Change →
+          </a>
+          
+          <div class="footer">
+            <p><strong>Action Required:</strong> Please review the engineer's proposed time and either approve it or contact the engineer to discuss alternatives.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Engineer Proposed Different Time
+
+Engineer: ${proposalData.engineerName} (${proposalData.engineerEmail})
+Site: ${proposalData.siteName}
+Client: ${proposalData.clientName}
+
+TIME COMPARISON:
+Client Requested: ${proposalData.requestedStartDate ? formatDate(proposalData.requestedStartDate) : 'Not specified'} ${proposalData.requestedStartTime || ''}
+${proposalData.proposedStartDate ? `Admin Proposed: ${formatDate(proposalData.proposedStartDate)} ${proposalData.proposedStartTime || ''}` : ''}
+Engineer Counter-Proposal: ${formatDate(proposalData.counterProposedDate)} ${proposalData.counterProposedTime || ''}
+
+${proposalData.counterProposalNotes ? `Engineer's Reason: "${proposalData.counterProposalNotes}"` : ''}
+
+Review job details: ${jobUrl}
+
+Action Required: Please review the engineer's proposed time and either approve it or contact the engineer to discuss alternatives.
+  `.trim();
+  
+  return await sendEmail({
+    to: adminEmail,
+    subject,
+    html,
+    text,
+  });
+}
+
+/**
+ * Send notification to client when admin adjusts the requested time
+ */
+export async function sendTimeAdjustmentNotification(clientEmail: string, adjustmentData: {
+  clientName: string;
+  siteName: string;
+  siteAddress: string;
+  requestedStartDate?: Date;
+  requestedStartTime?: string;
+  proposedStartDate: Date;
+  proposedStartTime?: string;
+  timeNegotiationNotes?: string;
+  trackingToken: string;
+  baseUrl?: string;
+}): Promise<boolean> {
+  const subject = `Schedule Adjusted: ${adjustmentData.siteName}`;
+  
+  const base = adjustmentData.baseUrl || process.env.PUBLIC_URL || 'https://transputec-dispatch.manus.space';
+  const trackingUrl = `${base}/track/${adjustmentData.trackingToken}`;
+  
+  const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { dateStyle: 'full' });
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #3b82f6; color: white; padding: 20px; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .detail-row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 3px; }
+        .label { font-weight: bold; color: #4b5563; }
+        .value { color: #1f2937; }
+        .info-box { background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
+        .comparison-box { background-color: #f0fdf4; border: 1px solid #22c55e; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .time-row { padding: 8px 0; }
+        .old-time { color: #dc2626; text-decoration: line-through; }
+        .new-time { color: #16a34a; font-weight: bold; font-size: 1.1em; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+        .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2 style="margin: 0;">📅 Service Schedule Adjusted</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${adjustmentData.clientName},</p>
+          
+          <div class="info-box">
+            We've adjusted the start time for your service request at <strong>${adjustmentData.siteName}</strong> to better coordinate with engineer availability.
+          </div>
+          
+          <div class="comparison-box">
+            <h3 style="margin-top: 0; color: #16a34a;">Updated Schedule</h3>
+            
+            ${adjustmentData.requestedStartDate ? `
+            <div class="time-row">
+              <div class="label">Originally Requested:</div>
+              <div class="old-time">${formatDate(adjustmentData.requestedStartDate)} ${adjustmentData.requestedStartTime || ''}</div>
+            </div>
+            ` : ''}
+            
+            <div class="time-row">
+              <div class="label">New Scheduled Time:</div>
+              <div class="new-time">${formatDate(adjustmentData.proposedStartDate)} ${adjustmentData.proposedStartTime || ''}</div>
+            </div>
+          </div>
+          
+          ${adjustmentData.timeNegotiationNotes ? `
+          <div class="detail-row">
+            <div class="label">Reason for Adjustment:</div>
+            <div class="value" style="font-style: italic;">"${adjustmentData.timeNegotiationNotes}"</div>
+          </div>
+          ` : ''}
+          
+          <div class="detail-row">
+            <div class="label">Site Location:</div>
+            <div class="value">${adjustmentData.siteAddress}</div>
+          </div>
+          
+          <a href="${trackingUrl}" class="button">
+            Track Your Service Request →
+          </a>
+          
+          <div class="footer">
+            <p>If this new time doesn't work for you, please contact us immediately to discuss alternatives.</p>
+            <p>This is an automated notification from FieldPulse Go Dispatch System.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  const text = `
+Service Schedule Adjusted
+
+Dear ${adjustmentData.clientName},
+
+We've adjusted the start time for your service request at ${adjustmentData.siteName}.
+
+${adjustmentData.requestedStartDate ? `Originally Requested: ${formatDate(adjustmentData.requestedStartDate)} ${adjustmentData.requestedStartTime || ''}` : ''}
+New Scheduled Time: ${formatDate(adjustmentData.proposedStartDate)} ${adjustmentData.proposedStartTime || ''}
+
+${adjustmentData.timeNegotiationNotes ? `Reason: "${adjustmentData.timeNegotiationNotes}"` : ''}
+
+Site Location: ${adjustmentData.siteAddress}
+
+Track your request: ${trackingUrl}
+
+If this new time doesn't work for you, please contact us immediately to discuss alternatives.
+  `.trim();
+  
+  return await sendEmail({
+    to: clientEmail,
+    subject,
+    html,
+    text,
+  });
+}
+

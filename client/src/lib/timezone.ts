@@ -219,10 +219,22 @@ export function formatDualTime(
  * @param sourceTimezone The IANA timezone the user intended (e.g., "Asia/Dubai")
  * @returns Date object in UTC
  */
-export function convertLocalTimeToUTC(datetimeLocalString: string, sourceTimezone: string): Date {
+export { convertLocalTimeToUTC } from '../../../shared/timezone';
+
+/**
+ * @deprecated Use the shared version from '../../../shared/timezone'
+ */
+function convertLocalTimeToUTC_OLD(datetimeLocalString: string, sourceTimezone: string): Date {
   // Parse the datetime-local string
   // datetime-local format: "2024-01-15T14:30"
   const [datePart, timePart] = datetimeLocalString.split('T');
+  
+  // If no time part, return a Date object with just the date
+  if (!timePart) {
+    const [year, month, day] = datePart.split('-');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
   const [year, month, day] = datePart.split('-');
   const [hour, minute] = timePart.split(':');
   
@@ -255,6 +267,9 @@ export function convertLocalTimeToUTC(datetimeLocalString: string, sourceTimezon
     if (offsetMatch) {
       const sign = offsetMatch[1] === '+' ? 1 : -1;
       offsetMinutes = sign * (parseInt(offsetMatch[2]) * 60 + parseInt(offsetMatch[3]));
+    } else if (tzNamePart.value === 'GMT' || tzNamePart.value === 'UTC') {
+      // GMT or UTC without offset means +00:00
+      offsetMinutes = 0;
     }
   }
   
@@ -289,6 +304,10 @@ export function getUTCPreviewText(datetimeLocalString: string, sourceTimezone: s
   try {
     // Parse the datetime-local string
     const [datePart, timePart] = datetimeLocalString.split('T');
+    
+    // Check if we have both date and time parts
+    if (!datePart || !timePart) return '';
+    
     const [year, month, day] = datePart.split('-');
     const [hour, minute] = timePart.split(':');
     

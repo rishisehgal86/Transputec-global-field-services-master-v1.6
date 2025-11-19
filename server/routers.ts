@@ -711,6 +711,9 @@ export const appRouter = router({
         engineerName: z.string(),
         engineerEmail: z.string().optional(),
         engineerPhone: z.string().optional(),
+        counterProposedDate: z.string().optional(), // Keep as string to avoid midnight UTC conversion
+        counterProposedTime: z.string().optional(),
+        counterProposalNotes: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const baseUrl = getBaseUrl(ctx.req);
@@ -720,18 +723,44 @@ export const appRouter = router({
           throw new Error("Job already accepted or completed");
         }
 
-        await updateJobStatus(job.id, "accepted", {
+        const updateFields: any = {
           engineerName: input.engineerName,
           engineerEmail: input.engineerEmail,
           engineerPhone: input.engineerPhone,
           acceptedAt: new Date(),
-        });
+        };
+        
+        // Add counter-proposal fields if provided
+        // Note: scheduledDateTime is NOT updated here - requires admin approval
+        if (input.counterProposedDate) {
+          // Convert string date to Date object for database storage
+          updateFields.confirmedStartDate = new Date(input.counterProposedDate);
+        }
+        if (input.counterProposedTime) {
+          updateFields.confirmedStartTime = input.counterProposedTime;
+        }
+        if (input.counterProposalNotes) {
+          updateFields.timeNegotiationNotes = input.counterProposalNotes;
+        }
+        
+        await updateJobStatus(job.id, "accepted", updateFields);
 
         await addJobStatusHistory({
           jobId: job.id,
           status: "accepted",
           notes: `Accepted by ${input.engineerName}`,
         });
+
+        // Add time counter-proposal history if engineer proposed different time
+        if (input.counterProposedDate) {
+          const currentTime = job.proposedStartTime || job.requestedStartTime || 'Flexible';
+          const proposedTime = input.counterProposedTime || 'Flexible';
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'time_counter_proposed',
+            notes: `Engineer ${input.engineerName} proposed time change from ${currentTime} to ${proposedTime}${input.counterProposalNotes ? `. Reason: ${input.counterProposalNotes}` : ''}. Awaiting admin approval.`,
+          });
+        }
 
         // Send email notification to client
         if (job.clientEmail) {
@@ -753,19 +782,43 @@ export const appRouter = router({
         // Send acceptance notification to admin
         try {
           const adminEmail = 'admin@field-pulse.io';
-          const { sendEngineerAcceptanceNotification } = await import('./email');
-          await sendEngineerAcceptanceNotification(adminEmail, {
-            engineerName: input.engineerName,
-            engineerEmail: input.engineerEmail || 'Not provided',
-            jobId: job.id,
-            siteName: job.siteName,
-            siteAddress: job.siteAddress,
-            clientName: job.clientName,
-            scheduledDateTime: job.scheduledDateTime || undefined,
-            acceptedAt: new Date(),
-            baseUrl,
-          });
-          console.log('[Email] Engineer acceptance notification sent to admin');
+          
+          // If engineer proposed different time, send time counter-proposal notification
+          if (input.counterProposedDate) {
+            const { sendTimeCounterProposalNotification } = await import('./email');
+            await sendTimeCounterProposalNotification(adminEmail, {
+              engineerName: input.engineerName,
+              engineerEmail: input.engineerEmail || 'Not provided',
+              jobId: job.id,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress || '',
+              clientName: job.clientName || '',
+              requestedStartDate: job.requestedStartDate || undefined,
+              requestedStartTime: job.requestedStartTime || undefined,
+              proposedStartDate: job.proposedStartDate || undefined,
+              proposedStartTime: job.proposedStartTime || undefined,
+              counterProposedDate: new Date(input.counterProposedDate),
+              counterProposedTime: input.counterProposedTime || undefined,
+              counterProposalNotes: input.counterProposalNotes || undefined,
+              baseUrl,
+            });
+            console.log('[Email] Time counter-proposal notification sent to admin');
+          } else {
+            // Regular acceptance notification
+            const { sendEngineerAcceptanceNotification } = await import('./email');
+            await sendEngineerAcceptanceNotification(adminEmail, {
+              engineerName: input.engineerName,
+              engineerEmail: input.engineerEmail || 'Not provided',
+              jobId: job.id,
+              siteName: job.siteName,
+              siteAddress: job.siteAddress || '',
+              clientName: job.clientName || '',
+              scheduledDateTime: job.scheduledDateTime || undefined,
+              acceptedAt: new Date(),
+              baseUrl,
+            });
+            console.log('[Email] Engineer acceptance notification sent to admin');
+          }
         } catch (error) {
           console.error('[Email] Failed to send acceptance notification to admin:', error);
         }
@@ -801,8 +854,8 @@ export const appRouter = router({
             engineerEmail: job.engineerEmail || 'Not provided',
             jobId: job.id,
             siteName: job.siteName,
-            siteAddress: job.siteAddress,
-            clientName: job.clientName,
+            siteAddress: job.siteAddress || '',
+            clientName: job.clientName || '',
             scheduledDateTime: job.scheduledDateTime || undefined,
             declinedAt: new Date(),
             baseUrl,
@@ -827,6 +880,9 @@ export const appRouter = router({
         engineerEmail: z.string().email().optional(),
         sendEmailToEngineer: z.boolean().optional(),
         timezone: z.string().optional(), // Site timezone (IANA format)
+        proposedStartDate: z.date().optional(),
+        proposedStartTime: z.string().optional(),
+        timeNegotiationNotes: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const baseUrl = getBaseUrl(ctx.req);
@@ -841,6 +897,36 @@ export const appRouter = router({
           updateFields.arrivedAt = new Date();
         } else if (input.status === "completed") {
           updateFields.completedAt = new Date();
+        } else if (input.status === "approved") {
+          // Add time negotiation fields if provided
+          if (input.proposedStartDate) {
+            updateFields.proposedStartDate = input.proposedStartDate;
+            
+            // Update scheduledDateTime to the proposed time with proper timezone conversion
+            if (input.proposedStartTime) {
+              // Combine date and time into local datetime string
+              const dateStr = input.proposedStartDate.toISOString().split('T')[0];
+              const localDateTimeStr = `${dateStr}T${input.proposedStartTime}`;
+              
+              // Convert from site's local timezone to UTC
+              if (job.timezone) {
+                const { convertLocalTimeToUTC } = await import('../shared/timezone');
+                updateFields.scheduledDateTime = convertLocalTimeToUTC(localDateTimeStr, job.timezone);
+              } else {
+                // Fallback if no timezone - treat as UTC
+                updateFields.scheduledDateTime = new Date(localDateTimeStr);
+              }
+            } else {
+              // Just update the date part
+              updateFields.scheduledDateTime = input.proposedStartDate;
+            }
+          }
+          if (input.proposedStartTime) {
+            updateFields.proposedStartTime = input.proposedStartTime;
+          }
+          if (input.timeNegotiationNotes) {
+            updateFields.timeNegotiationNotes = input.timeNegotiationNotes;
+          }
         }
 
         await updateJobStatus(job.id, input.status, updateFields);
@@ -853,19 +939,49 @@ export const appRouter = router({
           notes: input.notes || (input.status === 'sent_to_engineer' && input.engineerName ? `Assigned to ${input.engineerName} (${input.engineerEmail})` : undefined),
         });
 
+        // Add time adjustment history if admin changed the time
+        if (input.status === 'approved' && input.proposedStartDate) {
+          const oldTime = job.requestedStartTime || 'Flexible';
+          const newTime = input.proposedStartTime || 'Flexible';
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'time_adjusted',
+            notes: `Admin adjusted time from ${oldTime} to ${newTime}${input.timeNegotiationNotes ? `. Reason: ${input.timeNegotiationNotes}` : ''}`,
+          });
+        }
+
         // Send approval notification to client
         if (input.status === 'approved' && job.clientEmail) {
           try {
-            const { sendJobApprovalNotification } = await import('./email');
-            await sendJobApprovalNotification(job.clientEmail, {
-              clientName: job.clientName,
-              siteName: job.siteName,
-              siteAddress: job.siteAddress,
-              scheduledDateTime: job.scheduledDateTime || undefined,
-              trackingToken: job.jobToken,
-              baseUrl,
-            });
-            console.log('[Email] Job approval notification sent to client:', job.clientEmail);
+            // If admin adjusted the time, send time adjustment notification
+            if (input.proposedStartDate) {
+              const { sendTimeAdjustmentNotification } = await import('./email');
+              await sendTimeAdjustmentNotification(job.clientEmail, {
+                clientName: job.clientName || '',
+                siteName: job.siteName,
+                siteAddress: job.siteAddress || '',
+                requestedStartDate: job.requestedStartDate || undefined,
+                requestedStartTime: job.requestedStartTime || undefined,
+                proposedStartDate: input.proposedStartDate,
+                proposedStartTime: input.proposedStartTime || undefined,
+                timeNegotiationNotes: input.timeNegotiationNotes || undefined,
+                trackingToken: job.jobToken,
+                baseUrl,
+              });
+              console.log('[Email] Time adjustment notification sent to client:', job.clientEmail);
+            } else {
+              // Regular approval notification
+              const { sendJobApprovalNotification } = await import('./email');
+              await sendJobApprovalNotification(job.clientEmail, {
+                clientName: job.clientName || '',
+                siteName: job.siteName,
+                siteAddress: job.siteAddress || '',
+                scheduledDateTime: job.scheduledDateTime || undefined,
+                trackingToken: job.jobToken,
+                baseUrl,
+              });
+              console.log('[Email] Job approval notification sent to client:', job.clientEmail);
+            }
           } catch (error) {
             console.error('[Email] Failed to send approval notification to client:', error);
           }
@@ -876,9 +992,9 @@ export const appRouter = router({
           try {
             const { sendJobRejectionNotification } = await import('./email');
             await sendJobRejectionNotification(job.clientEmail, {
-              clientName: job.clientName,
+              clientName: job.clientName || '',
               siteName: job.siteName,
-              siteAddress: job.siteAddress,
+              siteAddress: job.siteAddress || '',
               scheduledDateTime: job.scheduledDateTime || undefined,
               rejectionReason: input.notes,
               baseUrl,
@@ -939,6 +1055,101 @@ export const appRouter = router({
             console.log('[Email] Status update sent to client:', job.clientEmail);
           } catch (error) {
             console.error('[Email] Failed to send status update:', error);
+          }
+        }
+
+        return { success: true };
+      }),
+
+    // Approve engineer's time counter-proposal
+    approveTimeChange: protectedProcedure
+      .input(z.object({
+        jobId: z.number(),
+        approved: z.boolean(),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const baseUrl = getBaseUrl(ctx.req);
+        const job = await getJobById(input.jobId);
+        if (!job) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Job not found' });
+        }
+
+        if (!job.confirmedStartDate) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'No time change proposal found for this job' 
+          });
+        }
+
+        const updateFields: any = {};
+
+        if (input.approved) {
+          // Admin approved - update scheduledDateTime to engineer's proposed time
+          if (job.confirmedStartTime) {
+            const dateStr = job.confirmedStartDate.toISOString().split('T')[0];
+            const localDateTimeStr = `${dateStr}T${job.confirmedStartTime}`;
+            
+            // Engineer's time is in the site's local timezone
+            // Convert to UTC using the job's timezone (defaults to GMT if not set)
+            const { convertLocalTimeToUTC } = await import('../shared/timezone');
+            const timezone = job.timezone || 'Europe/London'; // Default to GMT
+            updateFields.scheduledDateTime = convertLocalTimeToUTC(localDateTimeStr, timezone);
+          } else {
+            updateFields.scheduledDateTime = job.confirmedStartDate;
+          }
+          
+          // Clear counter-proposal fields after approval
+          updateFields.confirmedStartDate = null;
+          updateFields.confirmedStartTime = null;
+          
+          if (input.adminNotes) {
+            updateFields.timeNegotiationNotes = input.adminNotes;
+          }
+        } else {
+          // Admin rejected - clear the counter-proposal fields
+          updateFields.confirmedStartDate = null;
+          updateFields.confirmedStartTime = null;
+          if (input.adminNotes) {
+            updateFields.timeNegotiationNotes = input.adminNotes;
+          }
+        }
+
+        await updateJobStatus(job.id, job.status, updateFields);
+
+        // Add status history for approval/rejection
+        if (input.approved) {
+          const proposedTime = job.confirmedStartTime || 'Flexible';
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'time_approved',
+            notes: `Admin approved engineer's time change to ${proposedTime}${input.adminNotes ? `. Note: ${input.adminNotes}` : ''}`,
+          });
+        } else {
+          await addJobStatusHistory({
+            jobId: job.id,
+            status: 'time_rejected',
+            notes: `Admin rejected engineer's time change proposal${input.adminNotes ? `. Reason: ${input.adminNotes}` : ''}`,
+          });
+        }
+
+        // Send notification to engineer
+        if (job.engineerEmail) {
+          try {
+            // TODO: Create email template for time approval/rejection
+            console.log(`[Email] Time change ${input.approved ? 'approved' : 'rejected'} notification to engineer:`, job.engineerEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send time change notification:', error);
+          }
+        }
+
+        // Send notification to client if approved
+        if (input.approved && job.clientEmail) {
+          try {
+            // TODO: Notify client of final confirmed time
+            console.log('[Email] Final time confirmation to client:', job.clientEmail);
+          } catch (error) {
+            console.error('[Email] Failed to send time confirmation:', error);
           }
         }
 

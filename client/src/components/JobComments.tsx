@@ -125,7 +125,7 @@ export function JobComments({ token, authorName, authorType, canComment = true }
           });
           
           const mediaFile = await uploadMediaMutation.mutateAsync({
-            jobId: job.id,
+            jobId: job!.id,
             filename: file.name,
             mimeType: file.type,
             base64Data,

@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, name, slug FROM organizations",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, name, slug FROM organizations",
+  "rows": [
+    {
+      "id": "1",
+      "name": "FieldPulse",
+      "slug": "fieldpulse"
+    },
+    {
+      "id": "30001",
+      "name": "jessp's Organization",
+      "slug": "jessp-s-organization-1763133406929"
+    },
+    {
+      "id": "60001",
+      "name": "Test Organization",
+      "slug": "test-org-manual"
+    },
+    {
+      "id": "90001",
+      "name": "transtest",
+      "slug": "transtest-1763146741983"
+    },
+    {
+      "id": "90002",
+      "name": "robo",
+      "slug": "robo-1763147733544"
+    },
+    {
+      "id": "120001",
+      "name": "Riffj",
+      "slug": "riffj-1763154089187"
+    },
+    {
+      "id": "120002",
+      "name": "Test Organization",
+      "slug": "test-organization-1763155344144"
+    },
+    {
+      "id": "120003",
+      "name": "Test Company 2",
+      "slug": "test-company-2-1763155844179"
+    },
+    {
+      "id": "150001",
+      "name": "bob",
+      "slug": "bob-1763207069582"
+    },
+    {
+      "id": "180001",
+      "name": "asdisjd",
+      "slug": "asdisjd-1763207746947"
+    },
+    {
+      "id": "180002",
+      "name": "test ten 2",
+      "slug": "test-ten-2-1763208294745"
+    },
+    {
+      "id": "180003",
+      "name": "test ten 3",
+      "slug": "test-ten-3-1763208509273"
+    },
+    {
+      "id": "180004",
+      "name": "test ten 4",
+      "slug": "test-ten-4-1763208864262"
+    },
+    {
+      "id": "210001",
+      "name": "iiasdij",
+      "slug": "iiasdij-1763401781473"
+    },
+    {
+      "id": "240001",
+      "name": "Transputec",
+      "slug": "transputec-1763405331499"
+    },
+    {
+      "id": "240002",
+      "name": "transtester",
+      "slug": "transtester-1763405843986"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tslug\n1\tFieldPulse\tfieldpulse\n30001\tjessp's Organization\tjessp-s-organization-1763133406929\n60001\tTest Organization\ttest-org-manual\n90001\ttranstest\ttranstest-1763146741983\n90002\trobo\trobo-1763147733544\n120001\tRiffj\triffj-1763154089187\n120002\tTest Organization\ttest-organization-1763155344144\n120003\tTest Company 2\ttest-company-2-1763155844179\n150001\tbob\tbob-1763207069582\n180001\tasdisjd\tasdisjd-1763207746947\n180002\ttest ten 2\ttest-ten-2-1763208294745\n180003\ttest ten 3\ttest-ten-3-1763208509273\n180004\ttest ten 4\ttest-ten-4-1763208864262\n210001\tiiasdij\tiiasdij-1763401781473\n240001\tTransputec\ttransputec-1763405331499\n240002\ttranstester\ttranstester-1763405843986\n",
+  "stderr": "",
+  "execution_time_ms": 48
+}

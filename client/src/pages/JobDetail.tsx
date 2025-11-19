@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, MapPin, Clock, User, XCircle, CheckCircle2, Copy, Link as LinkIcon } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { DualTimeDisplay, CompactDualTime, InlineDualTime } from "@/components/DualTimeDisplay";
+import { getTimezoneAbbreviation, getTimezoneOffset, getUTCPreviewText } from "@/lib/timezone";
 import { useLocation } from "wouter";
 import { Link, useRoute } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -36,6 +37,9 @@ export default function JobDetail() {
   const [engineerName, setEngineerName] = useState("");
   const [engineerEmail, setEngineerEmail] = useState("");
   const [sendEmailToEngineer, setSendEmailToEngineer] = useState(false);
+  const [proposedStartDate, setProposedStartDate] = useState<string>("");
+  const [proposedStartTime, setProposedStartTime] = useState<string>("");
+  const [timeNegotiationNotes, setTimeNegotiationNotes] = useState<string>("");
 
   const { data: job, isLoading, refetch } = trpc.jobs.getById.useQuery(
     { id: jobId },
@@ -95,6 +99,20 @@ export default function JobDetail() {
     },
     onError: (error) => {
       toast.error(`Failed to cancel job: ${error.message}`);
+    },
+  });
+
+  const approveTimeChangeMutation = trpc.jobs.approveTimeChange.useMutation({
+    onSuccess: (_, variables) => {
+      if (variables.approved) {
+        toast.success("Time change approved! Job time has been updated.");
+      } else {
+        toast.success("Time change rejected. Original time maintained.");
+      }
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to process time change: ${error.message}`);
     },
   });
 
@@ -560,9 +578,87 @@ export default function JobDetail() {
                         <p className="font-medium">{job.projectName}</p>
                       </div>
                     )}
+                    {job.bookingType && (
+                      <div>
+                        <p className="text-muted-foreground">Booking Type</p>
+                        <p className="font-medium">
+                          {job.bookingType === 'full_day' && 'Full Day (8 hours)'}
+                          {job.bookingType === 'hourly' && 'Hourly'}
+                          {job.bookingType === 'multi_day' && 'Multi-Day'}
+                        </p>
+                      </div>
+                    )}
+                    {job.estimatedHours && (
+                      <div>
+                        <p className="text-muted-foreground">Estimated Hours</p>
+                        <p className="font-medium">{job.estimatedHours} hours</p>
+                      </div>
+                    )}
+                    {job.estimatedDays && (
+                      <div>
+                        <p className="text-muted-foreground">Estimated Days</p>
+                        <p className="font-medium">{job.estimatedDays} days</p>
+                      </div>
+                    )}
+                    {job.requestedStartDate && (
+                      <div>
+                        <p className="text-muted-foreground">Requested Start Date</p>
+                        <DualTimeDisplay date={job.requestedStartDate} timezone={job.timezone ?? undefined} showIcon={false} />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-muted-foreground">Requested Start Time</p>
+                      {job.requestedStartTime ? (
+                        <p className="font-medium">{job.requestedStartTime}</p>
+                      ) : (
+                        <p className="font-medium text-blue-600">⏰ Flexible - Coordinate with client</p>
+                      )}
+                    </div>
+                    {job.confirmedStartDate && (
+                      <div className="md:col-span-2 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-2">⏰ Engineer Proposed Different Time</p>
+                        <div className="mb-3">
+                          <p className="text-xs text-muted-foreground mb-1">Proposed Time</p>
+                          {job.confirmedStartTime ? (
+                            <p className="font-medium">
+                              {new Date(job.confirmedStartDate).toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                timeZone: job.timezone || 'Europe/London'
+                              })} at {job.confirmedStartTime}
+                            </p>
+                          ) : (
+                            <DualTimeDisplay date={job.confirmedStartDate} timezone={job.timezone ?? undefined} showIcon={false} />
+                          )}
+                        </div>
+                        {job.timeNegotiationNotes && (
+                          <p className="text-sm text-muted-foreground mb-3">Reason: {job.timeNegotiationNotes}</p>
+                        )}
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => approveTimeChangeMutation.mutate({ jobId: job.id, approved: true })}
+                            disabled={approveTimeChangeMutation.isPending}
+                          >
+                            {approveTimeChangeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}
+                            Approve Time Change
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => approveTimeChangeMutation.mutate({ jobId: job.id, approved: false })}
+                            disabled={approveTimeChangeMutation.isPending}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     {job.hoursRequired && (
                       <div>
-                        <p className="text-muted-foreground">Hours Required</p>
+                        <p className="text-muted-foreground">Hours Required (Legacy)</p>
                         <p className="font-medium">{job.hoursRequired}</p>
                       </div>
                     )}
@@ -830,6 +926,66 @@ export default function JobDetail() {
                 onChange={(e) => setEngineerEmail(e.target.value)}
               />
             </div>
+            
+            {/* Time Adjustment Section */}
+            <div className="border-t pt-4 space-y-4">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Adjust Schedule (Optional)</h4>
+                {job?.timezone && (
+                  <p className="text-xs text-muted-foreground">
+                    Site timezone: <span className="font-medium">{getTimezoneAbbreviation(job.timezone)}</span> {getTimezoneOffset(job.timezone)}
+                  </p>
+                )}
+                <div className="text-xs text-muted-foreground">
+                  <span>Client requested: </span>
+                  {job?.requestedStartDate ? (
+                    <InlineDualTime date={job.requestedStartDate} timezone={job.timezone ?? undefined} />
+                  ) : (
+                    <span>Not specified</span>
+                  )}
+                  {job?.requestedStartTime && <span className="ml-1">at {job.requestedStartTime}</span>}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="proposedStartDate">Proposed Start Date</Label>
+                  <Input
+                    id="proposedStartDate"
+                    type="date"
+                    value={proposedStartDate}
+                    onChange={(e) => setProposedStartDate(e.target.value)}
+                    placeholder="Leave blank to keep client's request"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="proposedStartTime">Proposed Start Time</Label>
+                  <Input
+                    id="proposedStartTime"
+                    type="time"
+                    value={proposedStartTime}
+                    onChange={(e) => setProposedStartTime(e.target.value)}
+                    placeholder="Leave blank to keep client's request"
+                  />
+                  {proposedStartDate && proposedStartTime && job?.timezone && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      UTC equivalent: {getUTCPreviewText(`${proposedStartDate}T${proposedStartTime}`, job.timezone)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="timeNegotiationNotes">Schedule Notes</Label>
+                <Input
+                  id="timeNegotiationNotes"
+                  placeholder="e.g., Adjusted to match engineer availability"
+                  value={timeNegotiationNotes}
+                  onChange={(e) => setTimeNegotiationNotes(e.target.value)}
+                />
+              </div>
+            </div>
+            
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="sendEmail"
@@ -854,11 +1010,17 @@ export default function JobDetail() {
                   engineerName: engineerName || undefined,
                   engineerEmail: engineerEmail || undefined,
                   sendEmailToEngineer: sendEmailToEngineer,
+                  proposedStartDate: proposedStartDate ? new Date(proposedStartDate) : undefined,
+                  proposedStartTime: proposedStartTime || undefined,
+                  timeNegotiationNotes: timeNegotiationNotes || undefined,
                 });
                 setApproveDialogOpen(false);
                 setEngineerName("");
                 setEngineerEmail("");
                 setSendEmailToEngineer(false);
+                setProposedStartDate("");
+                setProposedStartTime("");
+                setTimeNegotiationNotes("");
               }}
               disabled={updateStatusMutation.isPending}
             >

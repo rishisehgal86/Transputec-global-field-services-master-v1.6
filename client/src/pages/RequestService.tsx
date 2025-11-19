@@ -29,6 +29,11 @@ export default function RequestService({ projectId, project, organizationId }: {
   const [selectedProjectSite, setSelectedProjectSite] = useState<any | null>(null);
   const [detectedTimezone, setDetectedTimezone] = useState<string | null>(null);
   const [scheduledDateTime, setScheduledDateTime] = useState<string>("");
+  const [bookingType, setBookingType] = useState<'full_day' | 'hourly'>('full_day');
+  const [estimatedHours, setEstimatedHours] = useState<string>("");
+  const [estimatedDays, setEstimatedDays] = useState<string>("");
+  const [requestedStartTime, setRequestedStartTime] = useState<string>("");
+  const [isTimeFlexible, setIsTimeFlexible] = useState<boolean>(false);
   
   // Fetch project sites after verification or if provided via URL
   const effectiveProjectId = manualProjectId && projectValid ? manualProjectId : projectId;
@@ -112,7 +117,12 @@ export default function RequestService({ projectId, project, organizationId }: {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const scheduledDateTimeStr = formData.get("scheduledDateTime") as string;
+    // Use state values for controlled inputs instead of FormData
+    const scheduledDateTimeStr = scheduledDateTime;
+    // Combine date and time if time is provided
+    const fullDateTimeStr = scheduledDateTimeStr && requestedStartTime && !isTimeFlexible
+      ? `${scheduledDateTimeStr}T${requestedStartTime}`
+      : scheduledDateTimeStr;
     
     // When adding new site to project, allow submission even without search
     // The address will be captured from the search input
@@ -145,10 +155,11 @@ export default function RequestService({ projectId, project, organizationId }: {
       siteContactName: formData.get("siteContactName") as string,
       siteContactNumber: formData.get("siteContactNumber") as string,
       incidentDetails: formData.get("incidentDetails") as string,
-      scheduledDateTime: scheduledDateTimeStr && detectedTimezone ? convertLocalTimeToUTC(scheduledDateTimeStr, detectedTimezone) : (scheduledDateTimeStr ? new Date(scheduledDateTimeStr) : undefined),
+      scheduledDateTime: fullDateTimeStr && detectedTimezone ? convertLocalTimeToUTC(fullDateTimeStr, detectedTimezone) : (fullDateTimeStr ? new Date(fullDateTimeStr) : undefined),
       hoursRequired: formData.get("hoursRequired") as string,
       downTime: formData.get("downTime") === "on",
-      timezone: finalCoordinates.lng ? estimateTimezoneFromLongitude(finalCoordinates.lng) : undefined, // Determine timezone from site location
+      timezone: finalCoordinates.lng ? estimateTimezoneFromLongitude(finalCoordinates.lng) : 'Europe/London', // Determine timezone from site location, default to GMT
+      // Booking fields removed - multi-day and hourly estimation no longer supported
       // Optional fields
       siteId: formData.get("siteId") as string || undefined,
       changeNumber: formData.get("changeNumber") as string || undefined,
@@ -659,38 +670,139 @@ export default function RequestService({ projectId, project, organizationId }: {
                   />
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="scheduledDateTime">Preferred Date & Time *</Label>
-                    {detectedTimezone && (
-                      <p className="text-sm text-muted-foreground">
-                        Enter time in <span className="font-medium">{getTimezoneAbbreviation(detectedTimezone)}</span> {getTimezoneOffset(detectedTimezone)}
-                      </p>
-                    )}
-                    <Input 
-                      id="scheduledDateTime" 
-                      name="scheduledDateTime" 
-                      type="datetime-local" 
-                      required
-                      value={scheduledDateTime}
-                      onChange={(e) => setScheduledDateTime(e.target.value)}
-                    />
-                    {scheduledDateTime && detectedTimezone && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        UTC equivalent: {getUTCPreviewText(scheduledDateTime, detectedTimezone)}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="hoursRequired">Estimated Hours Required *</Label>
-                    <Input 
-                      id="hoursRequired" 
-                      name="hoursRequired" 
-                      required 
-                      placeholder="e.g., 2-4 hours" 
-                    />
-                  </div>
+                {/* Booking Type Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="bookingType">Booking Type *</Label>
+                  <Select value={bookingType} onValueChange={(value: any) => setBookingType(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select booking type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full_day">Full Day (8 hours standard)</SelectItem>
+                      <SelectItem value="hourly">Hourly (specify hours)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {bookingType === 'full_day' && 'Standard 8-hour workday'}
+                    {bookingType === 'hourly' && 'Any number of hours (1-20+ hours)'}
+                  </p>
                 </div>
+
+                {/* Conditional Fields Based on Booking Type */}
+                {bookingType === 'hourly' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="estimatedHours">Estimated Hours *</Label>
+                    <Input 
+                      id="estimatedHours" 
+                      name="estimatedHours" 
+                      type="number"
+                      min="1"
+                      step="0.5"
+                      required
+                      value={estimatedHours}
+                      onChange={(e) => setEstimatedHours(e.target.value)}
+                      placeholder="e.g., 4.5" 
+                    />
+                    <p className="text-xs text-muted-foreground">Enter any number of hours (can be 1-20+ hours)</p>
+                  </div>
+                )}
+
+                {/* Multi-day option removed */}
+                {false && (
+                  <div className="space-y-2">
+                    <Label htmlFor="estimatedDays">Number of Days *</Label>
+                    <Input 
+                      id="estimatedDays" 
+                      name="estimatedDays" 
+                      type="number"
+                      min="2"
+                      required
+                      value={estimatedDays}
+                      onChange={(e) => setEstimatedDays(e.target.value)}
+                      placeholder="e.g., 3" 
+                    />
+                    <p className="text-xs text-muted-foreground">Enter number of consecutive days required</p>
+                  </div>
+                )}
+
+                {/* Preferred Start Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="scheduledDateTime">Preferred Start Date *</Label>
+                  {detectedTimezone && (
+                    <p className="text-sm text-muted-foreground">
+                      Enter date in <span className="font-medium">{getTimezoneAbbreviation(detectedTimezone)}</span> {getTimezoneOffset(detectedTimezone)}
+                    </p>
+                  )}
+                  <Input 
+                    id="scheduledDateTime" 
+                    name="scheduledDateTime" 
+                    type="date" 
+                    required
+                    value={scheduledDateTime}
+                    onChange={(e) => setScheduledDateTime(e.target.value)}
+                  />
+                </div>
+
+                {/* Preferred Start Time */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="requestedStartTime">Preferred Start Time</Label>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="timeFlexible" 
+                        checked={isTimeFlexible}
+                        onCheckedChange={(checked) => {
+                          setIsTimeFlexible(checked as boolean);
+                          if (checked) setRequestedStartTime("");
+                        }}
+                      />
+                      <label htmlFor="timeFlexible" className="text-sm text-muted-foreground cursor-pointer">
+                        Time is flexible
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <Select 
+                    value={requestedStartTime} 
+                    onValueChange={setRequestedStartTime}
+                    disabled={isTimeFlexible}
+                  >
+                    <SelectTrigger id="requestedStartTime" className={isTimeFlexible ? "opacity-50" : ""}>
+                      <SelectValue placeholder="Select preferred start time" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {/* Generate all 24 hours in 30-minute intervals */}
+                      {Array.from({ length: 48 }, (_, i) => {
+                        const hour = Math.floor(i / 2);
+                        const minute = (i % 2) * 30;
+                        const timeValue = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                        const period = hour < 12 ? 'AM' : 'PM';
+                        const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+                        return (
+                          <SelectItem key={timeValue} value={timeValue}>
+                            {displayTime}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  
+                  {!isTimeFlexible && (
+                    <p className="text-xs text-muted-foreground">Select your preferred start time</p>
+                  )}
+                  {isTimeFlexible && (
+                    <p className="text-xs text-muted-foreground">No specific time required - we'll coordinate with you</p>
+                  )}
+                  {requestedStartTime && !isTimeFlexible && scheduledDateTime && detectedTimezone && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      UTC equivalent: {getUTCPreviewText(`${scheduledDateTime}T${requestedStartTime}`, detectedTimezone)}
+                    </p>
+                  )}
+                </div>
+
+                {/* Keep the old hoursRequired field for backward compatibility but make it optional */}
+                <input type="hidden" name="hoursRequired" value={bookingType === 'hourly' ? estimatedHours : '8 hours'} />
 
                 <div className="flex items-center space-x-2">
                   <Checkbox id="downTime" name="downTime" />

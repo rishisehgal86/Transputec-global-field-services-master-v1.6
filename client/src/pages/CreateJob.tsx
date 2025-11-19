@@ -113,7 +113,8 @@ export default function CreateJob() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const scheduledDateTimeStr = formData.get("scheduledDateTime") as string;
+    // Use state value for controlled input instead of FormData
+    const scheduledDateTimeStr = scheduledDateTime;
     
     createJobMutation.mutate({
       siteName: formData.get("siteName") as string,
@@ -143,7 +144,7 @@ export default function CreateJob() {
       engineerName: formData.get("engineerName") as string || undefined,
       engineerEmail: (formData.get("engineerEmail") as string)?.trim() || undefined,
       sendEmailToEngineer: formData.get("sendEmailToEngineer") === "on",
-      timezone: siteCoordinates?.lng ? estimateTimezoneFromLongitude(siteCoordinates.lng) : undefined, // Determine timezone from site location
+      timezone: siteCoordinates?.lng ? estimateTimezoneFromLongitude(siteCoordinates.lng) : 'Europe/London', // Determine timezone from site location, default to GMT
     });
   };
 

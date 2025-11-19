@@ -300,6 +300,8 @@ export default function ClientTracker() {
                     </div>
                   )}
                 </div>
+                
+
 
                 {job.scopeOfWork && (
                   <>

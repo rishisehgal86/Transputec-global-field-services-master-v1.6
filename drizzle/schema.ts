@@ -148,6 +148,20 @@ export const jobs = mysqlTable("jobs", {
   scheduledDateTime: timestamp("scheduledDateTime"),
   hoursRequired: varchar("hoursRequired", { length: 100 }),
   
+  // Booking Type and Duration
+  bookingType: mysqlEnum("bookingType", ["full_day", "hourly", "multi_day"]),
+  estimatedHours: int("estimatedHours"), // For hourly bookings
+  estimatedDays: int("estimatedDays"), // For multi-day bookings
+  
+  // Time Scheduling and Negotiation
+  requestedStartDate: timestamp("requestedStartDate"),
+  requestedStartTime: varchar("requestedStartTime", { length: 10 }), // HH:MM format
+  proposedStartDate: timestamp("proposedStartDate"), // Admin/Engineer counter-proposal
+  proposedStartTime: varchar("proposedStartTime", { length: 10 }),
+  confirmedStartDate: timestamp("confirmedStartDate"), // Final confirmed schedule
+  confirmedStartTime: varchar("confirmedStartTime", { length: 10 }),
+  timeNegotiationNotes: text("timeNegotiationNotes"),
+  
   // Technical Requirements
   toolsRequired: text("toolsRequired"),
   deviceDetails: text("deviceDetails"),

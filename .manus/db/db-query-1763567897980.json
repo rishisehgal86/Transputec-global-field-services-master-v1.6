@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, siteName, timezone, scheduledDateTime, confirmedStartDate, confirmedStartTime, status FROM jobs WHERE id = (SELECT MAX(id) FROM jobs);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, siteName, timezone, scheduledDateTime, confirmedStartDate, confirmedStartTime, status FROM jobs WHERE id = (SELECT MAX(id) FROM jobs);",
+  "rows": [
+    {
+      "id": "480014",
+      "siteName": "asdsdsd",
+      "timezone": "NULL",
+      "scheduledDateTime": "2025-12-18 19:00:00",
+      "confirmedStartDate": "NULL",
+      "confirmedStartTime": "NULL",
+      "status": "accepted"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsiteName\ttimezone\tscheduledDateTime\tconfirmedStartDate\tconfirmedStartTime\tstatus\n480014\tasdsdsd\tNULL\t2025-12-18 19:00:00\tNULL\tNULL\taccepted\n",
+  "stderr": "",
+  "execution_time_ms": 91
+}

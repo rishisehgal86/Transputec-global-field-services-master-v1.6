@@ -285,6 +285,11 @@ export default function AdminDashboard() {
                       <div className="flex items-center gap-3 mb-2">
                         <CardTitle className="text-xl">{job.siteName}</CardTitle>
                         {getStatusBadge(job.status)}
+                        {job.confirmedStartDate && (
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
+                            ⏰ Time Approval Pending
+                          </Badge>
+                        )}
                       </div>
                       <CardDescription>
                         <div className="space-y-1">
@@ -304,6 +309,14 @@ export default function AdminDashboard() {
                               <strong>Scheduled:</strong>
                               <CompactDualTime date={job.scheduledDateTime} timezone={job.timezone ?? undefined} />
                             </div>
+                          )}
+                          {job.bookingType && (
+                            <p>
+                              <strong>Booking:</strong>{" "}
+                              {job.bookingType === 'full_day' && 'Full Day (8 hours)'}
+                              {job.bookingType === 'hourly' && `Hourly (${job.estimatedHours || '?'} hours)`}
+                              {job.bookingType === 'multi_day' && `Multi-Day (${job.estimatedDays || '?'} days)`}
+                            </p>
                           )}
                         </div>
                       </CardDescription>

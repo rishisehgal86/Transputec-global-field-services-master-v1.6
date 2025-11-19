@@ -1,0 +1,14 @@
+{
+  "query": "SELECT slug, name FROM organizations LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT slug, name FROM organizations LIMIT 1",
+  "rows": [
+    {
+      "slug": "fieldpulse",
+      "name": "FieldPulse"
+    }
+  ],
+  "messages": [],
+  "stdout": "slug\tname\nfieldpulse\tFieldPulse\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

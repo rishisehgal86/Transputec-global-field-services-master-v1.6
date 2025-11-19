@@ -27,6 +27,10 @@ export default function EngineerView() {
   const [isTracking, setIsTracking] = useState(false);
   const [watchId, setWatchId] = useState<number | null>(null);
   const [showSVRForm, setShowSVRForm] = useState(false);
+  const [acceptWithTimeChange, setAcceptWithTimeChange] = useState(false);
+  const [counterProposedDate, setCounterProposedDate] = useState<string>("");
+  const [counterProposedTime, setCounterProposedTime] = useState<string>("");
+  const [counterProposalNotes, setCounterProposalNotes] = useState<string>("");
 
   const { data: job, isLoading, refetch } = trpc.jobs.getByToken.useQuery(
     { token },
@@ -274,6 +278,9 @@ export default function EngineerView() {
                     engineerName,
                     engineerEmail: engineerEmail || undefined,
                     engineerPhone: engineerPhone || undefined,
+                    counterProposedDate: acceptWithTimeChange && counterProposedDate ? counterProposedDate : undefined,
+                    counterProposedTime: acceptWithTimeChange ? counterProposedTime || undefined : undefined,
+                    counterProposalNotes: acceptWithTimeChange ? counterProposalNotes || undefined : undefined,
                   });
                 }}
                 className="space-y-4"
@@ -307,6 +314,95 @@ export default function EngineerView() {
                     />
                   </div>
                 </div>
+                
+                {/* Scheduling Information */}
+                <div className="border-t pt-4 space-y-3">
+                  <div className="bg-blue-100 p-3 rounded-md">
+                    <h4 className="font-medium text-sm mb-2">Job Schedule</h4>
+                    <div className="text-sm space-y-1">
+                      {job.bookingType && (
+                        <p>
+                          <strong>Type:</strong>{" "}
+                          {job.bookingType === 'full_day' && 'Full Day (8 hours)'}
+                          {job.bookingType === 'hourly' && `Hourly (${job.estimatedHours || '?'} hours)`}
+                          {job.bookingType === 'multi_day' && `Multi-Day (${job.estimatedDays || '?'} days)`}
+                        </p>
+                      )}
+                      {job.scheduledDateTime ? (
+                        <div>
+                          <strong>Scheduled Time:</strong>{" "}
+                          <InlineDualTime date={job.scheduledDateTime} timezone={job.timezone ?? undefined} />
+                          {job.proposedStartDate && (
+                            <span className="text-xs italic ml-1">(Admin adjusted from client request)</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <strong>Scheduled Time:</strong>{" "}
+                          <span className="text-blue-600 font-semibold">⏰ Flexible - You can propose a time below</span>
+                        </div>
+                      )}
+                      {job.timeNegotiationNotes && (
+                        <p className="text-xs italic mt-2 bg-amber-50 p-2 rounded">
+                          <strong>Admin Note:</strong> {job.timeNegotiationNotes}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="acceptWithTimeChange"
+                      checked={acceptWithTimeChange}
+                      onChange={(e) => setAcceptWithTimeChange(e.target.checked)}
+                      className="rounded"
+                    />
+                    <Label htmlFor="acceptWithTimeChange" className="cursor-pointer text-sm">
+                      I need to propose a different time
+                    </Label>
+                  </div>
+                  
+                  {acceptWithTimeChange && (
+                    <div className="space-y-3 pl-6 border-l-2 border-blue-300">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor="counterProposedDate" className="text-sm">Your Proposed Date</Label>
+                          <Input
+                            id="counterProposedDate"
+                            type="date"
+                            value={counterProposedDate}
+                            onChange={(e) => setCounterProposedDate(e.target.value)}
+                            required={acceptWithTimeChange}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="counterProposedTime" className="text-sm">Your Proposed Time</Label>
+                          <Input
+                            id="counterProposedTime"
+                            type="time"
+                            value={counterProposedTime}
+                            onChange={(e) => setCounterProposedTime(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="counterProposalNotes" className="text-sm">Reason for Time Change</Label>
+                        <Input
+                          id="counterProposalNotes"
+                          placeholder="e.g., Previous commitment, travel time needed"
+                          value={counterProposalNotes}
+                          onChange={(e) => setCounterProposalNotes(e.target.value)}
+                          required={acceptWithTimeChange}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Admin will review your proposed time and confirm
+                      </p>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="flex gap-3 pt-2">
                   <Button
                     type="submit"
@@ -315,7 +411,7 @@ export default function EngineerView() {
                   >
                     {acceptMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Accept Job
+                    {acceptWithTimeChange ? 'Accept with Time Change' : 'Accept Job'}
                   </Button>
                   <Button
                     type="button"

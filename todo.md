@@ -1663,3 +1663,262 @@ ns
 - [x] Allow deleting both active and inactive projects
 - [x] Test project deletion works on dev server
 
+
+
+
+## Version 3.0 - Engineer Booking Process with Time Negotiation
+- [x] Add booking type fields to database schema (bookingType, estimatedHours, estimatedDays)
+- [x] Add time negotiation fields to database schema (requestedStartDate, requestedStartTime, proposedStartDate, proposedStartTime, confirmedStartDate, confirmedStartTime, timeNegotiationNotes)
+- [x] Update service request form with booking type selector (Full Day/Hourly/Multi-Day)
+- [x] Add conditional hours/days input fields based on booking type
+- [x] Add preferred start date and time pickers to request form
+- [x] Display booking type and duration in admin dashboard job listings
+- [x] Show booking information in admin job detail page
+- [x] Add time adjustment fields to admin approve dialog
+- [x] Allow admin to propose different start date/time before assigning
+- [x] Display booking type and requested time in engineer view
+- [x] Add engineer time counter-proposal UI (checkbox + date/time fields)
+- [x] Save engineer counter-proposal to database (confirmedStartDate, confirmedStartTime)
+- [x] Create email notification for admin when engineer counter-proposes time
+- [x] Create email notification for client when admin adjusts requested time
+- [x] Integrate time notifications into approval and acceptance workflows
+
+
+
+
+## Bug Fix - Dual Time Display Not Showing
+- [x] Ensure dual time display on service request form (booking dates)
+- [x] Ensure dual time display on admin dashboard job listings
+- [x] Ensure dual time display on admin job detail page (all date fields)
+- [x] Ensure dual time display on admin approve dialog (time adjustment preview)
+- [x] Ensure dual time display on engineer view (booking schedule)
+- [x] Ensure dual time display on client tracking page
+- [x] Add dual time to UserManagement last login
+
+## Bug Fix - Time Selector on Booking Form
+- [x] Replace manual time input with dropdown selector
+- [x] Generate time options in 30-minute intervals (6:00 AM to 8:00 PM)
+- [x] Add "Flexible" option for clients who don't have a preference
+- [x] Test time selector on public booking form
+
+
+
+
+## Bug Fix - SelectItem Error on Booking Form
+- [x] Fix SelectItem empty string value error
+- [x] Use "flexible" as value instead of empty string
+- [x] Update form submission to handle "flexible" value
+
+
+
+
+## Enhancement - Full 24-Hour Time Options
+- [x] Create proper time picker with all 24 hours (00:00 to 23:30)
+- [x] Add separate "Flexible" checkbox outside the dropdown
+- [x] Disable time dropdown when "Flexible" is checked
+- [x] Update form submission logic for flexible checkbox
+- [x] Generate all time slots programmatically (48 slots in 30-min intervals)
+
+
+
+
+## Enhancement - Flexible Time Communication
+- [x] Display "Time Flexible" message on admin dashboard when no time specified
+- [x] Show "Time Flexible - Coordinate with client" on admin job detail page
+- [x] Display "Time Flexible - You can propose a time" on engineer view
+- [x] Show "Time Flexible - Will be coordinated" on client tracking page
+- [x] Ensure admin can set time when approving flexible requests (already supported)
+- [x] Ensure engineer can propose time when accepting flexible requests (already supported)
+
+
+
+
+## Bug Fix - Submit Button Not Clickable
+- [x] Fix timezone.ts error: "undefined is not an object (evaluating 'timePart.split')"
+- [x] Add null/undefined check in getUTCPreviewText function
+- [ ] Test form submission with flexible time selected
+- [ ] Verify form works with all booking types
+
+
+
+
+## Bug Fix - Adjusted Time Not Displaying
+- [x] Update scheduledDateTime when admin proposes new time
+- [x] Combine proposedStartDate + proposedStartTime into scheduledDateTime
+- [x] Update scheduledDateTime when engineer counter-proposes time
+- [x] Ensure job time reflects the latest agreed time in database
+
+
+
+
+## Feature - Admin Approval for Engineer Time Changes
+- [x] Remove automatic scheduledDateTime update when engineer counter-proposes
+- [x] Add approveTimeChange endpoint for admin to approve/reject
+- [x] Create admin UI to approve/reject engineer's proposed time
+- [x] Only update scheduledDateTime after admin approves engineer's time
+- [x] Update client tracker to show "Time pending admin approval" status
+- [x] Add visual indicator in admin dashboard for jobs with pending time approval
+- [ ] Send notification emails when admin approves/rejects time change
+
+
+
+
+## Enhancement - Admin Time Adjustment with Timezone Display
+- [x] Show site timezone in admin approve dialog
+- [x] Display timezone abbreviation and offset (e.g., "GST +04:00")
+- [x] Add dual timezone preview when admin selects time
+- [x] Show "UTC equivalent: [time]" below time picker
+- [x] Use site's timezone for all time adjustments
+
+
+
+
+## Bug Fix - Engineer Page Showing Two Different Times
+- [x] Replace "Requested Schedule" with "Job Schedule" section
+- [x] Show only the final scheduledDateTime that admin set
+- [x] Display booking type and estimated hours/days
+- [x] Keep counter-proposal UI but remove confusing original requested time
+- [x] Ensure engineer sees the time they need to work, not the original request
+- [x] Show admin's adjustment note if present
+
+
+
+
+## Enhancement - Timeline Time Adjustment History
+- [x] Add status history entries when admin adjusts time during approval
+- [x] Add status history entries when engineer counter-proposes time
+- [x] Add status history entries when admin approves/rejects engineer's time
+- [x] Show old time → new time in timeline entries
+- [x] Display who made the change (admin/engineer name)
+- [x] Include time adjustment notes in timeline
+
+
+
+
+## Bug Fix - Time Approval Box Not Disappearing
+- [x] Clear confirmedStartDate/confirmedStartTime after admin approves time
+- [x] Refetch job data after time approval/rejection (already in place)
+- [x] Update UI to hide approval box after approval (conditional on confirmedStartDate)
+- [x] Ensure scheduled time updates to show new approved time
+
+
+
+
+## UI Cleanup - Remove Redundant Service Time Field
+- [x] Remove "Service Time" field from client tracking page
+- [x] Keep only "Scheduled Date & Time" field which shows complete information
+- [x] Ensure dual timezone display remains on scheduled date/time
+
+
+
+
+## Bug Fix - Job Creation Time Not Saving Correctly (GMT Timezone)
+- [x] Fix convertLocalTimeToUTC for GMT/UTC timezone (offset +00:00)
+- [x] Use state value instead of FormData for controlled datetime input (CreateJob)
+- [x] Fix same issue in public service request form (RequestService.tsx)
+- [x] Combine date + time state values before timezone conversion
+- [ ] Test timezone conversion with GMT, EST, PST, and other timezones
+- [ ] Add booking type fields to CreateJob form (Full Day/Hourly/Multi-Day)
+
+
+
+
+## Bug Fix - Admin Time Adjustment Not Propagating
+- [x] Investigate admin approve dialog time adjustment functionality
+- [x] Fix time adjustment to update job scheduledDateTime in database
+- [x] Create shared timezone utility for server-side use
+- [x] Update routers.ts to properly convert admin-adjusted times from local to UTC
+- [ ] Test with different timezones and verify propagation to all views
+
+
+
+
+## Bug Fix - Engineer Time Counter-Proposal Reverting to 00:00 GMT
+- [x] Investigate engineer counter-proposal implementation in EngineerView
+- [x] Find where engineer's proposed time is being saved
+- [x] Change accept input schema to use string for counterProposedDate (not Date)
+- [x] Update EngineerView to send date as string instead of Date object
+- [x] Fix approveTimeChange mutation to use shared timezone conversion
+- [x] Ensure admin approval converts engineer's local time to UTC correctly
+- [ ] Test complete workflow with different timezones
+
+
+
+
+## Bug Fix - Engineer Counter-Proposal Display Confusion
+- [x] Fix JobDetail page to display engineer's proposed time correctly
+- [x] Combine confirmedStartDate + confirmedStartTime for display instead of showing date object
+- [x] Show single clear time instead of confusing "05:00 AM" date + "14:00" time
+- [x] Simplified to show only "Proposed Time" with combined date+time using DualTimeDisplay
+
+
+
+
+## UI Simplification - Remove Multi-Day Option
+- [x] Find multi-day option in RequestService page
+- [x] Remove multi_day from bookingType type definition
+- [x] Remove multi_day SelectItem from dropdown
+- [x] Remove multi_day description text
+- [x] Comment out estimatedDays input field
+- [x] Remove estimatedDays from mutation input
+- [x] Update hidden hoursRequired field logic
+
+
+
+
+## Bug Fix - Timezone Conversion Wrong Direction in approveTimeChange
+- [x] Debug why engineer's 06:00 becomes 11:00 after approval
+- [x] Check timezone conversion logic in shared/timezone.ts
+- [x] Found bug: conversion was using reference date incorrectly
+- [x] Fixed: Now calculates offset by comparing formatted time vs input time
+- [x] Test with GMT+5 timezone (should convert 06:00 local to 01:00 UTC, not 11:00 UTC)
+- [x] Verified: GMT → 06:00 stays 06:00 UTC, GMT+5 → 06:00 becomes 01:00 UTC
+
+
+
+
+## Investigation - Admin CreateJob Page Timezone Handling
+- [x] Check how CreateJob page handles scheduledDateTime input
+- [x] Verify if timezone conversion is applied when creating jobs from admin page
+- [x] Confirmed: CreateJob DOES use convertLocalTimeToUTC (line 132)
+- [x] The bug was in the shared convertLocalTimeToUTC function, not CreateJob itself
+- [x] Now that convertLocalTimeToUTC is fixed, CreateJob will work correctly too
+- [x] Note: CreateJob uses estimateTimezoneFromLongitude for timezone detection
+
+
+
+
+## Bug Fix - Fix Timezone Handling in Engineer Proposals
+- [x] Engineer proposes time in site's local timezone (e.g., 14:00)
+- [x] System stores as confirmedStartTime = "14:00"
+- [x] Problem: conversion was using wrong timezone or double-converting
+- [x] Solution: Check if job has timezone
+  - If no timezone or GMT/UTC: treat as UTC directly (no conversion)
+  - If has timezone (e.g., Asia/Karachi): convert from local to UTC
+- [x] Updated approveTimeChange with conditional logic
+- [ ] Test GMT site: 14:00 stays 14:00
+- [ ] Test GMT+5 site: 14:00 becomes 09:00 UTC (displayed as 14:00 in GMT+5)
+
+
+
+
+## Improvement - Set GMT as Default Timezone
+- [x] Update CreateJob page to set timezone = "Europe/London" when no location provided
+- [x] Update RequestService page to set timezone = "Europe/London" when no location provided
+- [x] Simplify approveTimeChange to always use convertLocalTimeToUTC (no special cases)
+- [x] Added fallback in approveTimeChange: `job.timezone || 'Europe/London'`
+- [ ] Test that jobs without location default to GMT timezone
+- [ ] Test engineer time proposal works correctly with GMT default
+
+
+
+
+## Bug Fix - Engineer Proposed Time Display Wrong in Admin Approval Dialog
+- [x] Identified: Approval logic works correctly (saves 14:00 as 14:00)
+- [x] Problem: Display shows wrong time (engineer enters 16:00, shows as 01:00 AM)
+- [x] Attempted fix with .000Z suffix - didn't work (still timezone issues)
+- [x] New approach: Display confirmedStartDate and confirmedStartTime as plain text
+- [x] Format date using toLocaleDateString with job timezone
+- [x] Show time string directly without conversion: "Feb 20, 2026 at 16:00"
+- [x] No Date object creation for time, no timezone manipulation
+

@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE jobs \nADD COLUMN bookingType ENUM('full_day', 'hourly', 'multi_day') AFTER hoursRequired,\nADD COLUMN estimatedHours INT AFTER bookingType,\nADD COLUMN estimatedDays INT AFTER estimatedHours,\nADD COLUMN requestedStartDate TIMESTAMP AFTER estimatedDays,\nADD COLUMN requestedStartTime VARCHAR(10) AFTER requestedStartDate,\nADD COLUMN proposedStartDate TIMESTAMP AFTER requestedStartTime,\nADD COLUMN proposedStartTime VARCHAR(10) AFTER proposedStartDate,\nADD COLUMN confirmedStartDate TIMESTAMP AFTER proposedStartTime,\nADD COLUMN confirmedStartTime VARCHAR(10) AFTER confirmedStartDate,\nADD COLUMN timeNegotiationNotes TEXT AFTER confirmedStartTime;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute ALTER TABLE jobs \nADD COLUMN bookingType ENUM('full_day', 'hourly', 'multi_day') AFTER hoursRequired,\nADD COLUMN estimatedHours INT AFTER bookingType,\nADD COLUMN estimatedDays INT AFTER estimatedHours,\nADD COLUMN requestedStartDate TIMESTAMP AFTER estimatedDays,\nADD COLUMN requestedStartTime VARCHAR(10) AFTER requestedStartDate,\nADD COLUMN proposedStartDate TIMESTAMP AFTER requestedStartTime,\nADD COLUMN proposedStartTime VARCHAR(10) AFTER proposedStartDate,\nADD COLUMN confirmedStartDate TIMESTAMP AFTER proposedStartTime,\nADD COLUMN confirmedStartTime VARCHAR(10) AFTER confirmedStartDate,\nADD COLUMN timeNegotiationNotes TEXT AFTER confirmedStartTime;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'bookingtype' in 'jobs'"
+  ]
+}
