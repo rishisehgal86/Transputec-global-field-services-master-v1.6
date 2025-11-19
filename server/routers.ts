@@ -1710,7 +1710,7 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("Unauthorized");
         
-        // Verify project belongs to user's organization with detailed validation
+        // Verify project belongs to user's organization (allow deleting inactive projects)
         const { getProjectForValidation } = await import('./projects-db');
         const project = await getProjectForValidation(input.projectId, ctx.user.organizationId);
         
@@ -1721,13 +1721,7 @@ export const appRouter = router({
           });
         }
         
-        if (!project.isActive) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: `Project "${project.name}" is currently inactive and cannot accept site uploads. Please contact an administrator to reactivate this project.`
-          });
-        }
-        
+        // Allow deleting both active and inactive projects
         const { deleteProject } = await import('./projects-db');
         return await deleteProject(input.projectId);
       }),

@@ -1649,3 +1649,17 @@ ns
 - [x] Update all project endpoints (getSites, updateProject, deleteProject) with better errors
 - [ ] Test error messages in UI after publishing
 
+
+
+## Fix TypeScript Build Errors
+- [x] Fix missing 'desc' import in project-sites-db.ts
+- [x] Test bulk upload working successfully
+- [x] Ready for checkpoint creation
+
+
+
+## Fix Project Deletion for Inactive Projects
+- [x] Remove isActive check from deleteProject endpoint
+- [x] Allow deleting both active and inactive projects
+- [x] Test project deletion works on dev server
+
