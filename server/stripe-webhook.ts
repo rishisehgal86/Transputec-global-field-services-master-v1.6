@@ -163,18 +163,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const billingCycleStart = new Date(subscription.current_period_start * 1000);
   const billingCycleEnd = new Date(subscription.current_period_end * 1000);
 
-  // Reset job count if new billing cycle
-  // TODO: Fetch organization to check if we should reset count
-  const shouldResetCount = false; // Will be handled by cron job
-
-  await updateOrganizationSubscription(parseInt(organizationId), {
+  // Update billing cycle dates - job count will be calculated dynamically based on these dates
+  await updateOrganizationSubscription({
+    organizationId: parseInt(organizationId),
     subscriptionStatus: subscription.status,
     planTier,
     monthlyJobLimit,
     maxAdminUsers,
     billingCycleStart,
     billingCycleEnd,
-    ...(shouldResetCount ? { currentMonthJobCount: 0 } : {}),
   });
 
   console.log('[Webhook] Subscription updated successfully for org:', organizationId);

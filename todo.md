@@ -2106,3 +2106,22 @@ ns
 - [x] Fix job counter not incrementing for admin-created jobs
 - [ ] Test that 51st job is blocked when limit is 50
 
+
+
+
+## Publishing Issue (Nov 20, 2025)
+- [ ] Fix TypeScript check process being killed during checkpoint creation
+- [ ] Investigate memory issues causing exit code 137
+- [ ] Enable successful checkpoint creation for publishing
+
+
+
+
+## Job Counter Sync Issues (Nov 20, 2025)
+- [x] Fix currentMonthJobCount out of sync with actual job count (shows 3 but has 54 jobs)
+- [x] Investigate if counter is being reset at login or other inappropriate times (no inappropriate resets found)
+- [x] Ensure counter only resets at billing cycle start
+- [x] Replaced stored counter with dynamic date-based counting
+- [x] Job counts now filter by billing cycle start date
+- [x] Automatic monthly reset via billing cycle dates from Stripe webhook
+
