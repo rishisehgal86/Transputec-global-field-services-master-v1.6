@@ -20,7 +20,9 @@ export default function BillingPortal() {
   const createCheckout = trpc.subscription.createCheckout.useMutation({
     onSuccess: (data) => {
       // Redirect to Stripe checkout
-      window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+      }
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to start checkout');
@@ -31,7 +33,9 @@ export default function BillingPortal() {
   const createPortalSession = trpc.subscription.createPortalSession.useMutation({
     onSuccess: (data) => {
       // Open Stripe customer portal in new tab
-      window.open(data.url, '_blank');
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
       setIsOpeningPortal(false);
     },
     onError: (error) => {
@@ -191,9 +195,9 @@ export default function BillingPortal() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">{getPlanName(subscription.planTier)}</CardTitle>
+                <CardTitle className="text-2xl">{getPlanName(subscription.planTier || 'trial')}</CardTitle>
                 <CardDescription className="text-lg mt-1">
-                  {getPlanPrice(subscription.planTier)}
+                  {getPlanPrice(subscription.planTier || 'trial')}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -212,7 +216,7 @@ export default function BillingPortal() {
                   <p className="text-sm text-muted-foreground">Jobs This Month</p>
                   <p className="text-2xl font-bold">
                     {subscription.currentMonthJobCount}
-                    {!isUnlimited(subscription.monthlyJobLimit) && (
+                    {!isUnlimited(subscription.monthlyJobLimit || 0) && (
                       <span className="text-sm text-muted-foreground font-normal">
                         {' '}/ {subscription.monthlyJobLimit}
                       </span>

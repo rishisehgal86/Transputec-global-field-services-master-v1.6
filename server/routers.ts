@@ -325,8 +325,8 @@ export const appRouter = router({
         }
         
         // Check if organization has exceeded job limit
-        const isUnlimited = org.monthlyJobLimit === -1;
-        if (!isUnlimited && org.currentMonthJobCount >= org.monthlyJobLimit) {
+        const isUnlimited = (org.monthlyJobLimit || 0) === -1;
+        if (!isUnlimited && org.currentMonthJobCount >= (org.monthlyJobLimit || 0)) {
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: 'JOB_LIMIT_EXCEEDED',
