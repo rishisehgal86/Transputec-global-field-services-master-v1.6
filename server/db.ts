@@ -1,6 +1,6 @@
-import { eq, desc, gte, lte, lt, and, or, not, sql } from "drizzle-orm";
+import { eq, desc, gte, lte, lt, and, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory, svrMediaFiles, InsertSvrMediaFile, jobComments, InsertJobComment } from "../drizzle/schema";
+import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory, svrMediaFiles, InsertSvrMediaFile, jobComments, InsertJobComment, organizations } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -388,5 +388,66 @@ export async function getJobFilterCountsByOrganization(organizationId: number) {
       job.status === "on_site"
     ).length,
   };
+}
+
+
+
+
+// Subscription Management Functions
+
+export async function updateOrganizationSubscription(params: {
+  organizationId: number;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  planTier?: 'trial' | 'starter' | 'enterprise' | 'free_enterprise';
+  subscriptionStatus?: string;
+  monthlyJobLimit?: number | null;
+  maxAdminUsers?: number;
+  billingCycleStart?: Date;
+  billingCycleEnd?: Date;
+  currentMonthJobCount?: number;
+  trialEndsAt?: Date | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const { organizationId, ...updates } = params;
+  
+  // Filter out undefined values
+  const cleanedUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([_, value]) => value !== undefined)
+  );
+  
+  await db.update(organizations)
+    .set(cleanedUpdates)
+    .where(eq(organizations.id, organizationId));
+  
+  console.log(`[DB] Updated subscription for org ${organizationId}`);
+}
+
+export async function getOrganizationSubscription(organizationId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.select().from(organizations).where(eq(organizations.id, organizationId)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function incrementJobCount(organizationId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(organizations)
+    .set({ currentMonthJobCount: sql`${organizations.currentMonthJobCount} + 1` })
+    .where(eq(organizations.id, organizationId));
+}
+
+export async function resetMonthlyJobCount(organizationId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(organizations)
+    .set({ currentMonthJobCount: 0 })
+    .where(eq(organizations.id, organizationId));
 }
 

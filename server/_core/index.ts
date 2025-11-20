@@ -34,6 +34,12 @@ async function startServer() {
   
   const app = express();
   const server = createServer(app);
+  
+  // Register Stripe webhook endpoint BEFORE JSON body parser
+  // Webhooks need raw body for signature verification
+  const { registerWebhookEndpoint } = await import('./webhook-middleware');
+  registerWebhookEndpoint(app);
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

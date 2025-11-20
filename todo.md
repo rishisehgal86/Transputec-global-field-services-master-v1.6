@@ -1934,3 +1934,67 @@ ns
 - [x] Integrate both notifications into approveTimeChange mutation
 - [x] Test email notifications with different timezone scenarios
 
+
+
+
+## Stripe Subscription Integration (Fresh Start - Clean Approach)
+
+### Phase 1: Setup
+- [x] Install stripe package
+- [x] Create server/stripe-config.ts with hardcoded credentials
+- [x] Test Stripe connection
+
+### Phase 2: Products & Helpers
+- [x] Define subscription plans (Starter $99, Enterprise $399)
+- [x] Create Stripe client helper
+- [x] Create checkout session helper
+- [x] Add subscription management functions to db.ts
+
+### Phase 3: Checkout Flow
+- [x] Add checkout mutation to routers.ts
+- [x] Add getStatus query
+- [x] Add createPortalSession mutation
+- [x] Add cancelSubscription mutation
+- [ ] Create pricing page UI
+- [ ] Implement checkout redirect
+
+### Phase 4: Webhooks
+- [ ] Create webhook endpoint
+- [ ] Handle subscription.created
+- [ ] Handle subscription.updated
+- [ ] Handle subscription.deleted
+- [ ] Handle invoice.payment_succeeded
+- [ ] Handle invoice.payment_failed
+
+### Phase 5: Billing Portal
+- [ ] Create /admin/billing page
+- [ ] Show current plan and usage
+- [ ] Add upgrade/downgrade buttons
+- [ ] Integrate Stripe customer portal
+
+### Phase 6: Trial & Usage
+- [ ] Set trial on new organization signup
+- [ ] Track monthly job count
+- [ ] Enforce job limits
+- [ ] Trial expiration logic
+
+### Phase 7: Testing
+- [ ] Test checkout flow
+- [ ] Test webhook events
+- [ ] Test billing portal
+- [ ] Test trial expiration
+- [ ] Save checkpoint
+
+
+
+
+## Stripe Subscription Integration
+- [x] Phase 1: Configure Stripe SDK and database schema
+- [x] Phase 2: Create subscription helper functions
+- [x] Phase 3: Build tRPC mutations for checkout and portal
+- [x] Phase 4: Implement webhook handler for Stripe events
+- [x] Phase 5: Create billing portal UI in admin dashboard
+- [ ] Phase 6: Implement usage tracking and enforcement
+- [ ] Phase 7: Add free enterprise plan feature
+- [ ] Phase 8: Test complete Stripe integration
+

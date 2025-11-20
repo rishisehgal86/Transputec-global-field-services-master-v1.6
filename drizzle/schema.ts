@@ -14,9 +14,15 @@ export const organizations = mysqlTable("organizations", {
   subscriptionStatus: mysqlEnum("subscriptionStatus", ["trial", "active", "past_due", "cancelled", "expired"]).default("trial").notNull(),
   subscriptionPlan: mysqlEnum("subscriptionPlan", ["go_only", "core_only", "both"]), // null during trial
   
-  // Stripe Integration (prepared for future)
+  // Stripe Integration
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
   stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  planTier: mysqlEnum("planTier", ["trial", "starter", "enterprise", "free_enterprise"]).default("trial"),
+  monthlyJobLimit: int("monthlyJobLimit").default(50), // 50 for trial, 100 for starter, NULL for enterprise
+  currentMonthJobCount: int("currentMonthJobCount").default(0).notNull(),
+  maxAdminUsers: int("maxAdminUsers").default(999).notNull(), // 3 for starter, 999 for others
+  billingCycleStart: timestamp("billingCycleStart"),
+  billingCycleEnd: timestamp("billingCycleEnd"),
   
   // Settings
   isActive: boolean("isActive").default(true).notNull(),

@@ -2684,6 +2684,160 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // Subscription Management
+  subscription: router({
+    // Create Stripe Checkout session for subscription
+    createCheckout: protectedProcedure
+      .input(z.object({
+        planTier: z.enum(['starter', 'enterprise']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { createCheckoutSession } = await import('./stripe-helpers');
+        const { getOrganizationSubscription } = await import('./db');
+        
+        if (!ctx.user) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Must be logged in' });
+        }
+        
+        // Get organization details
+        const org = await getOrganizationSubscription(ctx.user.organizationId);
+        if (!org) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
+        }
+        
+        // Check if already subscribed
+        if (org.subscriptionStatus === 'active' && org.planTier !== 'trial') {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'Already have an active subscription. Use billing portal to change plans.' 
+          });
+        }
+        
+        const baseUrl = getBaseUrl(ctx.req);
+        
+        try {
+          const session = await createCheckoutSession({
+            organizationId: ctx.user.organizationId,
+            planTier: input.planTier,
+            customerEmail: ctx.user.email,
+            successUrl: `${baseUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${baseUrl}/subscription/cancelled`,
+          });
+          
+          return {
+            sessionId: session.sessionId,
+            url: session.url,
+          };
+        } catch (error) {
+          console.error('[Subscription] Failed to create checkout:', error);
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Failed to create checkout session' 
+          });
+        }
+      }),
+    
+    // Get current subscription status
+    getStatus: protectedProcedure
+      .query(async ({ ctx }) => {
+        const { getOrganizationSubscription } = await import('./db');
+        
+        if (!ctx.user) {
+          throw new TRPCError({ code: 'UNAUTHORIZED' });
+        }
+        
+        const org = await getOrganizationSubscription(ctx.user.organizationId);
+        if (!org) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
+        }
+        
+        return {
+          planTier: org.planTier,
+          subscriptionStatus: org.subscriptionStatus,
+          monthlyJobLimit: org.monthlyJobLimit,
+          currentMonthJobCount: org.currentMonthJobCount,
+          maxAdminUsers: org.maxAdminUsers,
+          trialEndsAt: org.trialEndsAt,
+          billingCycleStart: org.billingCycleStart,
+          billingCycleEnd: org.billingCycleEnd,
+          stripeCustomerId: org.stripeCustomerId,
+          stripeSubscriptionId: org.stripeSubscriptionId,
+        };
+      }),
+    
+    // Create Stripe Customer Portal session
+    createPortalSession: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const { createPortalSession } = await import('./stripe-helpers');
+        const { getOrganizationSubscription } = await import('./db');
+        
+        if (!ctx.user) {
+          throw new TRPCError({ code: 'UNAUTHORIZED' });
+        }
+        
+        const org = await getOrganizationSubscription(ctx.user.organizationId);
+        if (!org || !org.stripeCustomerId) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'No active subscription found' 
+          });
+        }
+        
+        const baseUrl = getBaseUrl(ctx.req);
+        
+        try {
+          const session = await createPortalSession({
+            customerId: org.stripeCustomerId,
+            returnUrl: `${baseUrl}/settings/billing`,
+          });
+          
+          return {
+            url: session.url,
+          };
+        } catch (error) {
+          console.error('[Subscription] Failed to create portal session:', error);
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Failed to create portal session' 
+          });
+        }
+      }),
+    
+    // Cancel subscription
+    cancelSubscription: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const { cancelSubscription } = await import('./stripe-helpers');
+        const { getOrganizationSubscription } = await import('./db');
+        
+        if (!ctx.user) {
+          throw new TRPCError({ code: 'UNAUTHORIZED' });
+        }
+        
+        const org = await getOrganizationSubscription(ctx.user.organizationId);
+        if (!org || !org.stripeSubscriptionId) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'No active subscription found' 
+          });
+        }
+        
+        try {
+          await cancelSubscription(org.stripeSubscriptionId);
+          
+          return {
+            success: true,
+            message: 'Subscription cancelled successfully',
+          };
+        } catch (error) {
+          console.error('[Subscription] Failed to cancel subscription:', error);
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'Failed to cancel subscription' 
+          });
+        }
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

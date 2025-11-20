@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen, Building2 } from "lucide-react";
+import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen, Building2, CreditCard } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { CompactDualTime } from "@/components/DualTimeDisplay";
 import { Link, useLocation } from "wouter";
@@ -190,6 +190,12 @@ export default function AdminDashboard() {
             {/* Secondary Actions Group */}
             <div className="flex items-center gap-2">
               <ExportJobsDialog />
+              <Link href="/admin/billing">
+                <Button variant="outline" size="sm">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Billing
+                </Button>
+              </Link>
               <Link href="/admin/users">
                 <Button variant="outline" size="sm">
                   <Users className="h-4 w-4 mr-2" />
