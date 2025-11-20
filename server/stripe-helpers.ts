@@ -76,11 +76,15 @@ export async function createPortalSession(params: {
 }
 
 /**
- * Cancel a subscription
+ * Cancel a subscription at the end of the current billing period
+ * This allows users to continue using the service until their paid period ends
  */
 export async function cancelSubscription(subscriptionId: string) {
   try {
-    const subscription = await stripe.subscriptions.cancel(subscriptionId);
+    // Cancel at period end instead of immediately
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    });
     return subscription;
   } catch (error) {
     console.error('[Stripe] Failed to cancel subscription:', error);

@@ -17,8 +17,19 @@ const requireUser = t.middleware(async opts => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
-  // Update organization's lastUsedAt timestamp in background
+  // Check if organization is active
   if (ctx.user?.organizationId) {
+    const { getOrganizationById } = await import('../organizations-db');
+    const org = await getOrganizationById(ctx.user.organizationId);
+    
+    if (!org || !org.isActive) {
+      throw new TRPCError({ 
+        code: "FORBIDDEN", 
+        message: "Your organization subscription has been cancelled. Please contact support to reactivate." 
+      });
+    }
+    
+    // Update organization's lastUsedAt timestamp in background
     // Fire and forget - don't await to avoid slowing down requests
     const orgId = ctx.user.organizationId;
     import('../organizations-db').then(({ updateOrganizationLastUsed }) => {

@@ -65,7 +65,17 @@ export default function BillingPortal() {
   };
 
   const handleCancelSubscription = () => {
-    if (confirm('Are you sure you want to cancel your subscription? You will lose access to premium features.')) {
+    const message = `Are you sure you want to cancel your subscription?
+
+⚠️ Important:
+• Your subscription will remain active until the end of your current billing period (${subscription?.billingCycleEnd ? new Date(subscription.billingCycleEnd).toLocaleDateString() : 'billing cycle end'})
+• After that date, your organization will revert to the Free Trial plan
+• Trial plan limits: 50 jobs/month, 1 admin user
+• You can upgrade again at any time
+
+Do you want to proceed?`;
+    
+    if (confirm(message)) {
       cancelSubscription.mutate();
     }
   };

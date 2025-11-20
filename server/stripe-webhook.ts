@@ -194,16 +194,26 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return;
   }
 
-  // Downgrade to trial plan
-  await updateOrganizationSubscription({
-    organizationId: parseInt(organizationId),
-    subscriptionStatus: 'canceled',
-    planTier: 'trial',
-    monthlyJobLimit: 50,
-    maxAdminUsers: 1,
-  });
+  // Revert organization to trial plan (keep active)
+  const { getDb } = await import('./db');
+  const { organizations } = await import('../drizzle/schema');
+  const { eq } = await import('drizzle-orm');
+  
+  const db = await getDb();
+  if (db) {
+    await db.update(organizations)
+      .set({
+        isActive: true, // Keep organization active
+        subscriptionStatus: 'canceled',
+        planTier: 'trial',
+        monthlyJobLimit: 50,
+        maxAdminUsers: 1,
+        stripeSubscriptionId: null, // Clear Stripe subscription ID
+      })
+      .where(eq(organizations.id, parseInt(organizationId)));
+  }
 
-  console.log('[Webhook] Subscription cancelled for org:', organizationId);
+  console.log('[Webhook] Subscription cancelled, organization reverted to trial:', organizationId);
 }
 
 /**

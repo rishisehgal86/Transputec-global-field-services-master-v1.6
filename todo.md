@@ -2125,3 +2125,15 @@ ns
 - [x] Job counts now filter by billing cycle start date
 - [x] Automatic monthly reset via billing cycle dates from Stripe webhook
 
+
+
+
+## Subscription Cancellation Feature (Nov 20, 2025)
+- [x] Add backend endpoint to cancel subscription at period end
+- [x] Update billing page UI with cancellation button
+- [x] Add confirmation dialog for cancellation
+- [x] Revert tenant organization to trial plan when subscription ends
+- [x] Keep organization active with trial limits (50 jobs/month, 1 admin)
+- [x] Clear Stripe subscription ID on cancellation
+- [ ] Test cancellation flow with Stripe webhook
+
