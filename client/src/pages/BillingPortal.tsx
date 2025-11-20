@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,7 +72,9 @@ export default function BillingPortal() {
         <header className="border-b bg-card">
           <div className="container mx-auto flex items-center justify-between py-6">
             <div className="flex items-center gap-4">
-              <LogoImage className="h-14" alt="FieldPulse Go" />
+              <Link href="/">
+                <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" alt="FieldPulse Go" />
+              </Link>
               <div className="hidden md:flex items-center gap-4 border-l pl-4">
                 <span className="text-sm font-medium text-muted-foreground">
                   On-Demand Despatch Field Services Platform
@@ -100,7 +102,9 @@ export default function BillingPortal() {
         <header className="border-b bg-card">
           <div className="container mx-auto flex items-center justify-between py-6">
             <div className="flex items-center gap-4">
-              <LogoImage className="h-14" alt="FieldPulse Go" />
+              <Link href="/">
+                <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" alt="FieldPulse Go" />
+              </Link>
             </div>
             <Button variant="outline" onClick={() => setLocation('/admin')}>
               Back to Dashboard
@@ -158,14 +162,16 @@ export default function BillingPortal() {
       <header className="border-b bg-card">
         <div className="container mx-auto flex items-center justify-between py-6">
           <div className="flex items-center gap-4">
-            <LogoImage className="h-14" alt="FieldPulse Go" />
+            <Link href="/">
+              <LogoImage className="h-14 cursor-pointer hover:opacity-80 transition-opacity" alt="FieldPulse Go" />
+            </Link>
             <div className="hidden md:flex items-center gap-4 border-l pl-4">
               <span className="text-sm font-medium text-muted-foreground">
                 On-Demand Despatch Field Services Platform
               </span>
             </div>
           </div>
-          <Button variant="outline" onClick={() => navigate('/admin')}>
+          <Button variant="outline" onClick={() => setLocation('/admin')}>
             Back to Dashboard
           </Button>
         </div>

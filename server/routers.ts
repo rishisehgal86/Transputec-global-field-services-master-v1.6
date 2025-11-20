@@ -2741,7 +2741,9 @@ export const appRouter = router({
     // Get current subscription status
     getStatus: protectedProcedure
       .query(async ({ ctx }) => {
-        const { getOrganizationSubscription } = await import('./db');
+        const { getOrganizationSubscription, getDb } = await import('./db');
+        const { users, jobs } = await import('../drizzle/schema');
+        const { eq, and, gte, sql } = await import('drizzle-orm');
         
         if (!ctx.user) {
           throw new TRPCError({ code: 'UNAUTHORIZED' });
@@ -2752,11 +2754,42 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
         }
         
+        const db = await getDb();
+        if (!db) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        }
+        
+        // Count admin users in organization
+        const adminCountResult = await db.select({ count: sql<number>`count(*)` })
+          .from(users)
+          .where(
+            and(
+              eq(users.organizationId, ctx.user.organizationId),
+              eq(users.role, 'admin')
+            )
+          );
+        const adminUserCount = Number(adminCountResult[0]?.count || 0);
+        
+        // Count jobs created this month
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const jobCountResult = await db.select({ count: sql<number>`count(*)` })
+          .from(jobs)
+          .where(
+            and(
+              eq(jobs.organizationId, ctx.user.organizationId),
+              gte(jobs.createdAt, startOfMonth)
+            )
+          );
+        const currentMonthJobCount = Number(jobCountResult[0]?.count || 0);
+        
         return {
           planTier: org.planTier,
           subscriptionStatus: org.subscriptionStatus,
           monthlyJobLimit: org.monthlyJobLimit,
-          currentMonthJobCount: org.currentMonthJobCount,
+          currentMonthJobCount,
+          adminUserCount,
           maxAdminUsers: org.maxAdminUsers,
           trialEndsAt: org.trialEndsAt,
           billingCycleStart: org.billingCycleStart,
