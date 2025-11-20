@@ -2030,14 +2030,14 @@ ns
 - [x] Test complete upgrade flow from trial to paid plan
 
 ## Feature - Usage Limit Enforcement
-- [ ] Add backend job limit check in createJob mutation
-- [ ] Increment job count after successful job creation
-- [ ] Create admin dashboard warning banner for job limits
-- [ ] Add job counter display on admin page
-- [ ] Block admin job creation when limit exceeded
-- [ ] Block public job request page when org limit exceeded
-- [ ] Show "contact administrator" message on public page
-- [ ] Test all enforcement scenarios
+- [x] Add backend job limit check in createJob mutation
+- [x] Increment job count after successful job creation
+- [x] Create admin dashboard warning banner for job limits
+- [x] Add job counter display on admin page
+- [x] Block admin job creation when limit exceeded
+- [x] Block public job request page when org limit exceeded
+- [x] Show "contact administrator" message on public page
+- [ ] Test all enforcement scenarios (pending user testing)
 
 
 
