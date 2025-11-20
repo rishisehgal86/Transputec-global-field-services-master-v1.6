@@ -2051,3 +2051,58 @@ ns
 - [x] Test file upload and retrieval
 - [x] Document deployment setup for self-hosted installations
 
+
+
+
+## Feature - SaaS Homepage with Pricing
+- [x] Update homepage hero section with SaaS messaging
+- [x] Create pricing cards for Trial, Starter, Enterprise
+- [x] Add features comparison table
+- [x] Add call-to-action buttons for each tier
+- [x] Add testimonials/social proof section
+- [x] Update all pricing CTAs to "Sign Up Now" linking to /signup
+- [ ] Test responsive design on mobile
+
+
+
+
+## Bug Fix - Restore Original Homepage Features
+- [x] Check git history for original homepage content
+- [x] Identify missing features/sections
+- [x] Merge original features with new SaaS pricing design
+- [x] Add back Projects Feature section
+- [x] Add back Live Communication Channel section
+- [x] Add back Service Verification Reports section
+- [x] Add back End-of-Month Reporting section
+- [x] Ensure all functionality is preserved
+- [x] Test complete homepage
+
+
+
+
+## Bug Fix - Create Another Job Button (Nov 20, 2025)
+- [x] Fix "Create Another Job" button not working on job creation success page
+
+
+
+
+## TypeScript Compilation Errors (Nov 20, 2025)
+- [x] Fix Stripe webhook API version mismatch (2024-12-18.acacia vs 2025-11-17.clover)
+- [x] Fix Stripe subscription property access (current_period_start, current_period_end)
+- [x] Fix null handling in AdminDashboard.tsx (monthlyJobLimit, bookingType)
+- [x] Fix null handling in BillingPortal.tsx (bookingType, monthlyJobLimit)
+- [x] Fix null handling in TenantRequestForm.tsx (monthlyJobLimit)
+- [x] Fix null handling in routers.ts (monthlyJobLimit)
+- [x] Fix updateOrganizationSubscription function signature (changed to single object parameter)
+- [x] All 21 TypeScript errors resolved - zero errors remaining
+
+
+
+
+## Critical Bug - Job Limit Enforcement (Nov 20, 2025)
+- [x] Fix admin job creation bypassing job limit check
+- [x] Ensure jobs.create endpoint validates organization job limit
+- [x] Added user-friendly error message with upgrade prompt
+- [x] Fix job counter not incrementing for admin-created jobs
+- [ ] Test that 51st job is blocked when limit is 50
+
