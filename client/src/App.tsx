@@ -22,6 +22,7 @@ import Projects from "./pages/Projects";
 import ProjectRequest from "./pages/ProjectRequest";
 import DebugSites from "./pages/DebugSites";
 import BillingPortal from "./pages/BillingPortal";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/admin/tenants" component={TenantManagement} />
       <Route path="/projects" component={Projects} />
       <Route path="/admin/billing" component={BillingPortal} />
+      <Route path="/subscription/success" component={SubscriptionSuccess} />
       <Route path="/admin/job/:id" component={JobDetail} />
       <Route path="/engineer/:token" component={EngineerView} />
       <Route path="/track/:token" component={ClientTracker} />
