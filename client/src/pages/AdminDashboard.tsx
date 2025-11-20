@@ -10,6 +10,7 @@ import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { JobFilters } from "@/components/JobFilters";
 import { ExportJobsDialog } from "@/components/ExportJobsDialog";
+import { UsageWarningBanner } from "@/components/UsageWarningBanner";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -29,6 +30,11 @@ export default function AdminDashboard() {
   
   // Fetch organization for display
   const { data: organization } = trpc.organizations.getMy.useQuery(undefined, {
+    enabled: isAuthenticated && !!user?.organizationId,
+  });
+  
+  // Fetch subscription status for usage limits
+  const { data: subscription } = trpc.subscription.getStatus.useQuery(undefined, {
     enabled: isAuthenticated && !!user?.organizationId,
   });
   
@@ -234,9 +240,28 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-foreground mb-2">Field Service Jobs</h2>
-          <p className="text-muted-foreground">Manage and track all dispatch requests</p>
+        {/* Usage Warning Banner */}
+        {subscription && (
+          <UsageWarningBanner
+            currentJobs={subscription.currentMonthJobCount}
+            jobLimit={subscription.monthlyJobLimit}
+            planTier={subscription.planTier}
+          />
+        )}
+        
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Field Service Jobs</h2>
+            <p className="text-muted-foreground">Manage and track all dispatch requests</p>
+          </div>
+          {subscription && subscription.monthlyJobLimit !== -1 && (
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Jobs this month</p>
+              <p className="text-2xl font-bold text-foreground">
+                {subscription.currentMonthJobCount} / {subscription.monthlyJobLimit}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Quick Filters */}

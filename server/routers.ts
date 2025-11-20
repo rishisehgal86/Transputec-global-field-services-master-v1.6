@@ -313,6 +313,26 @@ export const appRouter = router({
         // Use organizationId from input (tenant-specific URL) or default to 1
         const organizationId = input.organizationId || 1;
         
+        // Check job limit before creating
+        const { getOrganizationSubscription } = await import('./db');
+        const org = await getOrganizationSubscription(organizationId);
+        
+        if (!org) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Organization not found',
+          });
+        }
+        
+        // Check if organization has exceeded job limit
+        const isUnlimited = org.monthlyJobLimit === -1;
+        if (!isUnlimited && org.currentMonthJobCount >= org.monthlyJobLimit) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'JOB_LIMIT_EXCEEDED',
+          });
+        }
+        
         const job = await createJob({
           ...input,
           jobToken,
@@ -323,6 +343,11 @@ export const appRouter = router({
         });
         
         console.log('✅ [CreateRequest] Job created with ID:', job?.id);
+        
+        // Increment job count for organization
+        const { incrementJobCount } = await import('./db');
+        await incrementJobCount(organizationId);
+        console.log('📊 [CreateRequest] Job count incremented for organization:', organizationId);
         
         // Send email notification to admin
         const adminEmail = 'admin@field-pulse.io';

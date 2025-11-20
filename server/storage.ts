@@ -1,7 +1,42 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
+/**
+ * Storage abstraction layer
+ * 
+ * Supports two storage backends:
+ * 1. Manus Forge API (S3) - For Manus-hosted deployments
+ * 2. Local Filesystem - For self-hosted deployments
+ * 
+ * Set USE_LOCAL_STORAGE=true in .env to use local filesystem storage
+ */
 
 import { ENV } from './_core/env';
+
+// Check which storage backend to use
+const USE_LOCAL_STORAGE = process.env.USE_LOCAL_STORAGE === 'true';
+
+// Import appropriate storage implementation
+let storageImpl: {
+  storagePut: (relKey: string, data: Buffer | Uint8Array | string, contentType?: string) => Promise<{ key: string; url: string }>;
+  storageGet: (relKey: string, expiresIn?: number) => Promise<{ key: string; url: string }>;
+};
+
+if (USE_LOCAL_STORAGE) {
+  console.log('[Storage] Using LOCAL FILESYSTEM storage');
+  storageImpl = require('./storage-local');
+} else {
+  console.log('[Storage] Using MANUS FORGE API (S3) storage');
+  storageImpl = {
+    storagePut: storagePutS3,
+    storageGet: storageGetS3,
+  };
+}
+
+// Export unified interface
+export const storagePut = storageImpl.storagePut;
+export const storageGet = storageImpl.storageGet;
+
+// ============================================================================
+// S3 / Manus Forge API Implementation
+// ============================================================================
 
 type StorageConfig = { baseUrl: string; apiKey: string };
 
@@ -67,7 +102,7 @@ function buildAuthHeaders(apiKey: string): HeadersInit {
   return { Authorization: `Bearer ${apiKey}` };
 }
 
-export async function storagePut(
+async function storagePutS3(
   relKey: string,
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream"
@@ -92,7 +127,7 @@ export async function storagePut(
   return { key, url };
 }
 
-export async function storageGet(relKey: string): Promise<{ key: string; url: string; }> {
+async function storageGetS3(relKey: string): Promise<{ key: string; url: string; }> {
   const { baseUrl, apiKey } = getStorageConfig();
   const key = normalizeKey(relKey);
   return {
@@ -100,3 +135,4 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
     url: await buildDownloadUrl(baseUrl, key, apiKey),
   };
 }
+

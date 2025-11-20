@@ -7,7 +7,7 @@
 
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
-import { STRIPE_CONFIG } from './stripe-config';
+import { STRIPE_CONFIG, SUBSCRIPTION_PLANS } from './stripe-config';
 import { updateOrganizationSubscription } from './db';
 
 const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
@@ -101,11 +101,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   let monthlyJobLimit = 50;
   let maxAdminUsers = 1;
 
-  if (priceId === STRIPE_CONFIG.prices.starter) {
+  if (priceId === SUBSCRIPTION_PLANS.starter.priceId) {
     planTier = 'starter';
     monthlyJobLimit = 100;
     maxAdminUsers = 3;
-  } else if (priceId === STRIPE_CONFIG.prices.enterprise) {
+  } else if (priceId === SUBSCRIPTION_PLANS.enterprise.priceId) {
     planTier = 'enterprise';
     monthlyJobLimit = -1; // unlimited
     maxAdminUsers = -1; // unlimited
@@ -149,11 +149,11 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   let monthlyJobLimit = 50;
   let maxAdminUsers = 1;
 
-  if (priceId === STRIPE_CONFIG.prices.starter) {
+  if (priceId === SUBSCRIPTION_PLANS.starter.priceId) {
     planTier = 'starter';
     monthlyJobLimit = 100;
     maxAdminUsers = 3;
-  } else if (priceId === STRIPE_CONFIG.prices.enterprise) {
+  } else if (priceId === SUBSCRIPTION_PLANS.enterprise.priceId) {
     planTier = 'enterprise';
     monthlyJobLimit = -1; // unlimited
     maxAdminUsers = -1; // unlimited

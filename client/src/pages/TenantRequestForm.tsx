@@ -1,6 +1,8 @@
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import RequestService from "./RequestService";
 
 /**
@@ -34,6 +36,46 @@ export default function TenantRequestForm() {
             The organization link you're trying to access is invalid or has expired.
           </p>
         </div>
+      </div>
+    );
+  }
+  
+  // Check if organization has exceeded job limit
+  const isUnlimited = organization.monthlyJobLimit === -1;
+  const limitExceeded = !isUnlimited && organization.currentMonthJobCount >= organization.monthlyJobLimit;
+  
+  if (limitExceeded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-lg">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-destructive/10 p-3">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Service Request Unavailable</CardTitle>
+            <CardDescription className="text-base mt-2">
+              {organization.name} has reached their monthly job limit
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted p-4 rounded-lg">
+              <p className="text-sm text-muted-foreground text-center">
+                This organization has used all <strong>{organization.monthlyJobLimit} jobs</strong> available in their current subscription plan this month.
+              </p>
+            </div>
+            <div className="text-center space-y-2">
+              <p className="text-sm font-medium">What can you do?</p>
+              <p className="text-sm text-muted-foreground">
+                Please contact the administrator at <strong>{organization.name}</strong> to request a plan upgrade.
+              </p>
+            </div>
+            <div className="pt-4 text-center text-xs text-muted-foreground">
+              Job limits reset at the beginning of each billing cycle.
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -2020,3 +2020,34 @@ ns
 - [x] Fix admin user count to show actual admin users
 - [x] Update getStatus query to calculate current month job count
 
+
+
+
+## Bug Fix - Plan Tier Not Updating After Upgrade
+- [x] Check webhook event processing logs
+- [x] Verify webhook receives subscription.created event
+- [x] Fix database update to change planTier from trial to starter/enterprise
+- [x] Test complete upgrade flow from trial to paid plan
+
+## Feature - Usage Limit Enforcement
+- [ ] Add backend job limit check in createJob mutation
+- [ ] Increment job count after successful job creation
+- [ ] Create admin dashboard warning banner for job limits
+- [ ] Add job counter display on admin page
+- [ ] Block admin job creation when limit exceeded
+- [ ] Block public job request page when org limit exceeded
+- [ ] Show "contact administrator" message on public page
+- [ ] Test all enforcement scenarios
+
+
+
+
+## Feature - Local Filesystem Storage (Self-Hosted)
+- [x] Create local storage implementation (storage-local.ts)
+- [x] Add environment variable USE_LOCAL_STORAGE flag
+- [x] Update storage.ts to support both S3 and local storage
+- [x] Configure Express to serve uploaded files as static assets
+- [x] Create uploads directory structure
+- [x] Test file upload and retrieval
+- [x] Document deployment setup for self-hosted installations
+
