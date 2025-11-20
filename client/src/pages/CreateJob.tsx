@@ -92,7 +92,17 @@ export default function CreateJob() {
       toast.success("Job created successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to create job: ${error.message}`);
+      if (error.message === 'JOB_LIMIT_EXCEEDED') {
+        toast.error('Job limit exceeded. Please upgrade your plan to create more jobs.', {
+          duration: 5000,
+          action: {
+            label: 'Upgrade Plan',
+            onClick: () => setLocation('/admin/billing'),
+          },
+        });
+      } else {
+        toast.error(`Failed to create job: ${error.message}`);
+      }
     },
   });
 

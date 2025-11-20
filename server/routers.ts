@@ -439,6 +439,26 @@ export const appRouter = router({
         timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
+        // Check organization job limit before creating job
+        const { getOrganizationById } = await import('./organizations-db');
+        const org = await getOrganizationById(ctx.user.organizationId);
+        
+        if (!org) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Organization not found',
+          });
+        }
+        
+        // Check if organization has exceeded job limit
+        const isUnlimited = (org.monthlyJobLimit || 0) === -1;
+        if (!isUnlimited && org.currentMonthJobCount >= (org.monthlyJobLimit || 0)) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'JOB_LIMIT_EXCEEDED',
+          });
+        }
+        
         // Create new site if requested
         if (input.createNewSite && input.projectId && input.siteName && input.siteAddress) {
           const { createProjectSite } = await import('./project-sites-db');
@@ -482,6 +502,11 @@ export const appRouter = router({
           status: "created",
           notes: "Job created by admin",
         });
+        
+        // Increment job count for organization
+        const { incrementJobCount } = await import('./db');
+        await incrementJobCount(ctx.user.organizationId);
+        console.log('📊 [CreateJob] Job count incremented for organization:', ctx.user.organizationId);
         
         // Send email to engineer if requested
         if (input.sendEmailToEngineer && input.engineerEmail && input.engineerName) {

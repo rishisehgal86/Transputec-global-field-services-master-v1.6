@@ -2096,3 +2096,13 @@ ns
 - [x] Fix updateOrganizationSubscription function signature (changed to single object parameter)
 - [x] All 21 TypeScript errors resolved - zero errors remaining
 
+
+
+
+## Critical Bug - Job Limit Enforcement (Nov 20, 2025)
+- [x] Fix admin job creation bypassing job limit check
+- [x] Ensure jobs.create endpoint validates organization job limit
+- [x] Added user-friendly error message with upgrade prompt
+- [x] Fix job counter not incrementing for admin-created jobs
+- [ ] Test that 51st job is blocked when limit is 50
+
