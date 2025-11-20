@@ -2077,3 +2077,9 @@ ns
 - [x] Ensure all functionality is preserved
 - [x] Test complete homepage
 
+
+
+
+## Bug Fix - Create Another Job Button (Nov 20, 2025)
+- [x] Fix "Create Another Job" button not working on job creation success page
+

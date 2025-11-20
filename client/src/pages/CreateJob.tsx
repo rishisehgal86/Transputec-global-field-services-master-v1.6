@@ -245,7 +245,10 @@ export default function CreateJob() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => setLocation("/admin/create")} variant="outline" className="flex-1">
+                <Button onClick={() => {
+                  setCreatedLinks(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} variant="outline" className="flex-1">
                   Create Another Job
                 </Button>
                 <Button onClick={() => setLocation("/admin")} className="flex-1">
