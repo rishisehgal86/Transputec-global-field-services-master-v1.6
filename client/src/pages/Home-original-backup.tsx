@@ -1,12 +1,11 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, MapPin, Clock, CheckCircle2, Users, Zap, Radio, FolderOpen, Link2, 
   Building2, Globe, ArrowRight, TrendingUp, FileSpreadsheet, Mail, Phone, 
   MessageSquare, BarChart3, Shield, Smartphone, Calendar, Bell, MessageCircle, 
-  Camera, ArrowLeftRight, FileText, Check, X
+  Camera, ArrowLeftRight, FileText
 } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { Link } from "wouter";
@@ -23,90 +22,26 @@ export default function Home() {
     );
   }
 
-  const pricingPlans = [
-    {
-      name: "Trial",
-      price: "Free",
-      period: "14 days",
-      description: "Perfect for testing and evaluation",
-      features: [
-        { text: "50 jobs per month", included: true },
-        { text: "1 admin user", included: true },
-        { text: "Real-time GPS tracking", included: true },
-        { text: "Client portal access", included: true },
-        { text: "Email notifications", included: true },
-        { text: "Basic reporting", included: true },
-        { text: "Priority support", included: false },
-        { text: "Custom branding", included: false },
-      ],
-      cta: "Sign Up Now",
-      popular: false,
-    },
-    {
-      name: "Starter",
-      price: "$99",
-      period: "per month",
-      description: "Ideal for small MSPs and growing teams",
-      features: [
-        { text: "100 jobs per month", included: true },
-        { text: "Up to 3 admin users", included: true },
-        { text: "Real-time GPS tracking", included: true },
-        { text: "Client portal access", included: true },
-        { text: "Email & SMS notifications", included: true },
-        { text: "Advanced reporting", included: true },
-        { text: "Priority support", included: true },
-        { text: "Custom branding", included: false },
-      ],
-      cta: "Sign Up Now",
-      popular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "$399",
-      period: "per month",
-      description: "For large MSPs with unlimited needs",
-      features: [
-        { text: "Unlimited jobs", included: true },
-        { text: "Unlimited admin users", included: true },
-        { text: "Real-time GPS tracking", included: true },
-        { text: "Client portal access", included: true },
-        { text: "Email & SMS notifications", included: true },
-        { text: "Advanced reporting & analytics", included: true },
-        { text: "24/7 priority support", included: true },
-        { text: "Custom branding & white-label", included: true },
-      ],
-      cta: "Sign Up Now",
-      popular: false,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <LogoImage className="h-12" />
-            <div className="hidden md:block">
-              <p className="text-sm font-semibold text-foreground">FieldPulse Go</p>
-              <p className="text-xs text-muted-foreground">Enterprise Field Service Platform for MSPs</p>
+            <LogoImage className="h-16" />
+            <div className="hidden md:block border-l border-border pl-3">
+              <p className="text-sm font-medium text-muted-foreground">Enterprise Field Service Platform for MSPs</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:inline">
-              Pricing
-            </a>
-            <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hidden md:inline">
-              Features
-            </a>
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             {isAuthenticated ? (
               <Link href="/admin">
-                <Button>Dashboard</Button>
+                <Button className="btn-pulse-glow">MSP Login</Button>
               </Link>
             ) : (
               <Link href="/login">
-                <Button variant="outline">Sign In</Button>
+                <Button className="btn-pulse-glow">MSP Login</Button>
               </Link>
             )}
           </div>
@@ -120,7 +55,7 @@ export default function Home() {
           <div className="max-w-5xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 mb-6">
               <Radio className="h-4 w-4 text-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary">All-in-One Field Service Management SaaS</span>
+              <span className="text-sm font-medium text-primary">All-in-One Field Service Management</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 leading-tight">
               Transform Your MSP<br />
@@ -133,14 +68,13 @@ export default function Home() {
               <Link href="/signup">
                 <Button size="lg" className="text-lg px-8 py-6 gradient-orange text-white hover:shadow-lg hover:shadow-primary/50 transition-all">
                   <Zap className="h-5 w-5 mr-2" />
-                  Start Free Trial
+                  Get Started
                 </Button>
               </Link>
-              <a href="#pricing">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-primary/30 hover:bg-primary/10">
-                  View Pricing
-                </Button>
-              </a>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-primary/30 hover:bg-primary/10">
+                <Users className="h-5 w-5 mr-2" />
+                Request Demo
+              </Button>
             </div>
             
             {/* Social Proof Bar */}
@@ -163,7 +97,7 @@ export default function Home() {
       </section>
 
       {/* Client Experience - The Centerpiece */}
-      <section id="features" className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 mb-4">
@@ -216,53 +150,53 @@ export default function Home() {
                   <Users className="h-6 w-6 text-accent" />
                 </div>
                 <CardTitle className="text-2xl">For Your Clients</CardTitle>
-                <CardDescription>Enterprise-Grade Transparency</CardDescription>
+                <CardDescription>Complete Transparency & Control</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Self-service portal - submit requests 24/7 without calling you</p>
+                  <p className="text-sm text-muted-foreground">Dedicated client portal - submit requests 24/7</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Live tracking links - see engineer location and ETA in real-time</p>
+                  <p className="text-sm text-muted-foreground">Complete transparency - see all jobs, engineers, status</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Automatic notifications - no more "where are you?" calls</p>
+                  <p className="text-sm text-muted-foreground">Real-time updates - know exactly when engineer arrives</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Complete job history - searchable audit trail</p>
+                  <p className="text-sm text-muted-foreground">Historical reporting - track service delivery metrics</p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* For Engineers */}
+            {/* For End Users */}
             <Card className="border-primary/30 hover:border-primary/50 transition-colors">
               <CardHeader>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <Smartphone className="h-6 w-6 text-primary" />
                 </div>
-                <CardTitle className="text-2xl">For Engineers</CardTitle>
-                <CardDescription>Mobile-First Experience</CardDescription>
+                <CardTitle className="text-2xl">For End Users</CardTitle>
+                <CardDescription>At the Service Location</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">One-tap navigation to job sites with GPS</p>
+                  <p className="text-sm text-muted-foreground">Live engineer tracking - see ETA on map</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Complete job details and client info at their fingertips</p>
+                  <p className="text-sm text-muted-foreground">Real-time job status updates at every stage</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Photo uploads and notes from the field</p>
+                  <p className="text-sm text-muted-foreground">Engineer details - name, photo, contact info</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">Automatic check-in/out with GPS verification</p>
+                  <p className="text-sm text-muted-foreground">Completion notifications - know when job is done</p>
                 </div>
               </CardContent>
             </Card>
@@ -287,8 +221,193 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Three-Column Layout: MSP, Client, Engineer */}
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {/* For MSPs */}
+              <Card className="border-primary/30">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <Building2 className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">MSP Control Center</CardTitle>
+                  <CardDescription>Complete Field Visibility</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-foreground">What MSPs See:</p>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Live map with all engineers' locations</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Real-time job status for every assignment</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Calculated ETAs to next job sites</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Engineer availability and workload</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Route history and travel time analytics</span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* For Clients */}
+              <Card className="border-accent/30">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                    <Users className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-xl">Client Portal View</CardTitle>
+                  <CardDescription>Track Your Service Request</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-foreground">What Clients See:</p>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Assigned engineer name and photo</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Live tracking weblink (shareable)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Real-time ETA with map view</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Job details and service description</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Engineer contact information</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 flex-shrink-0" />
+                        <span>Status updates (dispatched, en route, arrived)</span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* For Engineers */}
+              <Card className="border-primary/30">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <Smartphone className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Engineer Mobile App</CardTitle>
+                  <CardDescription>Everything Needed for the Job</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-foreground">What Engineers Receive:</p>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Complete job details and requirements</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Full address with GPS navigation</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Client contact information</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Site-specific notes and instructions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>One-tap navigation to job site</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Check-in/check-out with GPS verification</span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Benefits Section */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                    Key Benefits
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Eliminate "Where Are You?" Calls</p>
+                      <p className="text-sm text-muted-foreground">Clients and dispatchers see live location - no more phone tag</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Accurate ETAs Every Time</p>
+                      <p className="text-sm text-muted-foreground">Real-time traffic-aware calculations, not guesswork</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Route Optimization</p>
+                      <p className="text-sm text-muted-foreground">Dispatch closest available engineer, reduce travel time</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Accountability & Safety</p>
+                      <p className="text-sm text-muted-foreground">GPS timestamps prove arrival/departure times</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-accent/20">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center gap-2">
+                    <Link2 className="h-6 w-6 text-accent" />
+                    Shareable Tracking Links
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Every job gets a unique tracking weblink that clients can share with end users, security teams, or facility managers.
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">No Login Required</p>
+                      <p className="text-sm text-muted-foreground">Anyone with the link can track engineer arrival</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Real-Time Map View</p>
+                      <p className="text-sm text-muted-foreground">See engineer moving on map with live ETA countdown</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground mb-1">Mobile Friendly</p>
+                      <p className="text-sm text-muted-foreground">Works on any device - desktop, tablet, smartphone</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Stats Bar */}
-            <Card className="border-primary/30 bg-primary/5 mb-12">
+            <Card className="mt-8 border-primary/30 bg-primary/5">
               <CardContent className="py-8">
                 <div className="grid md:grid-cols-4 gap-8 text-center">
                   <div>
@@ -315,166 +434,168 @@ export default function Home() {
       </section>
 
       {/* End-to-End Workflow */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Complete End-to-End Solution
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Replace your entire field service stack with one integrated platform
-            </p>
-          </div>
+      <section className="bg-muted/30 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+                Complete End-to-End Solution
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Replace your entire field service stack with one integrated platform
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            <Card className="text-center border-primary/20">
-              <CardHeader>
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary">1</span>
-                </div>
-                <CardTitle className="text-xl">Request Intake</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Client portals + public forms replace emails and phone calls
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid md:grid-cols-4 gap-6">
+              <Card className="text-center border-primary/20">
+                <CardHeader>
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-primary">1</span>
+                  </div>
+                  <CardTitle className="text-xl">Request Intake</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Client portals + public forms replace emails and phone calls
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="text-center border-accent/20">
-              <CardHeader>
-                <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-accent">2</span>
-                </div>
-                <CardTitle className="text-xl">Dispatch</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Automated routing and assignment replaces spreadsheets
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="text-center border-accent/20">
+                <CardHeader>
+                  <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-accent">2</span>
+                  </div>
+                  <CardTitle className="text-xl">Dispatch</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Automated routing and assignment replaces spreadsheets
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="text-center border-primary/20">
-              <CardHeader>
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-primary">3</span>
-                </div>
-                <CardTitle className="text-xl">Execute</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Real-time tracking replaces WhatsApp status updates
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="text-center border-primary/20">
+                <CardHeader>
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-primary">3</span>
+                  </div>
+                  <CardTitle className="text-xl">Execute</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Real-time tracking replaces WhatsApp status updates
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card className="text-center border-accent/20">
-              <CardHeader>
-                <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-accent">4</span>
-                </div>
-                <CardTitle className="text-xl">Report</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Automated analytics replace manual reporting
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="text-center border-accent/20">
+                <CardHeader>
+                  <div className="h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-accent">4</span>
+                  </div>
+                  <CardTitle className="text-xl">Report</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Automated analytics replace manual reporting
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Replace Your Stack */}
-      <section className="bg-muted/30 py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-                Replace Your Entire Stack
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Stop juggling multiple tools. One platform for everything.
-              </p>
-            </div>
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+              Replace Your Entire Stack
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Stop juggling multiple tools. One platform for everything.
+            </p>
+          </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="border-destructive/30">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-destructive">❌ Before FieldPulse</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-5 w-5 text-destructive mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Email/Phone for Requests</p>
-                      <p className="text-sm text-muted-foreground">Lost emails, missed calls, no tracking</p>
-                    </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="text-2xl text-destructive">❌ Before FieldPulse</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-destructive mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Email/Phone for Requests</p>
+                    <p className="text-sm text-muted-foreground">Lost emails, missed calls, no tracking</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <FileSpreadsheet className="h-5 w-5 text-destructive mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Spreadsheets for Scheduling</p>
-                      <p className="text-sm text-muted-foreground">Manual updates, version conflicts, errors</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FileSpreadsheet className="h-5 w-5 text-destructive mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Spreadsheets for Scheduling</p>
+                    <p className="text-sm text-muted-foreground">Manual updates, version conflicts, errors</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <MessageSquare className="h-5 w-5 text-destructive mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">WhatsApp for Updates</p>
-                      <p className="text-sm text-muted-foreground">Unprofessional, no audit trail</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MessageSquare className="h-5 w-5 text-destructive mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">WhatsApp for Updates</p>
+                    <p className="text-sm text-muted-foreground">Unprofessional, no audit trail</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <FileSpreadsheet className="h-5 w-5 text-destructive mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Manual Reporting</p>
-                      <p className="text-sm text-muted-foreground">Hours spent compiling data</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <FileSpreadsheet className="h-5 w-5 text-destructive mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Manual Reporting</p>
+                    <p className="text-sm text-muted-foreground">Hours spent compiling data</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card className="border-primary/30">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-primary">✅ With FieldPulse</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Link2 className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Client Portals</p>
-                      <p className="text-sm text-muted-foreground">Self-service 24/7, automatic tracking</p>
-                    </div>
+            <Card className="border-primary/30">
+              <CardHeader>
+                <CardTitle className="text-2xl text-primary">✅ With FieldPulse</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Link2 className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Client Portals</p>
+                    <p className="text-sm text-muted-foreground">Self-service 24/7, automatic tracking</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Zap className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Dispatch Dashboard</p>
-                      <p className="text-sm text-muted-foreground">Automated assignment, real-time view</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Zap className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Dispatch Dashboard</p>
+                    <p className="text-sm text-muted-foreground">Automated assignment, real-time view</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Real-Time Tracking</p>
-                      <p className="text-sm text-muted-foreground">Live GPS, automatic notifications</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Real-Time Tracking</p>
+                    <p className="text-sm text-muted-foreground">Live GPS, automatic notifications</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <BarChart3 className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Automated Analytics</p>
-                      <p className="text-sm text-muted-foreground">One-click exports, scheduled reports</p>
-                    </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <BarChart3 className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground">Automated Analytics</p>
+                    <p className="text-sm text-muted-foreground">One-click exports, scheduled reports</p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
+
+      {/* Projects Feature - Client Experience Driver */}
       <section className="bg-muted/30 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
@@ -984,147 +1105,160 @@ export default function Home() {
           </div>
         </div>
       </section>
-      {/* Pricing Section */}
-      <section id="pricing" className="container mx-auto px-4 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 mb-4">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Simple, Transparent Pricing</span>
+
+      {/* Complete Feature Set */}
+      <section className="bg-muted/30 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+                Everything You Need. Nothing You Don't.
+              </h2>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Choose Your Plan
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Start with a free trial. Scale as you grow. No hidden fees.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {pricingPlans.map((plan, index) => (
-              <Card 
-                key={index} 
-                className={`relative ${plan.popular ? 'border-primary border-2 shadow-lg' : 'border-2'}`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
-                  <div className="mb-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.price !== "Free" && (
-                      <span className="text-muted-foreground">/{plan.period}</span>
-                    )}
-                  </div>
-                  <CardDescription className="text-base">{plan.description}</CardDescription>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <Building2 className="h-8 w-8 text-primary mb-2" />
+                  <CardTitle>Multi-Tenant Management</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, fIndex) => (
-                      <li key={fIndex} className="flex items-start gap-3">
-                        {feature.included ? (
-                          <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        ) : (
-                          <X className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                        )}
-                        <span className={feature.included ? "text-foreground" : "text-muted-foreground"}>
-                          {feature.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/signup">
-                    <Button 
-                      className="w-full" 
-                      variant={plan.popular ? "default" : "outline"}
-                      size="lg"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Manage unlimited clients with complete data isolation and dedicated portals
+                  </p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-muted-foreground">
-              All plans include 14-day free trial • No credit card required for trial
-            </p>
+              <Card className="border-accent/20">
+                <CardHeader>
+                  <MapPin className="h-8 w-8 text-accent mb-2" />
+                  <CardTitle>Real-Time GPS Tracking</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Live engineer location, ETA calculations, geofencing, route optimization
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <Zap className="h-8 w-8 text-primary mb-2" />
+                  <CardTitle>Automated Dispatch</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Smart assignment based on location, skills, availability, and workload
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-accent/20">
+                <CardHeader>
+                  <Link2 className="h-8 w-8 text-accent mb-2" />
+                  <CardTitle>Client Self-Service Portals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Branded portals for each client with unique request URLs and site libraries
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <Bell className="h-8 w-8 text-primary mb-2" />
+                  <CardTitle>Automated Notifications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Email/SMS updates at every job stage - dispatched, en route, arrived, completed
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-accent/20">
+                <CardHeader>
+                  <Shield className="h-8 w-8 text-accent mb-2" />
+                  <CardTitle>Enterprise Security</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Role-based access, data encryption, audit logs, SOC 2 compliant
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-muted/30 py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <Card className="bg-gradient-to-r from-orange-600 to-orange-500 border-0 text-white">
-              <CardContent className="p-12 text-center">
-                <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Field Operations?</h2>
-                <p className="text-xl mb-8 text-orange-50">
-                  Join 500+ MSPs delivering enterprise-grade field service experiences.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/signup">
-                    <Button size="lg" variant="secondary" className="text-lg px-8">
-                      Start Free Trial
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <a href="#pricing">
-                    <Button size="lg" variant="outline" className="text-lg px-8 bg-white/10 border-white/20 text-white hover:bg-white/20">
-                      View Pricing
-                    </Button>
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Final CTA */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            Ready to Transform Your Field Operations?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8">
+            Join 500+ MSPs who trust FieldPulse for their field service management
+          </p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/signup">
+              <Button size="lg" className="text-lg px-8 py-6 gradient-orange text-white hover:shadow-lg hover:shadow-primary/50 transition-all">
+                <Zap className="h-5 w-5 mr-2" />
+                Get Started
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-primary/30 hover:bg-primary/10">
+              <Users className="h-5 w-5 mr-2" />
+              Request Demo
+            </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-6">
+            Join 500+ MSPs managing field operations with FieldPulse
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 px-4">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <LogoImage className="h-10 mb-4" />
-              <p className="text-sm text-muted-foreground">
-                Enterprise field service management platform for modern MSPs.
-              </p>
+      <footer className="border-t bg-muted/30 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-4 gap-8">
+              <div>
+                <LogoImage className="h-12 mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Enterprise field service management for MSPs and IT service providers
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-foreground mb-4">Product</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="#" className="hover:text-primary transition-colors">Features</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Pricing</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Security</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold text-foreground mb-4">Company</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="#" className="hover:text-primary transition-colors">About</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Contact</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Careers</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold text-foreground mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><Link href="#" className="hover:text-primary transition-colors">Privacy</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Terms</Link></li>
+                  <li><Link href="#" className="hover:text-primary transition-colors">Security</Link></li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#features" className="hover:text-foreground">Features</a></li>
-                <li><a href="#pricing" className="hover:text-foreground">Pricing</a></li>
-                <li><Link href="/signup" className="hover:text-foreground">Sign Up</Link></li>
-              </ul>
+            <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
+              <p>© 2025 FieldPulse. All rights reserved.</p>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground">About</a></li>
-                <li><a href="#" className="hover:text-foreground">Contact</a></li>
-                <li><a href="#" className="hover:text-foreground">Support</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-foreground">Terms of Service</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© 2025 FieldPulse Go. All rights reserved.</p>
           </div>
         </div>
       </footer>

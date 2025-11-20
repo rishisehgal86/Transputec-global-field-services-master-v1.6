@@ -2051,3 +2051,29 @@ ns
 - [x] Test file upload and retrieval
 - [x] Document deployment setup for self-hosted installations
 
+
+
+
+## Feature - SaaS Homepage with Pricing
+- [x] Update homepage hero section with SaaS messaging
+- [x] Create pricing cards for Trial, Starter, Enterprise
+- [x] Add features comparison table
+- [x] Add call-to-action buttons for each tier
+- [x] Add testimonials/social proof section
+- [x] Update all pricing CTAs to "Sign Up Now" linking to /signup
+- [ ] Test responsive design on mobile
+
+
+
+
+## Bug Fix - Restore Original Homepage Features
+- [x] Check git history for original homepage content
+- [x] Identify missing features/sections
+- [x] Merge original features with new SaaS pricing design
+- [x] Add back Projects Feature section
+- [x] Add back Live Communication Channel section
+- [x] Add back Service Verification Reports section
+- [x] Add back End-of-Month Reporting section
+- [x] Ensure all functionality is preserved
+- [x] Test complete homepage
+
