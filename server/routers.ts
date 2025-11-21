@@ -462,15 +462,45 @@ export const appRouter = router({
         
         const jobToken = randomBytes(32).toString('hex');
         
-        const job = await createJob({
-          ...input,
+        // Build job data object, filtering out undefined values
+        const jobData: any = {
           jobToken,
           organizationId: ctx.user.organizationId,
           status: input.sendEmailToEngineer ? "sent_to_engineer" : "created",
-          engineerName: input.engineerName,
-          engineerEmail: input.engineerEmail,
           createdBy: ctx.user.id,
-        });
+        };
+        
+        // Add fields from input, but only if they have actual values
+        if (input.siteName) jobData.siteName = input.siteName;
+        if (input.siteId) jobData.siteId = input.siteId;
+        if (input.siteLocation) jobData.siteLocation = input.siteLocation;
+        if (input.siteAddress) jobData.siteAddress = input.siteAddress;
+        if (input.siteLatitude) jobData.siteLatitude = input.siteLatitude;
+        if (input.siteLongitude) jobData.siteLongitude = input.siteLongitude;
+        if (input.siteContactName) jobData.siteContactName = input.siteContactName;
+        if (input.siteContactNumber) jobData.siteContactNumber = input.siteContactNumber;
+        if (input.changeNumber) jobData.changeNumber = input.changeNumber;
+        if (input.incidentNumber) jobData.incidentNumber = input.incidentNumber;
+        if (input.projectName) jobData.projectName = input.projectName;
+        if (input.downTime !== undefined) jobData.downTime = input.downTime;
+        if (input.scheduledDateTime) jobData.scheduledDateTime = input.scheduledDateTime;
+        if (input.hoursRequired) jobData.hoursRequired = input.hoursRequired;
+        if (input.toolsRequired) jobData.toolsRequired = input.toolsRequired;
+        if (input.deviceDetails) jobData.deviceDetails = input.deviceDetails;
+        if (input.incidentDetails) jobData.incidentDetails = input.incidentDetails;
+        if (input.scopeOfWork) jobData.scopeOfWork = input.scopeOfWork;
+        if (input.coveredByCOI !== undefined) jobData.coveredByCOI = input.coveredByCOI;
+        if (input.videoConferenceLink) jobData.videoConferenceLink = input.videoConferenceLink;
+        if (input.notes) jobData.notes = input.notes;
+        if (input.clientName) jobData.clientName = input.clientName;
+        if (input.projectId) jobData.projectId = input.projectId;
+        if (input.engineerName) jobData.engineerName = input.engineerName;
+        if (input.engineerEmail) jobData.engineerEmail = input.engineerEmail;
+        if (input.timezone) jobData.timezone = input.timezone;
+        
+        console.log('[Router] Creating job with data:', JSON.stringify(jobData, null, 2));
+        
+        const job = await createJob(jobData);}
         
         if (!job) {
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create job' });
