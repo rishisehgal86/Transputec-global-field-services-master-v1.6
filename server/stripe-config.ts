@@ -23,7 +23,7 @@ if (!STRIPE_CONFIG.webhookSecret) {
 export const SUBSCRIPTION_PLANS = {
   starter: {
     name: 'Starter Plan',
-    priceId: 'price_1SVTqoFQaKsrrJ5ldmjfREtF',
+    priceId: process.env.STRIPE_STARTER_PRICE_ID || '',
     price: 99,
     currency: 'usd',
     interval: 'month',
@@ -35,7 +35,7 @@ export const SUBSCRIPTION_PLANS = {
   },
   enterprise: {
     name: 'Enterprise Plan',
-    priceId: 'price_1SVTrGFQaKsrrJ5lGaReOk3D',
+    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID || '',
     price: 399,
     currency: 'usd',
     interval: 'month',
@@ -46,6 +46,14 @@ export const SUBSCRIPTION_PLANS = {
     },
   },
 };
+
+// Validate required price IDs
+if (!SUBSCRIPTION_PLANS.starter.priceId) {
+  console.warn('[Stripe] WARNING: STRIPE_STARTER_PRICE_ID environment variable is not set. Starter plan checkout will fail.');
+}
+if (!SUBSCRIPTION_PLANS.enterprise.priceId) {
+  console.warn('[Stripe] WARNING: STRIPE_ENTERPRISE_PRICE_ID environment variable is not set. Enterprise plan checkout will fail.');
+}
 
 // Trial Configuration
 export const TRIAL_CONFIG = {
