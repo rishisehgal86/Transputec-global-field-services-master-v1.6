@@ -46,6 +46,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
   try {
     // Handle different event types
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+
       case 'customer.subscription.created':
         await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
         break;
@@ -78,6 +82,37 @@ export async function handleStripeWebhook(req: Request, res: Response) {
     // Log error for manual investigation
     res.json({ received: true, error: 'Processing failed' });
   }
+}
+
+/**
+ * Handle checkout.session.completed event
+ * This fires immediately when checkout completes
+ */
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('[Webhook] Processing checkout.session.completed:', session.id);
+
+  const organizationId = session.metadata?.organizationId;
+  
+  if (!organizationId) {
+    console.error('[Webhook] Missing organizationId in checkout session metadata');
+    return;
+  }
+
+  // Get the subscription ID from the session
+  const subscriptionId = session.subscription as string;
+  
+  if (!subscriptionId) {
+    console.error('[Webhook] No subscription found in checkout session');
+    return;
+  }
+
+  // Retrieve the full subscription details
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  
+  // Process the subscription
+  await handleSubscriptionCreated(subscription);
+  
+  console.log('[Webhook] Checkout completed successfully for org:', organizationId);
 }
 
 /**

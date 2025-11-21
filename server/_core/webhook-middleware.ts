@@ -13,22 +13,8 @@ export function registerWebhookEndpoint(app: Express) {
   // This endpoint must be registered BEFORE the JSON body parser middleware
   app.post(
     '/api/stripe/webhook',
-    // Use raw body parser for this specific endpoint
-    (req: Request, res: Response, next) => {
-      if (req.headers['content-type'] === 'application/json') {
-        let data = '';
-        req.setEncoding('utf8');
-        req.on('data', (chunk) => {
-          data += chunk;
-        });
-        req.on('end', () => {
-          req.body = data;
-          next();
-        });
-      } else {
-        next();
-      }
-    },
+    // Use express.raw() to get the raw body as a Buffer
+    require('express').raw({ type: 'application/json' }),
     handleStripeWebhook
   );
 

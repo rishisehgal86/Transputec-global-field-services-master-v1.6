@@ -1,0 +1,9 @@
+{
+  "query": "SELECT id, name, slug, planTier, subscriptionStatus, monthlyJobLimit, maxAdminUsers, billingCycleStart, billingCycleEnd FROM organizations WHERE slug = 'ookkokookk4';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4PejtppQzUdF9US.root --database BywbfAfExAafFHVk3TzLrT --execute SELECT id, name, slug, planTier, subscriptionStatus, monthlyJobLimit, maxAdminUsers, billingCycleStart, billingCycleEnd FROM organizations WHERE slug = 'ookkokookk4';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 80
+}

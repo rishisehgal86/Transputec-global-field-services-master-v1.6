@@ -2254,3 +2254,12 @@ ns
 - [ ] Verify plan tier badge displays correctly after real Stripe checkout
 - [ ] Note: Dev environment shows "No active subscription found" error because manually upgraded accounts don't have stripeCustomerId - this should work correctly on Railway with real Stripe checkouts
 
+
+
+## URGENT: Stripe Webhook Not Updating Accounts
+- [ ] Investigate why checkout completes but organization not upgraded
+- [ ] Check if organizationId is being passed in checkout session metadata
+- [ ] Verify webhook endpoint is configured in Stripe dashboard
+- [ ] Check webhook logs for errors
+- [ ] Test checkout session: cs_test_b1sM1R7RlKR1OP2yJmMXpCZ1K99kXxi8IInn9K0LIycc5R4aYglHglx1Nb
+
