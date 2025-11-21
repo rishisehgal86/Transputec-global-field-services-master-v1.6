@@ -112,9 +112,30 @@ export default function AdminDashboard() {
             {/* Organization & Admin Display */}
             <div className="flex items-center gap-3">
               {organization && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
-                  <span className="text-xs font-medium text-orange-700">Organization:</span>
-                  <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
+                    <span className="text-xs font-medium text-orange-700">Organization:</span>
+                    <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
+                  </div>
+                  {subscription && (
+                    <Link href="/admin/billing">
+                      <Badge 
+                        variant={subscription.planTier === 'enterprise' ? 'default' : subscription.planTier === 'starter' ? 'secondary' : 'outline'}
+                        className={
+                          subscription.planTier === 'enterprise' 
+                            ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                            : subscription.planTier === 'starter'
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer'
+                        }
+                      >
+                        {subscription.planTier === 'trial' ? '🎯 Trial' : 
+                         subscription.planTier === 'starter' ? '⭐ Starter' : 
+                         subscription.planTier === 'enterprise' ? '👑 Enterprise' : 
+                         subscription.planTier}
+                      </Badge>
+                    </Link>
+                  )}
                 </div>
               )}
               {user && (

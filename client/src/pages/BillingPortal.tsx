@@ -324,13 +324,13 @@ Do you want to proceed?`;
 
               {subscription.planTier === 'starter' && (
                 <Button
-                  onClick={() => handleUpgrade('enterprise')}
-                  disabled={isUpgrading}
+                  onClick={handleManagePayment}
+                  disabled={isOpeningPortal}
                 >
-                  {isUpgrading ? (
+                  {isOpeningPortal ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
+                      Opening Portal...
                     </>
                   ) : (
                     'Upgrade to Enterprise'
@@ -432,6 +432,14 @@ Do you want to proceed?`;
                 </ul>
                 {subscription.planTier === 'enterprise' ? (
                   <Badge variant="default" className="w-full justify-center">Current Plan</Badge>
+                ) : subscription.planTier === 'starter' ? (
+                  <Button
+                    className="w-full"
+                    onClick={handleManagePayment}
+                    disabled={isOpeningPortal}
+                  >
+                    Upgrade to Enterprise
+                  </Button>
                 ) : (
                   <Button
                     className="w-full"

@@ -2220,3 +2220,37 @@ ns
 - [ ] Test subscription upgrade/downgrade
 - [ ] Test subscription cancellation
 
+
+
+## Stripe Integration Bug Fix
+- [ ] Fix webhook handler to properly upgrade account from trial to paid plan
+- [ ] Ensure subscription status updates in database when Stripe checkout completes
+- [ ] Test trial → starter upgrade flow
+- [ ] Verify organization planTier and subscriptionStatus update correctly
+
+
+
+## Admin Dashboard Enhancement
+- [x] Add plan tier badge display to admin dashboard header
+- [x] Show current subscription plan (Trial, Starter, Enterprise)
+- [x] Color-code badges based on plan tier
+- [x] Make badge clickable to navigate to billing portal
+
+
+
+## Billing Portal Bug Fix
+- [x] Fix "Upgrade to Enterprise" button to open Stripe billing portal instead of checkout
+- [x] Change upgrade flow for existing subscribers to use portal session
+- [x] Test upgrade from Starter to Enterprise via billing portal
+
+
+
+## Stripe Integration - To Test on Railway Production
+- [ ] Test upgrade flow from Trial to Starter via Stripe checkout
+- [ ] Test upgrade flow from Starter to Enterprise via billing portal
+- [ ] Verify Stripe webhook receives events and updates database correctly
+- [ ] Confirm billing portal opens correctly for accounts with real Stripe subscriptions
+- [ ] Test subscription cancellation flow
+- [ ] Verify plan tier badge displays correctly after real Stripe checkout
+- [ ] Note: Dev environment shows "No active subscription found" error because manually upgraded accounts don't have stripeCustomerId - this should work correctly on Railway with real Stripe checkouts
+
