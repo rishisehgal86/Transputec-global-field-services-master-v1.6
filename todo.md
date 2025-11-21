@@ -2125,3 +2125,13 @@ ns
 - [x] Job counts now filter by billing cycle start date
 - [x] Automatic monthly reset via billing cycle dates from Stripe webhook
 
+
+
+
+## Railway Deployment Setup
+- [x] Create Railway configuration files (railway.json, Dockerfile)
+- [x] Create deployment guide documentation
+- [x] Document environment variables for Railway
+- [ ] Commit deployment configuration
+- [ ] Deploy to Railway and test
+
