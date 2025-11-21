@@ -154,8 +154,8 @@ Do you want to proceed?`;
   const getPlanName = (tier: string) => {
     const planNames: Record<string, string> = {
       trial: 'Free Trial',
-      starter: 'Starter Plan',
-      enterprise: 'Enterprise Plan',
+      starter: 'Scale Plan',
+      enterprise: 'Professional Plan',
     };
     return planNames[tier] || tier;
   };
@@ -302,7 +302,7 @@ Do you want to proceed?`;
                         Processing...
                       </>
                     ) : (
-                      'Upgrade to Starter'
+                      'Upgrade to Scale'
                     )}
                   </Button>
                   <Button
@@ -316,7 +316,7 @@ Do you want to proceed?`;
                         Processing...
                       </>
                     ) : (
-                      'Upgrade to Enterprise'
+                      'Upgrade to Professional'
                     )}
                   </Button>
                 </>
@@ -333,7 +333,7 @@ Do you want to proceed?`;
                       Opening Portal...
                     </>
                   ) : (
-                    'Upgrade to Enterprise'
+                    'Upgrade to Professional'
                   )}
                 </Button>
               )}
@@ -384,10 +384,10 @@ Do you want to proceed?`;
               </CardContent>
             </Card>
 
-            {/* Starter Plan */}
+            {/* Scale Plan */}
             <Card className={subscription.planTier === 'starter' ? 'border-primary' : ''}>
               <CardHeader>
-                <CardTitle>Starter</CardTitle>
+                <CardTitle>Scale</CardTitle>
                 <CardDescription className="text-2xl font-bold text-foreground">
                   $99<span className="text-sm font-normal text-muted-foreground">/month</span>
                 </CardDescription>
@@ -408,16 +408,16 @@ Do you want to proceed?`;
                     onClick={() => handleUpgrade('starter')}
                     disabled={isUpgrading}
                   >
-                    Upgrade to Starter
+                    Upgrade to Scale
                   </Button>
                 ) : null}
               </CardContent>
             </Card>
 
-            {/* Enterprise Plan */}
+            {/* Professional Plan */}
             <Card className={subscription.planTier === 'enterprise' ? 'border-primary' : ''}>
               <CardHeader>
-                <CardTitle>Enterprise</CardTitle>
+                <CardTitle>Professional</CardTitle>
                 <CardDescription className="text-2xl font-bold text-foreground">
                   $399<span className="text-sm font-normal text-muted-foreground">/month</span>
                 </CardDescription>
@@ -438,7 +438,7 @@ Do you want to proceed?`;
                     onClick={handleManagePayment}
                     disabled={isOpeningPortal}
                   >
-                    Upgrade to Enterprise
+                    Upgrade to Professional
                   </Button>
                 ) : (
                   <Button
@@ -446,7 +446,7 @@ Do you want to proceed?`;
                     onClick={() => handleUpgrade('enterprise')}
                     disabled={isUpgrading}
                   >
-                    Upgrade to Enterprise
+                    Upgrade to Professional
                   </Button>
                 )}
               </CardContent>

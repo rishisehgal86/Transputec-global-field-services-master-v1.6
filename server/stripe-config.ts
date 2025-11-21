@@ -30,7 +30,7 @@ console.log(`[Stripe]   - Webhook Secret: ${STRIPE_CONFIG.webhookSecret.substrin
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   starter: {
-    name: 'Starter Plan',
+    name: 'Scale Plan',
     priceId: getRequiredEnv('STRIPE_STARTER_PRICE_ID'),
     price: 99,
     currency: 'usd',
@@ -38,11 +38,11 @@ export const SUBSCRIPTION_PLANS = {
     features: {
       monthlyJobLimit: 100,
       maxAdminUsers: 3,
-      description: '100 jobs per month, 3 admin users, all features, email support',
+      description: '100 jobs per month, 3 admin users, all features, priority email support',
     },
   },
   enterprise: {
-    name: 'Enterprise Plan',
+    name: 'Professional Plan',
     priceId: getRequiredEnv('STRIPE_ENTERPRISE_PRICE_ID'),
     price: 399,
     currency: 'usd',
@@ -50,7 +50,7 @@ export const SUBSCRIPTION_PLANS = {
     features: {
       monthlyJobLimit: null, // unlimited
       maxAdminUsers: 999, // unlimited
-      description: 'Unlimited jobs, unlimited admin users, priority support, all features',
+      description: 'Unlimited jobs, unlimited admin users, dedicated account manager, priority support',
     },
   },
 };
