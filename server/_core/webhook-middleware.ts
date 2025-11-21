@@ -5,7 +5,7 @@
  * Must be registered BEFORE JSON body parser
  */
 
-import { Express, Request, Response } from 'express';
+import express, { Express, Request, Response } from 'express';
 import { handleStripeWebhook } from '../stripe-webhook';
 
 export function registerWebhookEndpoint(app: Express) {
@@ -14,7 +14,7 @@ export function registerWebhookEndpoint(app: Express) {
   app.post(
     '/api/stripe/webhook',
     // Use express.raw() to get the raw body as a Buffer
-    require('express').raw({ type: 'application/json' }),
+    express.raw({ type: 'application/json' }),
     handleStripeWebhook
   );
 

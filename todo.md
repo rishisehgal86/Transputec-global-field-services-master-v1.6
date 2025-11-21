@@ -2257,9 +2257,10 @@ ns
 
 
 ## URGENT: Stripe Webhook Not Updating Accounts
-- [ ] Investigate why checkout completes but organization not upgraded
-- [ ] Check if organizationId is being passed in checkout session metadata
-- [ ] Verify webhook endpoint is configured in Stripe dashboard
-- [ ] Check webhook logs for errors
-- [ ] Test checkout session: cs_test_b1sM1R7RlKR1OP2yJmMXpCZ1K99kXxi8IInn9K0LIycc5R4aYglHglx1Nb
+- [x] Investigate why checkout completes but organization not upgraded
+- [x] Check if organizationId is being passed in checkout session metadata
+- [x] Verify webhook endpoint is configured in Stripe dashboard
+- [x] Fix raw body parsing for webhook signature verification
+- [x] Add checkout.session.completed event handler
+- [ ] Test on Railway after deployment
 
