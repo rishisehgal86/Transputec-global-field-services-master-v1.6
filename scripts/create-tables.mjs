@@ -188,6 +188,27 @@ try {
   const connection = await mysql.createConnection(DATABASE_URL);
   
   console.log('✅ Connected successfully');
+  
+  // Drop existing tables to ensure clean slate
+  console.log('🗑️  Dropping existing tables (if any)...\n');
+  const dropTables = [
+    'DROP TABLE IF EXISTS password_reset_tokens',
+    'DROP TABLE IF EXISTS svr_media_files',
+    'DROP TABLE IF EXISTS svr_reports',
+    'DROP TABLE IF EXISTS job_comments',
+    'DROP TABLE IF EXISTS job_locations',
+    'DROP TABLE IF EXISTS jobs',
+    'DROP TABLE IF EXISTS project_sites',
+    'DROP TABLE IF EXISTS projects',
+    'DROP TABLE IF EXISTS users',
+    'DROP TABLE IF EXISTS organizations',
+  ];
+  
+  for (const sql of dropTables) {
+    await connection.execute(sql);
+  }
+  console.log('  ✓ Dropped all existing tables\n');
+  
   console.log('📝 Creating tables...\n');
 
   for (const [index, sql] of tables.entries()) {
