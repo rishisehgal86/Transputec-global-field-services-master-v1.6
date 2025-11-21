@@ -10,7 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "node scripts/create-tables.mjs"
+    "db:push": "node scripts/create-tables.mjs",
+    "test:email": "node scripts/test-email.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
