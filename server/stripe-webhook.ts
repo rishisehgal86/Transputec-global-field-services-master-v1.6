@@ -106,8 +106,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Retrieve the full subscription details
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  // Retrieve the full subscription details with expand to ensure all data is loaded
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    expand: ['latest_invoice', 'customer'],
+  });
   
   // Process the subscription
   await handleSubscriptionCreated(subscription);
@@ -239,7 +241,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     await db.update(organizations)
       .set({
         isActive: true, // Keep organization active
-        subscriptionStatus: 'canceled',
+        subscriptionStatus: 'cancelled',
         planTier: 'trial',
         monthlyJobLimit: 50,
         maxAdminUsers: 1,

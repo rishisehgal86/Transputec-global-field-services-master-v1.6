@@ -118,9 +118,24 @@ export async function handleSubscriptionCreated(subscription: any) {
   const planTier = subscription.metadata.planTier as 'starter' | 'enterprise';
   const plan = getPlanByTier(planTier);
   
+  // Validate subscription has required date fields
+  if (!subscription.current_period_start || !subscription.current_period_end) {
+    console.error('[Stripe] Subscription missing period dates:', {
+      id: subscription.id,
+      current_period_start: subscription.current_period_start,
+      current_period_end: subscription.current_period_end,
+    });
+    throw new Error('Subscription missing billing period dates');
+  }
+  
   // Calculate billing cycle dates
   const billingCycleStart = new Date(subscription.current_period_start * 1000);
   const billingCycleEnd = new Date(subscription.current_period_end * 1000);
+  
+  console.log('[Stripe] Processing subscription with dates:', {
+    billingCycleStart: billingCycleStart.toISOString(),
+    billingCycleEnd: billingCycleEnd.toISOString(),
+  });
   
   await updateOrganizationSubscription({
     organizationId,
