@@ -2149,3 +2149,61 @@ ns
 - [ ] Test checkpoint creation with new build system
 - [ ] Verify Railway deployment with optimized builds
 
+
+
+
+## Restore Original Working Vite Config (Nov 21, 2025)
+- [x] Identify that Vite worked in previous checkpoints (05c1f2cd)
+- [x] Check main branch has optimization scripts that may be causing issues
+- [x] Remove all optimization scripts (build-minimal.sh, build-sequential.sh, etc.)
+- [x] Restore simple build command: vite build && esbuild
+- [x] Remove custom vite configs (vite.config.minimal.ts, vite.config.checkpoint.ts)
+- [x] Restore original simple vite.config.ts (no code splitting optimizations)
+- [x] Test build locally (works in 7.02s)
+- [ ] Test checkpoint creation with restored config
+- [ ] Document what was different between working and failing configs
+
+
+
+
+## Test Large File Hypothesis (Nov 21, 2025)
+- [x] Identify that checkpoints worked until Nov 20 (0d55b90)
+- [x] Find that Home.tsx was massively rewritten (1650+ lines changed)
+- [x] Current Home.tsx is 1268 lines - very large
+- [ ] Create minimal Home.tsx temporarily
+- [ ] Test checkpoint with minimal Home.tsx
+- [ ] If successful, confirm large files are the issue
+- [ ] If successful, optimize Home.tsx by code splitting
+
+
+
+
+## Vite Version Downgrade Test (Nov 21, 2025)
+- [x] Downgrade Vite from 7.1.9 to 7.1.7 (last successful checkpoint version)
+- [x] Test build locally (works in 6.67s)
+- [x] Create checkpoint with Vite 7.1.7 - ❌ FAILED
+- [x] Confirmed: Vite version is NOT the issue
+
+
+
+
+## Railway Deployment Guide (Nov 21, 2025)
+- [x] Create comprehensive step-by-step deployment guide (RAILWAY_DEPLOYMENT_GUIDE.md)
+- [x] Create quick start checklist (RAILWAY_QUICK_START.md)
+- [x] Verify Dockerfile configuration
+- [x] Verify railway.json configuration
+- [x] Create environment variables template (.env.railway.template)
+- [x] Document post-deployment steps
+- [ ] User to test actual deployment on Railway
+
+
+
+
+## Railway Deployment Fix (Nov 21, 2025)
+- [x] Identified JavaScript loading error (asset serving path issue)
+- [x] Fixed server/_core/vite.ts serveStatic function to use correct dist path
+- [ ] Commit and push fix to GitHub
+- [ ] Railway auto-redeploys
+- [ ] Test deployment URL
+- [ ] Run database migrations
+
