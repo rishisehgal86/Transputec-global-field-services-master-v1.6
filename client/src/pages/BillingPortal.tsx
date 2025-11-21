@@ -65,7 +65,17 @@ export default function BillingPortal() {
   };
 
   const handleCancelSubscription = () => {
-    if (confirm('Are you sure you want to cancel your subscription? You will lose access to premium features.')) {
+    const message = `Are you sure you want to cancel your subscription?
+
+⚠️ Important:
+• Your subscription will remain active until the end of your current billing period (${subscription?.billingCycleEnd ? new Date(subscription.billingCycleEnd).toLocaleDateString() : 'billing cycle end'})
+• After that date, your organization will revert to the Free Trial plan
+• Trial plan limits: 50 jobs/month, 1 admin user
+• You can upgrade again at any time
+
+Do you want to proceed?`;
+    
+    if (confirm(message)) {
       cancelSubscription.mutate();
     }
   };
@@ -195,9 +205,9 @@ export default function BillingPortal() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">{getPlanName(subscription.planTier ?? 'trial')}</CardTitle>
+                <CardTitle className="text-2xl">{getPlanName(subscription.planTier || 'trial')}</CardTitle>
                 <CardDescription className="text-lg mt-1">
-                  {getPlanPrice(subscription.planTier ?? 'trial')}
+                  {getPlanPrice(subscription.planTier || 'trial')}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -215,10 +225,10 @@ export default function BillingPortal() {
                 <div>
                   <p className="text-sm text-muted-foreground">Jobs This Month</p>
                   <p className="text-2xl font-bold">
-                    {subscription.currentMonthJobCount ?? 0}
-                    {!isUnlimited(subscription.monthlyJobLimit ?? 0) && (
+                    {subscription.currentMonthJobCount}
+                    {!isUnlimited(subscription.monthlyJobLimit || 0) && (
                       <span className="text-sm text-muted-foreground font-normal">
-                        {' '}/ {subscription.monthlyJobLimit ?? 0}
+                        {' '}/ {subscription.monthlyJobLimit}
                       </span>
                     )}
                   </p>

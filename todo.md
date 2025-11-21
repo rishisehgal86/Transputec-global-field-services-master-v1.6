@@ -2207,3 +2207,16 @@ ns
 - [ ] Test deployment URL
 - [ ] Run database migrations
 
+
+
+
+## Stripe Subscription Integration (from cancellation-flow-refinement branch)
+
+- [ ] Merge updated Home.tsx with pricing plans (Trial/Starter/Enterprise)
+- [ ] Add BillingPortal.tsx page for subscription management
+- [ ] Update App.tsx routing to include /billing route
+- [ ] Add any missing UI components for pricing/billing
+- [ ] Test Stripe checkout flow
+- [ ] Test subscription upgrade/downgrade
+- [ ] Test subscription cancellation
+
