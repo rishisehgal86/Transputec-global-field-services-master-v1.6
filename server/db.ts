@@ -27,38 +27,44 @@ export async function createJob(job: InsertJob) {
   
   console.log('[DB] createJob called with:', JSON.stringify(job, null, 2));
   
-  // Filter out undefined, empty string, and "default" string values
-  const cleanedJob = Object.fromEntries(
-    Object.entries(job).filter(([key, value]) => {
-      // Remove undefined
-      if (value === undefined) {
-        console.log(`[DB] Filtering out undefined field: ${key}`);
-        return false;
+  // Use raw MySQL query to bypass Drizzle's "default" bug
+  const mysql = await import('mysql2/promise');
+  const connection = await mysql.createConnection(process.env.DATABASE_URL!);
+  
+  try {
+    // Build the INSERT query dynamically based on provided fields
+    const fields: string[] = [];
+    const placeholders: string[] = [];
+    const values: any[] = [];
+    
+    // Add each field that has a value
+    Object.entries(job).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && value !== 'default') {
+        fields.push(`\`${key}\``);
+        placeholders.push('?');
+        values.push(value);
       }
-      // Remove empty strings
-      if (value === '') {
-        console.log(`[DB] Filtering out empty string field: ${key}`);
-        return false;
-      }
-      // Remove the literal string "default"
-      if (value === 'default') {
-        console.log(`[DB] Filtering out "default" string field: ${key}`);
-        return false;
-      }
-      return true;
-    })
-  ) as Partial<InsertJob>;
-  
-  console.log('[DB] Cleaned job data:', JSON.stringify(cleanedJob, null, 2));
-  
-  const result = await db.insert(jobs).values(cleanedJob as InsertJob);
-  const insertId = Number(result[0].insertId);
-  
-  console.log('[DB] Job created with ID:', insertId);
-  
-  // Fetch and return the created job
-  const createdJob = await getJobById(insertId);
-  return createdJob;
+    });
+    
+    const query = `INSERT INTO jobs (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`;
+    console.log('[DB] Executing query:', query);
+    console.log('[DB] With values:', values);
+    
+    const [result] = await connection.execute(query, values) as any;
+    const insertId = result.insertId;
+    
+    console.log('[DB] Job created with ID:', insertId);
+    
+    await connection.end();
+    
+    // Fetch and return the created job using Drizzle (SELECT is safe)
+    const createdJob = await getJobById(insertId);
+    return createdJob;
+  } catch (error) {
+    await connection.end();
+    console.error('[DB] Raw MySQL insert failed:', error);
+    throw error;
+  }
 }
 
 export async function getJobByToken(token: string) {
