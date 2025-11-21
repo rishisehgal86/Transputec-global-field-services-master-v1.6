@@ -18,7 +18,29 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // Define public routes that don't require authentication
+  const publicRoutes = [
+    '/',
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/request/',
+    '/project-request/',
+    '/engineer/',
+    '/track/',
+  ];
+
+  // Check if current path is a public route
+  const currentPath = window.location.pathname;
+  const isPublicRoute = publicRoutes.some(route => 
+    currentPath === route || currentPath.startsWith(route)
+  );
+
+  // Only redirect to login if on a protected route
+  if (!isPublicRoute) {
+    window.location.href = getLoginUrl();
+  }
 };
 
 queryClient.getQueryCache().subscribe(event => {
