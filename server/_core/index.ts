@@ -78,8 +78,16 @@ async function startServer() {
 
   const port = parseInt(process.env.PORT || "3000");
 
-  server.listen(port, () => {
+  server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
+    
+    // Verify email connection
+    try {
+      const { verifyEmailConnection } = await import('../email');
+      await verifyEmailConnection();
+    } catch (error) {
+      console.error('[Server] Email verification skipped:', error);
+    }
   });
 }
 

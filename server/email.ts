@@ -28,14 +28,22 @@ interface EmailOptions {
 }
 
 // SMTP Configuration from environment variables
+// Using port 465 with SSL for better compatibility with cloud platforms like Railway
 const EMAIL_CONFIG = {
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // Use TLS
+  port: parseInt(process.env.SMTP_PORT || '465'), // Changed from 587 to 465
+  secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465', // SSL for port 465
   auth: {
     user: process.env.SMTP_USER || 'admin@field-pulse.io',
     pass: process.env.SMTP_PASS || 'mtcglnmbucshoyev', // Gmail App Password
   },
+  // Add connection timeout and retry settings
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 5000, // 5 seconds
+  socketTimeout: 10000, // 10 seconds
+  pool: true, // Use connection pooling
+  maxConnections: 5,
+  maxMessages: 100,
 };
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'admin@field-pulse.io';
@@ -49,6 +57,27 @@ function getTransporter() {
     transporter = nodemailer.createTransport(EMAIL_CONFIG);
   }
   return transporter;
+}
+
+/**
+ * Verify SMTP connection on startup
+ */
+export async function verifyEmailConnection(): Promise<boolean> {
+  console.log('[Email] 🔍 Verifying SMTP connection...');
+  console.log(`[Email] 📡 Host: ${EMAIL_CONFIG.host}:${EMAIL_CONFIG.port}`);
+  console.log(`[Email] 🔒 Secure: ${EMAIL_CONFIG.secure}`);
+  console.log(`[Email] 👤 User: ${EMAIL_CONFIG.auth.user}`);
+  
+  try {
+    const transport = getTransporter();
+    await transport.verify();
+    console.log('[Email] ✅ SMTP connection verified successfully!');
+    return true;
+  } catch (error) {
+    console.error('[Email] ❌ SMTP connection failed:', error);
+    console.error('[Email] 💡 Tip: Check SMTP credentials and firewall settings');
+    return false;
+  }
 }
 
 /**
