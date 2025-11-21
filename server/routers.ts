@@ -126,22 +126,25 @@ export const appRouter = router({
           isPrimaryAdmin: true, // First admin who created the organization
         });
         
-        // Send welcome email (don't block on failure)
+        // Send welcome email asynchronously (don't block signup)
         if (user) {
-          try {
-            const { sendWelcomeEmail } = await import('./auth-emails');
-            const baseUrl = getBaseUrl(ctx.req);
-            await sendWelcomeEmail({
-              email: user.email,
-              name: user.name,
-              organizationName: organization.name,
-              baseUrl,
-            });
-            console.log(`[Auth] Welcome email sent to: ${user.email}`);
-          } catch (error) {
-            console.error('[Auth] Failed to send welcome email:', error);
-            // Continue despite email failure
-          }
+          // Fire and forget - don't await
+          (async () => {
+            try {
+              const { sendWelcomeEmail } = await import('./auth-emails');
+              const baseUrl = getBaseUrl(ctx.req);
+              await sendWelcomeEmail({
+                email: user.email,
+                name: user.name,
+                organizationName: organization.name,
+                baseUrl,
+              });
+              console.log(`[Auth] Welcome email sent to: ${user.email}`);
+            } catch (error) {
+              console.error('[Auth] Failed to send welcome email:', error);
+              // Email failure doesn't affect signup
+            }
+          })();
         }
         
         return {
