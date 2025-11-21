@@ -2202,8 +2202,8 @@ ns
 ## Railway Deployment Fix (Nov 21, 2025)
 - [x] Identified JavaScript loading error (asset serving path issue)
 - [x] Fixed server/_core/vite.ts serveStatic function to use correct dist path
-- [ ] Commit and push fix to GitHub
-- [ ] Railway auto-redeploys
+- [x] Commit and push fix to GitHub (pushed to saas remote)
+- [ ] Railway auto-redeploys (watch deployment logs)
 - [ ] Test deployment URL
 - [ ] Run database migrations
 
