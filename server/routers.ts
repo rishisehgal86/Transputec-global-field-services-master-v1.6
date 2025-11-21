@@ -503,7 +503,7 @@ export const appRouter = router({
         
         console.log('[Router] Creating job with data:', JSON.stringify(jobData, null, 2));
         
-        const job = await createJob(jobData);}
+        const job = await createJob(jobData);
         
         if (!job) {
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create job' });
