@@ -24,6 +24,39 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Aggressive code splitting to reduce memory usage
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Split vendor libraries into separate chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@trpc') || id.includes('@tanstack')) {
+              return 'vendor-trpc';
+            }
+            if (id.includes('leaflet')) {
+              return 'vendor-map';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('stripe')) {
+              return 'vendor-stripe';
+            }
+            // All other vendor code
+            return 'vendor-other';
+          }
+        },
+      },
+    },
+    // Reduce chunk size warnings
+    chunkSizeWarningLimit: 1000,
+    // Optimize minification
+    minify: 'esbuild',
+    // Reduce source map overhead
+    sourcemap: false,
   },
   server: {
     host: true,

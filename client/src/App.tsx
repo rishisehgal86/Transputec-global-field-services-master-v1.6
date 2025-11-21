@@ -1,28 +1,38 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import RequestService from "./pages/RequestService";
-import TenantRequestForm from "./pages/TenantRequestForm";
-import AdminDashboard from "./pages/AdminDashboard";
-import CreateJob from "./pages/CreateJob";
-import JobDetail from "./pages/JobDetail";
-import EngineerView from "./pages/EngineerView";
-import ClientTracker from "./pages/ClientTracker";
-import UserManagement from "./pages/UserManagement";
-import TenantManagement from "./pages/TenantManagement";
-import Projects from "./pages/Projects";
-import ProjectRequest from "./pages/ProjectRequest";
-import DebugSites from "./pages/DebugSites";
-import BillingPortal from "./pages/BillingPortal";
-import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import { Loader2 } from "lucide-react";
+
+// Lazy load all page components to reduce initial bundle size
+const Home = lazy(() => import("./pages/Home"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const TenantRequestForm = lazy(() => import("./pages/TenantRequestForm"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const CreateJob = lazy(() => import("./pages/CreateJob"));
+const JobDetail = lazy(() => import("./pages/JobDetail"));
+const EngineerView = lazy(() => import("./pages/EngineerView"));
+const ClientTracker = lazy(() => import("./pages/ClientTracker"));
+const UserManagement = lazy(() => import("./pages/UserManagement"));
+const TenantManagement = lazy(() => import("./pages/TenantManagement"));
+const Projects = lazy(() => import("./pages/Projects"));
+const ProjectRequest = lazy(() => import("./pages/ProjectRequest"));
+const DebugSites = lazy(() => import("./pages/DebugSites"));
+const BillingPortal = lazy(() => import("./pages/BillingPortal"));
+const SubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
+
+// Loading component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -67,7 +77,9 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <Suspense fallback={<PageLoader />}>
+            <Router />
+          </Suspense>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
