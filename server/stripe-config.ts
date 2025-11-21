@@ -9,10 +9,15 @@ import Stripe from 'stripe';
 
 // Stripe API Keys
 export const STRIPE_CONFIG = {
-  publishableKey: 'pk_test_51SVTpTFQaKsrrJ5lX4WM4HqzWm7x3RoAATGsYiBR06DoOs9cJVkR3hWsVqCBo5sGpyrjuLEoL4Km1F8gxn0wVKdy00MYjBuKOK',
-  secretKey: 'sk_test_51SVTpTFQaKsrrJ5lrke9ZjzjkC1CvGe9XZQ1IUY7vxdcLBhEHjpdRcMIBhzlOl17QZb4zYPzDPHPw6vfiyo7kFTT00zoZ5qSA2',
-  webhookSecret: 'whsec_KjapVPVObhhSG7kFpxFU4gFm4xm79oCL',
+  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_51SVTpTFQaKsrrJ5lX4WM4HqzWm7x3RoAATGsYiBR06DoOs9cJVkR3hWsVqCBo5sGpyrjuLEoL4Km1F8gxn0wVKdy00MYjBuKOK',
+  secretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_51SVTpTFQaKsrrJ5lrke9ZjzjkC1CvGe9XZQ1IUY7vxdcLBhEHjpdRcMIBhzlOl17QZb4zYPzDPHPw6vfiyo7kFTT00zoZ5qSA2',
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
 };
+
+// Validate required Stripe configuration
+if (!STRIPE_CONFIG.webhookSecret) {
+  console.warn('[Stripe] WARNING: STRIPE_WEBHOOK_SECRET environment variable is not set. Webhook signature verification will fail.');
+}
 
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {

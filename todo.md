@@ -2264,3 +2264,11 @@ ns
 - [x] Add checkout.session.completed event handler
 - [ ] Test on Railway after deployment
 
+
+
+## Fix Stripe Webhook Secret Configuration
+- [ ] Change webhook secret from hardcoded to environment variable
+- [ ] Update stripe-config.ts to use STRIPE_WEBHOOK_SECRET env var
+- [ ] Document STRIPE_WEBHOOK_SECRET in environment variables section
+- [ ] Test webhook with correct secret: whsec_vr69EpN0HfwEnce4pCbnCp0zxfwBGOD3
+
