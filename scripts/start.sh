@@ -3,13 +3,17 @@ set -e
 
 echo "🚀 Starting application..."
 
-# Create database tables
-echo "📊 Creating database tables..."
-node scripts/create-tables.mjs
+# Backup existing data
+echo "💾 Backing up database..."
+node scripts/backup-database.mjs
 
-# Run migrations to add any missing columns
-echo "🔄 Running database migrations..."
-node scripts/add-createdby-column.mjs
+# Drop all tables for clean slate
+echo "🗑️  Dropping existing tables..."
+node scripts/reset-schema.mjs
+
+# Create fresh schema using Drizzle
+echo "📊 Creating tables with Drizzle..."
+pnpm drizzle-kit push --force
 
 # Start the server
 echo "🌐 Starting server..."
