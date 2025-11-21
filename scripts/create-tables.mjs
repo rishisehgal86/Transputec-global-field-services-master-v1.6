@@ -191,6 +191,10 @@ try {
   
   // Drop existing tables to ensure clean slate
   console.log('🗑️  Dropping existing tables (if any)...\n');
+  
+  // Disable foreign key checks to allow dropping tables with constraints
+  await connection.execute('SET FOREIGN_KEY_CHECKS = 0');
+  
   const dropTables = [
     'DROP TABLE IF EXISTS password_reset_tokens',
     'DROP TABLE IF EXISTS svr_media_files',
@@ -207,6 +211,10 @@ try {
   for (const sql of dropTables) {
     await connection.execute(sql);
   }
+  
+  // Re-enable foreign key checks
+  await connection.execute('SET FOREIGN_KEY_CHECKS = 1');
+  
   console.log('  ✓ Dropped all existing tables\n');
   
   console.log('📝 Creating tables...\n');
