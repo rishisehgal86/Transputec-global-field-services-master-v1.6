@@ -243,9 +243,9 @@ export default function AdminDashboard() {
         {/* Usage Warning Banner */}
         {subscription && (
           <UsageWarningBanner
-            currentJobs={subscription.currentMonthJobCount}
-            jobLimit={subscription.monthlyJobLimit}
-            planTier={subscription.planTier}
+            currentJobs={subscription.currentMonthJobCount ?? 0}
+            jobLimit={subscription.monthlyJobLimit ?? 0}
+            planTier={subscription.planTier ?? 'trial'}
           />
         )}
         

@@ -11,7 +11,7 @@ import { STRIPE_CONFIG, SUBSCRIPTION_PLANS } from './stripe-config';
 import { updateOrganizationSubscription } from './db';
 
 const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-11-17.clover',
 });
 
 /**
@@ -112,10 +112,11 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   }
 
   // Calculate billing cycle dates
-  const billingCycleStart = new Date(subscription.current_period_start * 1000);
-  const billingCycleEnd = new Date(subscription.current_period_end * 1000);
+  const billingCycleStart = new Date((subscription as any).current_period_start * 1000);
+  const billingCycleEnd = new Date((subscription as any).current_period_end * 1000);
 
-  await updateOrganizationSubscription(parseInt(organizationId), {
+  await updateOrganizationSubscription({
+    organizationId: parseInt(organizationId),
     stripeCustomerId: customerId,
     stripeSubscriptionId: subscription.id,
     subscriptionStatus: subscription.status,
@@ -160,8 +161,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   // Calculate billing cycle dates
-  const billingCycleStart = new Date(subscription.current_period_start * 1000);
-  const billingCycleEnd = new Date(subscription.current_period_end * 1000);
+  const billingCycleStart = new Date((subscription as any).current_period_start * 1000);
+  const billingCycleEnd = new Date((subscription as any).current_period_end * 1000);
 
   // Update billing cycle dates - job count will be calculated dynamically based on these dates
   await updateOrganizationSubscription({
@@ -192,7 +193,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Downgrade to trial plan
-  await updateOrganizationSubscription(parseInt(organizationId), {
+  await updateOrganizationSubscription({
+    organizationId: parseInt(organizationId),
     subscriptionStatus: 'canceled',
     planTier: 'trial',
     monthlyJobLimit: 50,
@@ -209,7 +211,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log('[Webhook] Processing invoice.payment_succeeded:', invoice.id);
 
-  const subscriptionId = invoice.subscription as string;
+  const subscriptionId = (invoice as any).subscription as string;
 
   if (!subscriptionId) {
     console.log('[Webhook] Invoice not associated with subscription');
@@ -226,7 +228,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 
   // Update subscription status to active
-  await updateOrganizationSubscription(parseInt(organizationId), {
+  await updateOrganizationSubscription({
+    organizationId: parseInt(organizationId),
     subscriptionStatus: 'active',
   });
 
@@ -240,7 +243,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   console.log('[Webhook] Processing invoice.payment_failed:', invoice.id);
 
-  const subscriptionId = invoice.subscription as string;
+  const subscriptionId = (invoice as any).subscription as string;
 
   if (!subscriptionId) {
     console.log('[Webhook] Invoice not associated with subscription');
@@ -257,7 +260,8 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   }
 
   // Update subscription status to past_due
-  await updateOrganizationSubscription(parseInt(organizationId), {
+  await updateOrganizationSubscription({
+    organizationId: parseInt(organizationId),
     subscriptionStatus: 'past_due',
   });
 
