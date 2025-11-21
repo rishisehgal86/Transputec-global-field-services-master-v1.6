@@ -313,11 +313,20 @@ export const appRouter = router({
         // Use organizationId from input (tenant-specific URL) or default to 1
         const organizationId = input.organizationId || 1;
         
-        // Check organization job limit using date-based counting
-        const { isJobLimitExceeded } = await import('./job-count-helper');
-        const limitExceeded = await isJobLimitExceeded(organizationId);
+        // Check job limit before creating
+        const { getOrganizationSubscription } = await import('./db');
+        const org = await getOrganizationSubscription(organizationId);
         
-        if (limitExceeded) {
+        if (!org) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Organization not found',
+          });
+        }
+        
+        // Check if organization has exceeded job limit
+        const isUnlimited = org.monthlyJobLimit === -1;
+        if (!isUnlimited && org.currentMonthJobCount >= org.monthlyJobLimit) {
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: 'JOB_LIMIT_EXCEEDED',
@@ -335,8 +344,10 @@ export const appRouter = router({
         
         console.log('✅ [CreateRequest] Job created with ID:', job?.id);
         
-        // Note: Job count is now calculated dynamically based on creation date
-        // No need to increment a stored counter
+        // Increment job count for organization
+        const { incrementJobCount } = await import('./db');
+        await incrementJobCount(organizationId);
+        console.log('📊 [CreateRequest] Job count incremented for organization:', organizationId);
         
         // Send email notification to admin
         const adminEmail = 'admin@field-pulse.io';
@@ -428,17 +439,6 @@ export const appRouter = router({
         timezone: z.string().optional(), // Site timezone (IANA format)
       }))
       .mutation(async ({ input, ctx }) => {
-        // Check organization job limit before creating job using date-based counting
-        const { isJobLimitExceeded } = await import('./job-count-helper');
-        const limitExceeded = await isJobLimitExceeded(ctx.user.organizationId);
-        
-        if (limitExceeded) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'JOB_LIMIT_EXCEEDED',
-          });
-        }
-        
         // Create new site if requested
         if (input.createNewSite && input.projectId && input.siteName && input.siteAddress) {
           const { createProjectSite } = await import('./project-sites-db');
@@ -482,9 +482,6 @@ export const appRouter = router({
           status: "created",
           notes: "Job created by admin",
         });
-        
-        // Note: Job count is now calculated dynamically based on creation date
-        // No need to increment a stored counter
         
         // Send email to engineer if requested
         if (input.sendEmailToEngineer && input.engineerEmail && input.engineerName) {
@@ -2798,18 +2795,16 @@ export const appRouter = router({
           );
         const adminUserCount = Number(adminCountResult[0]?.count || 0);
         
-        // Count jobs created in current billing cycle
-        // Use billing cycle start date if available, otherwise use calendar month
-        const startDate = org.billingCycleStart 
-          ? new Date(org.billingCycleStart)
-          : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        // Count jobs created this month
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         
         const jobCountResult = await db.select({ count: sql<number>`count(*)` })
           .from(jobs)
           .where(
             and(
               eq(jobs.organizationId, ctx.user.organizationId),
-              gte(jobs.createdAt, startDate)
+              gte(jobs.createdAt, startOfMonth)
             )
           );
         const currentMonthJobCount = Number(jobCountResult[0]?.count || 0);

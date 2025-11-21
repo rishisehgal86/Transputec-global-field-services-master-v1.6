@@ -20,9 +20,7 @@ export default function BillingPortal() {
   const createCheckout = trpc.subscription.createCheckout.useMutation({
     onSuccess: (data) => {
       // Redirect to Stripe checkout
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      window.location.href = data.url;
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to start checkout');
@@ -33,9 +31,7 @@ export default function BillingPortal() {
   const createPortalSession = trpc.subscription.createPortalSession.useMutation({
     onSuccess: (data) => {
       // Open Stripe customer portal in new tab
-      if (data.url) {
-        window.open(data.url, '_blank');
-      }
+      window.open(data.url, '_blank');
       setIsOpeningPortal(false);
     },
     onError: (error) => {
@@ -65,17 +61,7 @@ export default function BillingPortal() {
   };
 
   const handleCancelSubscription = () => {
-    const message = `Are you sure you want to cancel your subscription?
-
-⚠️ Important:
-• Your subscription will remain active until the end of your current billing period (${subscription?.billingCycleEnd ? new Date(subscription.billingCycleEnd).toLocaleDateString() : 'billing cycle end'})
-• After that date, your organization will revert to the Free Trial plan
-• Trial plan limits: 50 jobs/month, 1 admin user
-• You can upgrade again at any time
-
-Do you want to proceed?`;
-    
-    if (confirm(message)) {
+    if (confirm('Are you sure you want to cancel your subscription? You will lose access to premium features.')) {
       cancelSubscription.mutate();
     }
   };
@@ -205,9 +191,9 @@ Do you want to proceed?`;
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">{getPlanName(subscription.planTier || 'trial')}</CardTitle>
+                <CardTitle className="text-2xl">{getPlanName(subscription.planTier)}</CardTitle>
                 <CardDescription className="text-lg mt-1">
-                  {getPlanPrice(subscription.planTier || 'trial')}
+                  {getPlanPrice(subscription.planTier)}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -226,7 +212,7 @@ Do you want to proceed?`;
                   <p className="text-sm text-muted-foreground">Jobs This Month</p>
                   <p className="text-2xl font-bold">
                     {subscription.currentMonthJobCount}
-                    {!isUnlimited(subscription.monthlyJobLimit || 0) && (
+                    {!isUnlimited(subscription.monthlyJobLimit) && (
                       <span className="text-sm text-muted-foreground font-normal">
                         {' '}/ {subscription.monthlyJobLimit}
                       </span>

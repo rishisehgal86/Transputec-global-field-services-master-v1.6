@@ -92,17 +92,7 @@ export default function CreateJob() {
       toast.success("Job created successfully!");
     },
     onError: (error) => {
-      if (error.message === 'JOB_LIMIT_EXCEEDED') {
-        toast.error('Job limit exceeded. Please upgrade your plan to create more jobs.', {
-          duration: 5000,
-          action: {
-            label: 'Upgrade Plan',
-            onClick: () => setLocation('/admin/billing'),
-          },
-        });
-      } else {
-        toast.error(`Failed to create job: ${error.message}`);
-      }
+      toast.error(`Failed to create job: ${error.message}`);
     },
   });
 
@@ -255,10 +245,7 @@ export default function CreateJob() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => {
-                  setCreatedLinks(null);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }} variant="outline" className="flex-1">
+                <Button onClick={() => setLocation("/admin/create")} variant="outline" className="flex-1">
                   Create Another Job
                 </Button>
                 <Button onClick={() => setLocation("/admin")} className="flex-1">

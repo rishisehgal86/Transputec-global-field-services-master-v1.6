@@ -37,8 +37,7 @@ export function registerTestSubscriptionEndpoint(app: Express) {
       const billingCycleEnd = new Date(now);
       billingCycleEnd.setMonth(billingCycleEnd.getMonth() + 1);
 
-      await updateOrganizationSubscription({
-        organizationId,
+      await updateOrganizationSubscription(organizationId, {
         planTier,
         monthlyJobLimit,
         maxAdminUsers,

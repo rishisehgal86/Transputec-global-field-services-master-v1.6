@@ -41,8 +41,8 @@ export default function TenantRequestForm() {
   }
   
   // Check if organization has exceeded job limit
-  const isUnlimited = (organization.monthlyJobLimit || 0) === -1;
-  const limitExceeded = !isUnlimited && organization.currentMonthJobCount >= (organization.monthlyJobLimit || 0);
+  const isUnlimited = organization.monthlyJobLimit === -1;
+  const limitExceeded = !isUnlimited && organization.currentMonthJobCount >= organization.monthlyJobLimit;
   
   if (limitExceeded) {
     return (
