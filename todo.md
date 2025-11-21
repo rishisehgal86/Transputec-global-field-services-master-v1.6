@@ -2267,8 +2267,9 @@ ns
 
 
 ## Fix Stripe Webhook Secret Configuration
-- [ ] Change webhook secret from hardcoded to environment variable
-- [ ] Update stripe-config.ts to use STRIPE_WEBHOOK_SECRET env var
-- [ ] Document STRIPE_WEBHOOK_SECRET in environment variables section
-- [ ] Test webhook with correct secret: whsec_vr69EpN0HfwEnce4pCbnCp0zxfwBGOD3
+- [x] Change webhook secret from hardcoded to environment variable
+- [x] Update stripe-config.ts to use STRIPE_WEBHOOK_SECRET env var
+- [x] Pushed to GitHub - Railway will auto-deploy
+- [ ] Add STRIPE_WEBHOOK_SECRET=whsec_vr69EpN0HfwEnce4pCbnCp0zxfwBGOD3 to Railway env vars
+- [ ] Test webhook after Railway deployment
 

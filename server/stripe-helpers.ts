@@ -47,7 +47,12 @@ export async function createCheckoutSession(params: {
     };
   } catch (error) {
     console.error('[Stripe] Failed to create checkout session:', error);
-    throw new Error('Failed to create checkout session');
+    // Log the full error details for debugging
+    if (error instanceof Error) {
+      console.error('[Stripe] Error message:', error.message);
+      console.error('[Stripe] Error stack:', error.stack);
+    }
+    throw new Error(`Failed to create checkout session: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
