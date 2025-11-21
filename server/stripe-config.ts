@@ -1,29 +1,37 @@
 import Stripe from 'stripe';
 
 /**
- * Stripe Configuration for FieldPulse Go
- * 
- * Account: Field Pulse Go sandbox (acct_1SVTpIJzUbfX1hA7)
- * Email: rishi@karrdservicesuae.com
+ * Stripe Configuration - All values loaded from environment variables
+ * NO hardcoded credentials or price IDs
  */
 
-// Stripe API Keys
+// Load and validate required environment variables
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
+// Stripe API Configuration
 export const STRIPE_CONFIG = {
-  publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_51SVTpTFQaKsrrJ5lX4WM4HqzWm7x3RoAATGsYiBR06DoOs9cJVkR3hWsVqCBo5sGpyrjuLEoL4Km1F8gxn0wVKdy00MYjBuKOK',
-  secretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_51SVTpTFQaKsrrJ5lrke9ZjzjkC1CvGe9XZQ1IUY7vxdcLBhEHjpdRcMIBhzlOl17QZb4zYPzDPHPw6vfiyo7kFTT00zoZ5qSA2',
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  publishableKey: getRequiredEnv('STRIPE_PUBLISHABLE_KEY'),
+  secretKey: getRequiredEnv('STRIPE_SECRET_KEY'),
+  webhookSecret: getRequiredEnv('STRIPE_WEBHOOK_SECRET'),
 };
 
-// Validate required Stripe configuration
-if (!STRIPE_CONFIG.webhookSecret) {
-  console.warn('[Stripe] WARNING: STRIPE_WEBHOOK_SECRET environment variable is not set. Webhook signature verification will fail.');
-}
+// Log loaded configuration (without exposing secrets)
+console.log('[Stripe] Configuration loaded:');
+console.log(`[Stripe]   - Publishable Key: ${STRIPE_CONFIG.publishableKey.substring(0, 20)}...`);
+console.log(`[Stripe]   - Secret Key: ${STRIPE_CONFIG.secretKey.substring(0, 20)}...`);
+console.log(`[Stripe]   - Webhook Secret: ${STRIPE_CONFIG.webhookSecret.substring(0, 20)}...`);
 
 // Subscription Plans
 export const SUBSCRIPTION_PLANS = {
   starter: {
     name: 'Starter Plan',
-    priceId: process.env.STRIPE_STARTER_PRICE_ID || '',
+    priceId: getRequiredEnv('STRIPE_STARTER_PRICE_ID'),
     price: 99,
     currency: 'usd',
     interval: 'month',
@@ -35,7 +43,7 @@ export const SUBSCRIPTION_PLANS = {
   },
   enterprise: {
     name: 'Enterprise Plan',
-    priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID || '',
+    priceId: getRequiredEnv('STRIPE_ENTERPRISE_PRICE_ID'),
     price: 399,
     currency: 'usd',
     interval: 'month',
@@ -47,13 +55,9 @@ export const SUBSCRIPTION_PLANS = {
   },
 };
 
-// Validate required price IDs
-if (!SUBSCRIPTION_PLANS.starter.priceId) {
-  console.warn('[Stripe] WARNING: STRIPE_STARTER_PRICE_ID environment variable is not set. Starter plan checkout will fail.');
-}
-if (!SUBSCRIPTION_PLANS.enterprise.priceId) {
-  console.warn('[Stripe] WARNING: STRIPE_ENTERPRISE_PRICE_ID environment variable is not set. Enterprise plan checkout will fail.');
-}
+console.log('[Stripe] Price IDs loaded:');
+console.log(`[Stripe]   - Starter: ${SUBSCRIPTION_PLANS.starter.priceId}`);
+console.log(`[Stripe]   - Enterprise: ${SUBSCRIPTION_PLANS.enterprise.priceId}`);
 
 // Trial Configuration
 export const TRIAL_CONFIG = {
@@ -67,6 +71,8 @@ export const stripe = new Stripe(STRIPE_CONFIG.secretKey, {
   apiVersion: '2025-11-17.clover',
   typescript: true,
 });
+
+console.log('[Stripe] ✅ Stripe client initialized successfully');
 
 // Helper to get plan by price ID
 export function getPlanByPriceId(priceId: string) {
