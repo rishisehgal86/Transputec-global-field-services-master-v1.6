@@ -25,18 +25,36 @@ export async function createJob(job: InsertJob) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   
-  // Filter out undefined and empty string values to prevent "default" string insertion
+  console.log('[DB] createJob called with:', JSON.stringify(job, null, 2));
+  
+  // Filter out undefined, empty string, and "default" string values
   const cleanedJob = Object.fromEntries(
-    Object.entries(job).filter(([_, value]) => {
-      // Keep the value if it's not undefined and not an empty string
-      if (value === undefined) return false;
-      if (value === '') return false;
+    Object.entries(job).filter(([key, value]) => {
+      // Remove undefined
+      if (value === undefined) {
+        console.log(`[DB] Filtering out undefined field: ${key}`);
+        return false;
+      }
+      // Remove empty strings
+      if (value === '') {
+        console.log(`[DB] Filtering out empty string field: ${key}`);
+        return false;
+      }
+      // Remove the literal string "default"
+      if (value === 'default') {
+        console.log(`[DB] Filtering out "default" string field: ${key}`);
+        return false;
+      }
       return true;
     })
   ) as Partial<InsertJob>;
   
+  console.log('[DB] Cleaned job data:', JSON.stringify(cleanedJob, null, 2));
+  
   const result = await db.insert(jobs).values(cleanedJob as InsertJob);
   const insertId = Number(result[0].insertId);
+  
+  console.log('[DB] Job created with ID:', insertId);
   
   // Fetch and return the created job
   const createdJob = await getJobById(insertId);
