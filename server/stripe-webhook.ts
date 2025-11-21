@@ -204,7 +204,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     await db.update(organizations)
       .set({
         isActive: true, // Keep organization active
-        subscriptionStatus: 'cancelled',
+        subscriptionStatus: 'canceled',
         planTier: 'trial',
         monthlyJobLimit: 50,
         maxAdminUsers: 1,
