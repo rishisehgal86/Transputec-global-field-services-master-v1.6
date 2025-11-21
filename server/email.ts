@@ -27,19 +27,19 @@ interface EmailOptions {
   }>;
 }
 
-// Gmail SMTP Configuration
+// SMTP Configuration from environment variables
 const EMAIL_CONFIG = {
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Use TLS
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true', // Use TLS
   auth: {
-    user: 'admin@field-pulse.io',
-    pass: 'mtcglnmbucshoyev', // Gmail App Password
+    user: process.env.SMTP_USER || 'admin@field-pulse.io',
+    pass: process.env.SMTP_PASS || 'mtcglnmbucshoyev', // Gmail App Password
   },
 };
 
-const FROM_EMAIL = 'admin@field-pulse.io';
-const FROM_NAME = 'FieldPulse Go';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'admin@field-pulse.io';
+const FROM_NAME = process.env.FROM_NAME || 'FieldPulse Go';
 
 // Create reusable transporter
 let transporter: nodemailer.Transporter | null = null;
