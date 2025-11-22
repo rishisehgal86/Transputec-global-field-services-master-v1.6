@@ -112,6 +112,7 @@ export async function getSubscription(subscriptionId: string) {
 
 /**
  * Handle successful subscription creation (called from webhook)
+ * Updated: 2025-11-22 - Fixed customer object handling and date validation
  */
 export async function handleSubscriptionCreated(subscription: any) {
   console.log('[Stripe] Raw subscription object:', JSON.stringify({
