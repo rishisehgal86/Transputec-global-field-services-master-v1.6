@@ -148,10 +148,17 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     maxAdminUsers = -1; // unlimited
   }
 
-  // Calculate billing cycle dates
-  const sub = subscription as any;
-  const billingCycleStart = new Date((sub.current_period_start || 0) * 1000);
-  const billingCycleEnd = new Date((sub.current_period_end || 0) * 1000);
+  // Calculate billing cycle dates from subscription items (correct nested path)
+  const subscriptionItem = subscription.items.data[0];
+  const billingCycleStart = new Date((subscriptionItem?.current_period_start || 0) * 1000);
+  const billingCycleEnd = new Date((subscriptionItem?.current_period_end || 0) * 1000);
+
+  console.log('[Webhook] Extracted dates from subscription.items.data[0]:', {
+    current_period_start: subscriptionItem?.current_period_start,
+    current_period_end: subscriptionItem?.current_period_end,
+    billingCycleStart: billingCycleStart.toISOString(),
+    billingCycleEnd: billingCycleEnd.toISOString(),
+  });
 
   await updateOrganizationSubscription({
     organizationId: parseInt(organizationId),
@@ -198,10 +205,17 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     maxAdminUsers = -1; // unlimited
   }
 
-  // Calculate billing cycle dates
-  const sub = subscription as any;
-  const billingCycleStart = new Date((sub.current_period_start || 0) * 1000);
-  const billingCycleEnd = new Date((sub.current_period_end || 0) * 1000);
+  // Calculate billing cycle dates from subscription items (correct nested path)
+  const subscriptionItem = subscription.items.data[0];
+  const billingCycleStart = new Date((subscriptionItem?.current_period_start || 0) * 1000);
+  const billingCycleEnd = new Date((subscriptionItem?.current_period_end || 0) * 1000);
+
+  console.log('[Webhook] Extracted dates from subscription.items.data[0]:', {
+    current_period_start: subscriptionItem?.current_period_start,
+    current_period_end: subscriptionItem?.current_period_end,
+    billingCycleStart: billingCycleStart.toISOString(),
+    billingCycleEnd: billingCycleEnd.toISOString(),
+  });
 
   // Update billing cycle dates - job count will be calculated dynamically based on these dates
   await updateOrganizationSubscription({
