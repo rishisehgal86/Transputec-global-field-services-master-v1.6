@@ -2273,3 +2273,11 @@ ns
 - [ ] Add STRIPE_WEBHOOK_SECRET=whsec_vr69EpN0HfwEnce4pCbnCp0zxfwBGOD3 to Railway env vars
 - [ ] Test webhook after Railway deployment
 
+
+
+
+## Stripe Integration Issues
+- [ ] Fix webhook billing cycle dates - make nullable in schema to allow subscription status updates
+- [ ] Investigate why Railway isn't deploying latest code changes
+- [ ] Test subscription upgrade flow end-to-end after fix
+

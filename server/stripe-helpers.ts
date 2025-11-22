@@ -127,19 +127,23 @@ export async function handleSubscriptionCreated(subscription: any) {
   const planTier = subscription.metadata.planTier as 'starter' | 'enterprise';
   const plan = getPlanByTier(planTier);
   
-  // Validate subscription has required date fields
-  if (!subscription.current_period_start || !subscription.current_period_end) {
-    console.error('[Stripe] Subscription missing period dates:', {
+  // Extract billing period dates from subscription items
+  // Stripe stores these in items.data[0], not at the top level
+  const subscriptionItem = subscription.items?.data?.[0];
+  
+  if (!subscriptionItem?.current_period_start || !subscriptionItem?.current_period_end) {
+    console.error('[Stripe] Subscription missing period dates in items:', {
       id: subscription.id,
-      current_period_start: subscription.current_period_start,
-      current_period_end: subscription.current_period_end,
+      hasItems: !!subscription.items,
+      itemsCount: subscription.items?.data?.length,
+      firstItem: subscriptionItem,
     });
-    throw new Error('Subscription missing billing period dates');
+    throw new Error('Subscription missing billing period dates in items');
   }
   
-  // Calculate billing cycle dates
-  const billingCycleStart = new Date(subscription.current_period_start * 1000);
-  const billingCycleEnd = new Date(subscription.current_period_end * 1000);
+  // Calculate billing cycle dates from subscription item
+  const billingCycleStart = new Date(subscriptionItem.current_period_start * 1000);
+  const billingCycleEnd = new Date(subscriptionItem.current_period_end * 1000);
   
   console.log('[Stripe] Processing subscription with dates:', {
     billingCycleStart: billingCycleStart.toISOString(),
@@ -171,8 +175,10 @@ export async function handleSubscriptionUpdated(subscription: any) {
   const planTier = subscription.metadata.planTier as 'starter' | 'enterprise';
   const plan = getPlanByTier(planTier);
   
-  const billingCycleStart = new Date(subscription.current_period_start * 1000);
-  const billingCycleEnd = new Date(subscription.current_period_end * 1000);
+  // Extract dates from subscription items (same as handleSubscriptionCreated)
+  const subscriptionItem = subscription.items?.data?.[0];
+  const billingCycleStart = new Date((subscriptionItem?.current_period_start || 0) * 1000);
+  const billingCycleEnd = new Date((subscriptionItem?.current_period_end || 0) * 1000);
   
   await updateOrganizationSubscription({
     organizationId,
