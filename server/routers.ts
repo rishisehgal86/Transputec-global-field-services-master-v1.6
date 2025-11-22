@@ -2767,8 +2767,12 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
         }
         
-        // Check if already subscribed
-        if (org.subscriptionStatus === 'active' && org.planTier !== 'trial') {
+        // Check if already subscribed (but allow resubscription for disabled accounts or pending cancellations)
+        const isActiveSubscription = org.subscriptionStatus === 'active' && org.planTier !== 'trial';
+        const isDisabled = !org.isActive;
+        const isPendingCancellation = org.cancelAtPeriodEnd;
+        
+        if (isActiveSubscription && !isDisabled && !isPendingCancellation) {
           throw new TRPCError({ 
             code: 'BAD_REQUEST', 
             message: 'Already have an active subscription. Use billing portal to change plans.' 
