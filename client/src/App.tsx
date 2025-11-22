@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Loader2 } from "lucide-react";
+import { AccountStatusWrapper } from "./components/AccountStatusWrapper";
 
 // Lazy load all page components to reduce initial bundle size
 const Home = lazy(() => import("./pages/Home"));
@@ -78,7 +79,9 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Suspense fallback={<PageLoader />}>
-            <Router />
+            <AccountStatusWrapper>
+              <Router />
+            </AccountStatusWrapper>
           </Suspense>
         </TooltipProvider>
       </ThemeProvider>

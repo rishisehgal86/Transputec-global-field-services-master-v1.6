@@ -2847,6 +2847,10 @@ export const appRouter = router({
           );
         const currentMonthJobCount = Number(jobCountResult[0]?.count || 0);
         
+        // Calculate trial status
+        const { getTrialStatus } = await import('./trial-manager');
+        const trialStatus = await getTrialStatus(ctx.user.organizationId);
+        
         return {
           planTier: org.planTier,
           subscriptionStatus: org.subscriptionStatus,
@@ -2860,6 +2864,12 @@ export const appRouter = router({
           stripeCustomerId: org.stripeCustomerId,
           stripeSubscriptionId: org.stripeSubscriptionId,
           cancelAtPeriodEnd: org.cancelAtPeriodEnd || false,
+          isActive: org.isActive,
+          trial: {
+            isOnTrial: trialStatus.isOnTrial,
+            daysRemaining: trialStatus.daysRemaining,
+            isExpired: trialStatus.isExpired,
+          },
         };
       }),
     

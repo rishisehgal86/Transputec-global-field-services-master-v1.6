@@ -25,11 +25,20 @@ export async function createOrganization(data: { name: string }): Promise<{ id: 
   try {
     const slug = generateSlug(data.name);
     
+    // Set trial to expire in 14 days
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+    
     const result = await db.insert(organizations).values({
       name: data.name,
       slug,
       isActive: true,
       projectsEnabled: true,
+      trialEndsAt,
+      subscriptionStatus: 'trial',
+      planTier: 'trial',
+      monthlyJobLimit: 50,
+      maxAdminUsers: 1,
     });
 
     const organizationId = Number(result[0].insertId);

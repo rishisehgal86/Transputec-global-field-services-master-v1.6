@@ -170,6 +170,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     maxAdminUsers,
     billingCycleStart,
     billingCycleEnd,
+    isActive: true, // Reactivate account when subscription is created
   });
 
   console.log('[Webhook] Subscription created successfully for org:', organizationId);
