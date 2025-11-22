@@ -65,15 +65,18 @@ export default function BillingPortal() {
   };
 
   const handleCancelSubscription = () => {
-    const message = `Are you sure you want to cancel your subscription?
+    const message = `⚠️ CANCEL SUBSCRIPTION - ACCOUNT WILL BE CLOSED
+
+Are you sure you want to cancel your subscription?
 
 ⚠️ Important:
 • Your subscription will remain active until the end of your current billing period (${subscription?.billingCycleEnd ? new Date(subscription.billingCycleEnd).toLocaleDateString() : 'billing cycle end'})
-• After that date, your organization will revert to the Free Trial plan
-• Trial plan limits: 50 jobs/month, 1 admin user
-• You can upgrade again at any time
+• After that date, your organization account will be CLOSED and DEACTIVATED
+• All users will lose access to the system
+• You will need to contact support to reactivate your account
+• All data will be retained but inaccessible until reactivation
 
-Do you want to proceed?`;
+This action cannot be undone automatically. Do you want to proceed?`;
     
     if (confirm(message)) {
       cancelSubscription.mutate();
