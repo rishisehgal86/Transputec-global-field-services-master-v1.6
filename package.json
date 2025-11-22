@@ -10,7 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "node scripts/create-tables.mjs",
+    "db:migrate": "node scripts/migrate-safe.mjs",
+    "db:reset": "node scripts/create-tables.mjs",
     "test:email": "node scripts/test-email.mjs"
   },
   "dependencies": {

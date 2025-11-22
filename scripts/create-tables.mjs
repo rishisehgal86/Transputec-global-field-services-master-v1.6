@@ -1,7 +1,17 @@
 #!/usr/bin/env node
 /**
- * Create all database tables using raw MySQL
- * This bypasses drizzle-kit's interactive prompts
+ * ⚠️⚠️⚠️ DESTRUCTIVE SCRIPT - DO NOT USE ON PRODUCTION ⚠️⚠️⚠️
+ * 
+ * This script DROPS ALL TABLES and DELETES ALL DATA!
+ * 
+ * Use this ONLY for:
+ * - Initial local development setup
+ * - Resetting local test database
+ * 
+ * For production migrations, use: pnpm db:migrate
+ * See DATABASE_MIGRATIONS.md for details
+ * 
+ * ⚠️⚠️⚠️ YOU HAVE BEEN WARNED ⚠️⚠️⚠️
  */
 import mysql from 'mysql2/promise';
 
@@ -31,6 +41,7 @@ const tables = [
     maxAdminUsers INT NOT NULL DEFAULT 999,
     billingCycleStart TIMESTAMP NULL,
     billingCycleEnd TIMESTAMP NULL,
+    cancelAtPeriodEnd BOOLEAN NOT NULL DEFAULT FALSE,
     isActive BOOLEAN NOT NULL DEFAULT TRUE,
     projectsEnabled BOOLEAN NOT NULL DEFAULT FALSE,
     lastUsedAt TIMESTAMP NULL,
