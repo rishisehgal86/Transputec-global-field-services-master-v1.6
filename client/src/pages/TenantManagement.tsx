@@ -36,6 +36,8 @@ export default function TenantManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newTenantName, setNewTenantName] = useState("");
   const [newTenantSlug, setNewTenantSlug] = useState("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: number; name: string } | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   // Redirect if not super admin
   if (!authLoading && user?.role !== "super_admin") {
@@ -101,9 +103,21 @@ export default function TenantManagement() {
   };
 
   const handleDeleteTenant = (id: number, name: string) => {
-    if (confirm(`Are you sure you want to delete tenant "${name}"? This will delete all associated data.`)) {
-      deleteMutation.mutate({ id });
+    setDeleteConfirmation({ id, name });
+    setDeleteConfirmText("");
+  };
+
+  const confirmDelete = () => {
+    if (!deleteConfirmation) return;
+    
+    if (deleteConfirmText !== deleteConfirmation.name) {
+      toast.error("Tenant name does not match. Deletion cancelled.");
+      return;
     }
+
+    deleteMutation.mutate({ id: deleteConfirmation.id });
+    setDeleteConfirmation(null);
+    setDeleteConfirmText("");
   };
 
   const handleToggleSuspension = (id: number, name: string, isActive: boolean) => {
@@ -337,6 +351,67 @@ export default function TenantManagement() {
             </Button>
             <Button onClick={handleCreateTenant} disabled={createMutation.isPending}>
               {createMutation.isPending ? "Creating..." : "Create Tenant"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmation} onOpenChange={() => {
+        setDeleteConfirmation(null);
+        setDeleteConfirmText("");
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">⚠️ Permanent Deletion</DialogTitle>
+            <DialogDescription>
+              This action <strong>cannot be undone</strong>. All data associated with this tenant will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-sm font-medium text-destructive mb-2">
+                You are about to delete:
+              </p>
+              <p className="text-lg font-bold text-destructive">
+                {deleteConfirmation?.name}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delete-confirm">
+                Type the tenant name to confirm deletion:
+              </Label>
+              <Input
+                id="delete-confirm"
+                placeholder={deleteConfirmation?.name}
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs text-amber-900">
+                <strong>💡 Tip:</strong> Consider <strong>suspending</strong> the tenant instead of deleting. 
+                Suspended accounts can be reactivated, but deleted accounts are gone forever.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteConfirmation(null);
+                setDeleteConfirmText("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deleteConfirmText !== deleteConfirmation?.name || deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete Permanently"}
             </Button>
           </DialogFooter>
         </DialogContent>
