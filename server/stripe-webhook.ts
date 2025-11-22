@@ -217,6 +217,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     billingCycleEnd: billingCycleEnd.toISOString(),
   });
 
+  // Check if subscription is set to cancel at period end
+  const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+  
+  console.log('[Webhook] Subscription cancel status:', {
+    cancel_at_period_end: subscription.cancel_at_period_end,
+    status: subscription.status,
+  });
+
   // Update billing cycle dates - job count will be calculated dynamically based on these dates
   await updateOrganizationSubscription({
     organizationId: parseInt(organizationId),
@@ -226,6 +234,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     maxAdminUsers,
     billingCycleStart,
     billingCycleEnd,
+    cancelAtPeriodEnd,
   });
 
   console.log('[Webhook] Subscription updated successfully for org:', organizationId);

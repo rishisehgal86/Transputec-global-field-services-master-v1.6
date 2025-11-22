@@ -436,6 +436,7 @@ export async function updateOrganizationSubscription(params: {
   billingCycleEnd?: Date;
   currentMonthJobCount?: number;
   trialEndsAt?: Date | null;
+  cancelAtPeriodEnd?: boolean;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

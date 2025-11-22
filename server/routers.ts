@@ -2859,6 +2859,7 @@ export const appRouter = router({
           billingCycleEnd: org.billingCycleEnd,
           stripeCustomerId: org.stripeCustomerId,
           stripeSubscriptionId: org.stripeSubscriptionId,
+          cancelAtPeriodEnd: org.cancelAtPeriodEnd || false,
         };
       }),
     

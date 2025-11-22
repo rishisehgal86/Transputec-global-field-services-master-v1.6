@@ -23,6 +23,7 @@ export const organizations = mysqlTable("organizations", {
   maxAdminUsers: int("maxAdminUsers").default(999).notNull(), // 3 for starter, 999 for others
   billingCycleStart: timestamp("billingCycleStart"),
   billingCycleEnd: timestamp("billingCycleEnd"),
+  cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").default(false).notNull(), // Stripe cancel_at_period_end flag
   
   // Settings
   isActive: boolean("isActive").default(true).notNull(),

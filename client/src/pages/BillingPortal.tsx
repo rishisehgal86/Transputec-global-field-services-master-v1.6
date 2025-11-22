@@ -212,6 +212,9 @@ Do you want to proceed?`;
               </div>
               <div className="flex items-center gap-2">
                 {getStatusBadge(subscription.subscriptionStatus)}
+                {subscription.cancelAtPeriodEnd && (
+                  <Badge variant="destructive">Cancels {subscription.billingCycleEnd ? new Date(subscription.billingCycleEnd).toLocaleDateString() : 'soon'}</Badge>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -333,12 +336,15 @@ Do you want to proceed?`;
                       Opening Portal...
                     </>
                   ) : (
-                    'Upgrade to Professional'
+                    <>
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      Upgrade to Professional
+                    </>
                   )}
                 </Button>
               )}
 
-              {subscription.stripeSubscriptionId && subscription.subscriptionStatus === 'active' && (
+              {subscription.stripeSubscriptionId && subscription.subscriptionStatus === 'active' && !subscription.cancelAtPeriodEnd && (
                 <Button
                   onClick={handleCancelSubscription}
                   variant="destructive"

@@ -98,6 +98,43 @@ export async function cancelSubscription(subscriptionId: string) {
 }
 
 /**
+ * Upgrade an existing subscription to a new plan
+ */
+export async function upgradeSubscription(params: {
+  subscriptionId: string;
+  newPlanTier: 'starter' | 'enterprise';
+}) {
+  const { subscriptionId, newPlanTier } = params;
+  const newPlan = getPlanByTier(newPlanTier);
+  
+  try {
+    // Update the subscription to the new price
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const currentItemId = subscription.items.data[0].id;
+    
+    const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+      items: [
+        {
+          id: currentItemId,
+          price: newPlan.priceId,
+        },
+      ],
+      proration_behavior: 'always_invoice', // Charge prorated amount immediately
+      metadata: {
+        organizationId: subscription.metadata.organizationId,
+        planTier: newPlanTier,
+      },
+    });
+    
+    console.log(`[Stripe] Subscription ${subscriptionId} upgraded to ${newPlanTier}`);
+    return updatedSubscription;
+  } catch (error) {
+    console.error('[Stripe] Failed to upgrade subscription:', error);
+    throw new Error(`Failed to upgrade subscription: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * Get subscription details from Stripe
  */
 export async function getSubscription(subscriptionId: string) {
