@@ -114,6 +114,14 @@ export async function getSubscription(subscriptionId: string) {
  * Handle successful subscription creation (called from webhook)
  */
 export async function handleSubscriptionCreated(subscription: any) {
+  console.log('[Stripe] Raw subscription object:', JSON.stringify({
+    id: subscription.id,
+    current_period_start: subscription.current_period_start,
+    current_period_end: subscription.current_period_end,
+    customer: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id,
+    status: subscription.status,
+  }));
+  
   const organizationId = parseInt(subscription.metadata.organizationId);
   const planTier = subscription.metadata.planTier as 'starter' | 'enterprise';
   const plan = getPlanByTier(planTier);
@@ -139,7 +147,7 @@ export async function handleSubscriptionCreated(subscription: any) {
   
   await updateOrganizationSubscription({
     organizationId,
-    stripeCustomerId: subscription.customer,
+    stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
     stripeSubscriptionId: subscription.id,
     planTier: planTier,
     subscriptionStatus: subscription.status,
@@ -167,7 +175,7 @@ export async function handleSubscriptionUpdated(subscription: any) {
   
   await updateOrganizationSubscription({
     organizationId,
-    stripeCustomerId: subscription.customer,
+    stripeCustomerId: typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id,
     stripeSubscriptionId: subscription.id,
     planTier: planTier,
     subscriptionStatus: subscription.status,
