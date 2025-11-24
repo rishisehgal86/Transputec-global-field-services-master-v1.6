@@ -2869,6 +2869,7 @@ export const appRouter = router({
           stripeSubscriptionId: org.stripeSubscriptionId,
           cancelAtPeriodEnd: org.cancelAtPeriodEnd || false,
           isActive: org.isActive,
+          createdAt: org.createdAt,
           trial: {
             isOnTrial: trialStatus.isOnTrial,
             daysRemaining: trialStatus.daysRemaining,

@@ -2321,3 +2321,7 @@ ns
 
 - [x] Standardize billing page formatting to match admin dashboard card-style design
 
+
+
+- [x] Fix account creation date showing N/A - ensure createdAt is returned from subscription.getStatus
+
