@@ -145,7 +145,7 @@ export default function UserManagement() {
               </Link>
               <div>
                 <h1 className="text-xl font-bold">User Management</h1>
-                <p className="text-sm text-gray-600">Manage admin users and change your password</p>
+                <p className="text-sm text-gray-600">Manage service delivery team members and change your password</p>
               </div>
             </div>
           </div>
@@ -240,21 +240,21 @@ export default function UserManagement() {
                 <UserPlus className="h-5 w-5" />
                 Create New User
               </CardTitle>
-              <CardDescription>Add a new admin user</CardDescription>
+              <CardDescription>Add a new team member</CardDescription>
             </CardHeader>
             <CardContent>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Create Admin User
+                    Create Team Member
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create New Admin User</DialogTitle>
+                    <DialogTitle>Create New Team Member</DialogTitle>
                     <DialogDescription>
-                      Enter details for the new admin user
+                      Enter details for the new service delivery team member
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateUser} className="space-y-4">
@@ -294,7 +294,7 @@ export default function UserManagement() {
                     </div>
                     <Alert>
                       <AlertDescription className="text-sm">
-                        The new user will be created with admin privileges and should change their password after first login.
+                        The new team member will be created with admin privileges and should change their password after first login.
                       </AlertDescription>
                     </Alert>
                     <Button
@@ -351,7 +351,7 @@ export default function UserManagement() {
         <Card>
           <CardHeader>
             <CardTitle>All Users</CardTitle>
-            <CardDescription>Manage existing admin users</CardDescription>
+            <CardDescription>Manage existing team members</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

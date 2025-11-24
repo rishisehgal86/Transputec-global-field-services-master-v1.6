@@ -31,7 +31,7 @@ export default function Home() {
       description: "Perfect for testing and evaluation",
       features: [
         { text: "50 jobs per month", included: true },
-        { text: "1 admin user", included: true },
+        { text: "1 team member", included: true },
         { text: "Real-time GPS tracking", included: true },
         { text: "Client portal access", included: true },
         { text: "Email notifications", included: true },
@@ -49,7 +49,7 @@ export default function Home() {
       description: "Ideal for small MSPs and growing teams",
       features: [
         { text: "100 jobs per month", included: true },
-        { text: "Up to 3 admin users", included: true },
+        { text: "Up to 3 team members", included: true },
         { text: "Real-time GPS tracking", included: true },
         { text: "Client portal access", included: true },
         { text: "Email & SMS notifications", included: true },
@@ -67,7 +67,7 @@ export default function Home() {
       description: "For large MSPs with unlimited needs",
       features: [
         { text: "Unlimited jobs", included: true },
-        { text: "Unlimited admin users", included: true },
+        { text: "Unlimited team members", included: true },
         { text: "Real-time GPS tracking", included: true },
         { text: "Client portal access", included: true },
         { text: "Email & SMS notifications", included: true },

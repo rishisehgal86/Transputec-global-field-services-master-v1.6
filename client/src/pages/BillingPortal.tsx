@@ -237,7 +237,7 @@ This action cannot be undone automatically. Do you want to proceed?`;
               </div>
 
               <div className="px-4 py-3 bg-purple-50 rounded-lg border border-purple-200">
-                <p className="text-[10px] font-medium text-purple-600 uppercase tracking-wide">Admin Users</p>
+                <p className="text-[10px] font-medium text-purple-600 uppercase tracking-wide">Team Members</p>
                 <p className="text-2xl font-bold text-purple-900 mt-1">
                   {subscription.adminUserCount || 0}
                   {!isUnlimited(subscription.maxAdminUsers) && (
@@ -398,7 +398,7 @@ This action cannot be undone automatically. Do you want to proceed?`;
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-sm">
                   <li>✓ 100 jobs per month</li>
-                  <li>✓ 3 admin users</li>
+                  <li>✓ 3 team members</li>
                   <li>✓ All core features</li>
                   <li>✓ Priority email support</li>
                   <li>✓ Advanced reporting</li>
@@ -428,7 +428,7 @@ This action cannot be undone automatically. Do you want to proceed?`;
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-sm">
                   <li>✓ Unlimited jobs</li>
-                  <li>✓ Unlimited admin users</li>
+                  <li>✓ Unlimited team members</li>
                   <li>✓ All features</li>
                   <li>✓ Priority support</li>
                   <li>✓ Dedicated account manager</li>

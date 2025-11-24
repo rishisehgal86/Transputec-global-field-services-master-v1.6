@@ -2325,3 +2325,7 @@ ns
 
 - [x] Fix account creation date showing N/A - ensure createdAt is returned from subscription.getStatus
 
+
+
+- [x] Rename 'Admin Users' to 'Service Delivery Team Members' throughout platform
+
