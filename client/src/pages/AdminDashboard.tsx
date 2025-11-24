@@ -171,6 +171,7 @@ export default function AdminDashboard() {
                     </span>
                   )}
                 </div>
+              </div>
               )}
             </div>
           </div>
