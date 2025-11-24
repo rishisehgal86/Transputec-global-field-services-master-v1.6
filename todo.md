@@ -2340,3 +2340,7 @@ ns
 
 - [x] Implement MySQL connection pool configuration to fix IO-layer timeout errors
 
+
+
+- [x] Fix 401 errors on subscription.getStatus causing slow page loads on signup page
+

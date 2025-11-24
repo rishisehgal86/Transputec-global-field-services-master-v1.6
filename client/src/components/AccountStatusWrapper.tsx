@@ -15,7 +15,12 @@ interface AccountStatusWrapperProps {
  * - Normal content for active paid accounts
  */
 export function AccountStatusWrapper({ children }: AccountStatusWrapperProps) {
-  const { data: status, isLoading } = trpc.subscription.getStatus.useQuery();
+  const { data: user } = trpc.auth.me.useQuery();
+  
+  // Skip subscription check for unauthenticated users (signup/login pages)
+  const { data: status, isLoading } = trpc.subscription.getStatus.useQuery(undefined, {
+    enabled: !!user?.organizationId,
+  });
 
   if (isLoading) {
     return (
