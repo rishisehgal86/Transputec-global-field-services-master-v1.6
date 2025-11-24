@@ -1,3 +1,17 @@
+#!/usr/bin/env node
+/**
+ * ⚠️⚠️⚠️ DESTRUCTIVE SCRIPT - DO NOT USE ON PRODUCTION ⚠️⚠️⚠️
+ * 
+ * This script DROPS ALL TABLES and DELETES ALL DATA!
+ * 
+ * Use this ONLY for:
+ * - Initial local development setup
+ * - Resetting local test database
+ * 
+ * For production migrations, use: pnpm db:migrate
+ * 
+ * ⚠️⚠️⚠️ YOU HAVE BEEN WARNED ⚠️⚠️⚠️
+ */
 import mysql from 'mysql2/promise';
 
 const DATABASE_URL = process.env.DATABASE_URL;
