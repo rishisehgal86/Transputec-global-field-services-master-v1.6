@@ -223,67 +223,47 @@ This action cannot be undone automatically. Do you want to proceed?`;
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Usage Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-4 border rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Briefcase className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Jobs This Month</p>
-                  <p className="text-2xl font-bold">
-                    {subscription.currentMonthJobCount}
-                    {!isUnlimited(subscription.monthlyJobLimit || 0) && (
-                      <span className="text-sm text-muted-foreground font-normal">
-                        {' '}/ {subscription.monthlyJobLimit}
-                      </span>
-                    )}
-                  </p>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Jobs This Month</p>
+                <p className="text-2xl font-bold text-blue-900 mt-1">
+                  {subscription.currentMonthJobCount}
+                  {!isUnlimited(subscription.monthlyJobLimit || 0) && (
+                    <span className="text-base text-blue-700 font-semibold">
+                      {' '}/ {subscription.monthlyJobLimit}
+                    </span>
+                  )}
+                </p>
               </div>
 
-              <div className="flex items-center gap-3 p-4 border rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Admin Users</p>
-                  <p className="text-2xl font-bold">
-                    {subscription.adminUserCount || 0}
-                    {!isUnlimited(subscription.maxAdminUsers) && (
-                      <span className="text-sm text-muted-foreground font-normal">
-                        {' '}/ {subscription.maxAdminUsers}
-                      </span>
-                    )}
-                  </p>
-                </div>
+              <div className="px-4 py-3 bg-purple-50 rounded-lg border border-purple-200">
+                <p className="text-[10px] font-medium text-purple-600 uppercase tracking-wide">Admin Users</p>
+                <p className="text-2xl font-bold text-purple-900 mt-1">
+                  {subscription.adminUserCount || 0}
+                  {!isUnlimited(subscription.maxAdminUsers) && (
+                    <span className="text-base text-purple-700 font-semibold">
+                      {' '}/ {subscription.maxAdminUsers}
+                    </span>
+                  )}
+                </p>
               </div>
 
-              <div className="flex items-center gap-3 p-4 border rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Billing Cycle</p>
-                  <p className="text-sm font-medium">
-                    {subscription.billingCycleEnd
-                      ? `Renews ${new Date(subscription.billingCycleEnd).toLocaleDateString()}`
-                      : 'N/A'}
-                  </p>
-                </div>
+              <div className="px-4 py-3 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-[10px] font-medium text-green-600 uppercase tracking-wide">Billing Cycle</p>
+                <p className="text-sm font-semibold text-green-900 mt-1">
+                  {subscription.billingCycleEnd
+                    ? `Renews ${new Date(subscription.billingCycleEnd).toLocaleDateString()}`
+                    : 'N/A'}
+                </p>
               </div>
               
-              <div className="flex items-center gap-3 p-4 border rounded-lg">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <CreditCard className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Account Created</p>
-                  <p className="text-sm font-medium">
-                    {subscription.createdAt
-                      ? new Date(subscription.createdAt).toLocaleDateString()
-                      : 'N/A'}
-                  </p>
-                </div>
+              <div className="px-4 py-3 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-[10px] font-medium text-slate-600 uppercase tracking-wide">Account Created</p>
+                <p className="text-sm font-semibold text-slate-900 mt-1">
+                  {subscription.createdAt
+                    ? new Date(subscription.createdAt).toLocaleDateString()
+                    : 'N/A'}
+                </p>
               </div>
             </div>
 

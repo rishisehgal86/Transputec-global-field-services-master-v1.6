@@ -2317,3 +2317,7 @@ ns
 - [x] Unify formatting between header badges (organization, trial, email) and trial/job count boxes
 - [x] Create consistent professional styling across all dashboard elements
 
+
+
+- [x] Standardize billing page formatting to match admin dashboard card-style design
+
