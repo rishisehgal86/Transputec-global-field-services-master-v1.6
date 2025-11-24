@@ -110,43 +110,57 @@ export default function AdminDashboard() {
             </div>
             
             {/* Organization & Admin Display */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {organization && (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-md border border-orange-200">
-                    <span className="text-xs font-medium text-orange-700">Organization:</span>
-                    <span className="text-sm font-semibold text-orange-900">{organization.name}</span>
+                  <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-[10px] font-medium text-slate-600 uppercase tracking-wide">Organization</p>
+                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{organization.name}</p>
                   </div>
                   {subscription && (
                     <Link href="/admin/billing">
-                      <Badge 
-                        variant={subscription.planTier === 'enterprise' ? 'default' : subscription.planTier === 'starter' ? 'secondary' : 'outline'}
-                        className={
-                          subscription.planTier === 'enterprise' 
-                            ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                      <div className={
+                        subscription.planTier === 'enterprise' 
+                          ? 'px-3 py-2 bg-purple-50 rounded-lg border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors'
+                          : subscription.planTier === 'starter'
+                          ? 'px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors'
+                          : 'px-3 py-2 bg-orange-50 rounded-lg border border-orange-200 cursor-pointer hover:bg-orange-100 transition-colors'
+                      }>
+                        <p className={
+                          subscription.planTier === 'enterprise'
+                            ? 'text-[10px] font-medium text-purple-600 uppercase tracking-wide'
                             : subscription.planTier === 'starter'
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer'
-                        }
-                      >
-                        {subscription.planTier === 'trial' ? '🎯 Trial' : 
-                         subscription.planTier === 'starter' ? '⭐ Starter' : 
-                         subscription.planTier === 'enterprise' ? '👑 Enterprise' : 
-                         subscription.planTier}
-                      </Badge>
+                            ? 'text-[10px] font-medium text-blue-600 uppercase tracking-wide'
+                            : 'text-[10px] font-medium text-orange-600 uppercase tracking-wide'
+                        }>Plan</p>
+                        <p className={
+                          subscription.planTier === 'enterprise'
+                            ? 'text-sm font-semibold text-purple-900 mt-0.5'
+                            : subscription.planTier === 'starter'
+                            ? 'text-sm font-semibold text-blue-900 mt-0.5'
+                            : 'text-sm font-semibold text-orange-900 mt-0.5'
+                        }>
+                          {subscription.planTier === 'trial' ? 'Trial' : 
+                           subscription.planTier === 'starter' ? 'Starter' : 
+                           subscription.planTier === 'enterprise' ? 'Enterprise' : 
+                           subscription.planTier}
+                        </p>
+                      </div>
                     </Link>
                   )}
                 </div>
               )}
               {user && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-md border border-gray-200">
-                  <span className="text-xs text-gray-600">{user.email}</span>
-                  {user.isPrimaryAdmin && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-medium">
-                      Primary Admin
-                    </span>
-                  )}
-                  {user.role === 'super_admin' && (
+                <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-[10px] font-medium text-slate-600 uppercase tracking-wide">Admin</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-sm font-semibold text-slate-900">{user.email}</p>
+                    {user.isPrimaryAdmin && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-medium">
+                        Primary
+                      </span>
+                    )}
+                    {user.role === 'super_admin' && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-600 text-white font-medium">
                       Super Admin
                     </span>
@@ -276,21 +290,21 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Manage and track all dispatch requests</p>
           </div>
           {subscription && subscription.monthlyJobLimit !== -1 && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Trial Days Remaining (if on trial) */}
               {subscription.planTier === 'trial' && subscription.trial?.daysRemaining !== null && (
-                <div className="text-right px-4 py-2 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-xs text-orange-700 font-medium">Trial Days Remaining</p>
-                  <p className="text-2xl font-bold text-orange-900">
+                <div className="px-4 py-3 bg-orange-50 rounded-lg border border-orange-200">
+                  <p className="text-[10px] font-medium text-orange-600 uppercase tracking-wide">Trial Days Remaining</p>
+                  <p className="text-2xl font-bold text-orange-900 mt-1">
                     {subscription.trial.daysRemaining}
                   </p>
                 </div>
               )}
               
               {/* Job Count */}
-              <div className="text-right px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs text-blue-700 font-medium">Jobs this month</p>
-                <p className="text-2xl font-bold text-blue-900">
+              <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wide">Jobs This Month</p>
+                <p className="text-2xl font-bold text-blue-900 mt-1">
                   {subscription.currentMonthJobCount} / {subscription.monthlyJobLimit}
                 </p>
               </div>
@@ -298,7 +312,7 @@ export default function AdminDashboard() {
               {/* Upgrade Button (if on trial) */}
               {subscription.planTier === 'trial' && (
                 <Link href="/admin/billing">
-                  <Button size="sm" className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold">
+                  <Button size="default" className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold px-6">
                     Upgrade Now
                   </Button>
                 </Link>
