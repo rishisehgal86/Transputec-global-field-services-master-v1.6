@@ -2344,3 +2344,7 @@ ns
 
 - [x] Fix 401 errors on subscription.getStatus causing slow page loads on signup page
 
+
+
+- [x] Fix 502 errors and TRPC transformation errors in job creation endpoint
+

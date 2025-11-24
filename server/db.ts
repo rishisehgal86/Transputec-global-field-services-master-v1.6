@@ -84,13 +84,13 @@ export async function createJob(job: InsertJob) {
     
     console.log('[DB] Job created with ID:', insertId);
     
-    await connection.end();
+    connection.release(); // Return connection to pool
     
     // Fetch and return the created job using Drizzle (SELECT is safe)
     const createdJob = await getJobById(insertId);
     return createdJob;
   } catch (error) {
-    await connection.end();
+    connection.release(); // Return connection to pool even on error
     console.error('[DB] Raw MySQL insert failed:', error);
     throw error;
   }
