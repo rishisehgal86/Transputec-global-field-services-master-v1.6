@@ -2607,11 +2607,32 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const { createUserInOrganization, getUserByEmail } = await import('./auth');
+        const { getOrganizationById } = await import('./organizations-db');
+        const { getAdminUserCount } = await import('./user-db');
         
         // Check if user already exists
         const existingUser = await getUserByEmail(input.email);
         if (existingUser) {
           throw new Error('User with this email already exists');
+        }
+        
+        // Get organization details to check admin user limit
+        const organization = await getOrganizationById(ctx.user.organizationId);
+        if (!organization) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
+        }
+        
+        // Check admin user limit (only for Professional plan, unlimited admins)
+        if (organization.planTier !== 'enterprise' && organization.planTier !== 'free_enterprise') {
+          const currentAdminCount = await getAdminUserCount(ctx.user.organizationId);
+          const maxAdmins = organization.maxAdminUsers || 1;
+          
+          if (currentAdminCount >= maxAdmins) {
+            throw new TRPCError({
+              code: 'FORBIDDEN',
+              message: `ADMIN_LIMIT_EXCEEDED: Your ${organization.planTier === 'trial' ? 'trial' : 'Scale'} plan allows ${maxAdmins} team member${maxAdmins > 1 ? 's' : ''}. Please upgrade to add more.`,
+            });
+          }
         }
         
         // Create user in the same organization as the admin creating them

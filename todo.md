@@ -2356,3 +2356,7 @@ ns
 
 - [x] Fix 'Unknown column createNewSite' error in job creation - exclude form-only fields from database insert
 
+
+
+- [x] Implement admin user limit enforcement in user creation endpoint
+
