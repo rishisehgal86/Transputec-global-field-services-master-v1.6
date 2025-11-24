@@ -43,7 +43,7 @@ export default function Home() {
       popular: false,
     },
     {
-      name: "Starter",
+      name: "Scale",
       price: "$99",
       period: "per month",
       description: "Ideal for small MSPs and growing teams",
@@ -61,7 +61,7 @@ export default function Home() {
       popular: true,
     },
     {
-      name: "Enterprise",
+      name: "Professional",
       price: "$399",
       period: "per month",
       description: "For large MSPs with unlimited needs",

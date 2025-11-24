@@ -141,8 +141,8 @@ export default function AdminDashboard() {
                             : 'text-sm font-semibold text-orange-900 mt-0.5'
                         }>
                           {subscription.planTier === 'trial' ? 'Trial' : 
-                           subscription.planTier === 'starter' ? 'Starter' : 
-                           subscription.planTier === 'enterprise' ? 'Enterprise' : 
+                           subscription.planTier === 'starter' ? 'Scale' : 
+                           subscription.planTier === 'enterprise' ? 'Professional' : 
                            subscription.planTier}
                         </p>
                       </div>

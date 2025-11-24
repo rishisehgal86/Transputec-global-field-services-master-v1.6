@@ -2348,3 +2348,7 @@ ns
 
 - [x] Fix 502 errors and TRPC transformation errors in job creation endpoint
 
+
+
+- [x] Fix plan tier display showing 'Starter' instead of 'Scale' throughout application
+
