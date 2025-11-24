@@ -2352,3 +2352,7 @@ ns
 
 - [x] Fix plan tier display showing 'Starter' instead of 'Scale' throughout application
 
+
+
+- [x] Fix 'Unknown column createNewSite' error in job creation - exclude form-only fields from database insert
+

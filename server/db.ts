@@ -61,14 +61,28 @@ export async function createJob(job: InsertJob) {
   const connection = await pool.getConnection();
   
   try {
+    // Whitelist of valid database columns
+    const validColumns = new Set([
+      'jobToken', 'organizationId', 'projectId', 'siteName', 'siteId', 'siteLocation',
+      'siteAddress', 'siteLatitude', 'siteLongitude', 'siteContactName', 'siteContactNumber',
+      'changeNumber', 'incidentNumber', 'projectName', 'downTime', 'scheduledDateTime',
+      'hoursRequired', 'bookingType', 'estimatedHours', 'estimatedDays', 'requestedStartDate',
+      'requestedStartTime', 'proposedStartDate', 'proposedStartTime', 'confirmedStartDate',
+      'confirmedStartTime', 'timeNegotiationNotes', 'toolsRequired', 'deviceDetails',
+      'incidentDetails', 'scopeOfWork', 'coveredByCOI', 'notes', 'videoConferenceLink',
+      'status', 'engineerName', 'engineerEmail', 'engineerPhone', 'timezone', 'acceptedAt',
+      'enRouteAt', 'arrivedAt', 'completedAt', 'cancelledAt', 'cancellationReason',
+      'cancelledBy', 'clientName', 'clientEmail', 'createdBy'
+    ]);
+    
     // Build the INSERT query dynamically based on provided fields
     const fields: string[] = [];
     const placeholders: string[] = [];
     const values: any[] = [];
     
-    // Add each field that has a value
+    // Add each field that has a value AND is a valid column
     Object.entries(job).forEach(([key, value]) => {
-      if (value !== undefined && value !== '' && value !== 'default') {
+      if (value !== undefined && value !== '' && value !== 'default' && validColumns.has(key)) {
         fields.push(`\`${key}\``);
         placeholders.push('?');
         values.push(value);
