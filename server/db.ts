@@ -1,14 +1,42 @@
-import { eq, desc, gte, lte, lt, and, or, sql } from "drizzle-orm";
+import { eq, desc, gte, lte, lt, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from 'mysql2/promise';
 import { InsertUser, users, jobs, jobLocations, jobStatusHistory, InsertJob, InsertJobLocation, InsertJobStatusHistory, svrMediaFiles, InsertSvrMediaFile, jobComments, InsertJobComment, organizations } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: mysql.Pool | null = null;
+
+// Create connection pool with proper timeout configuration
+export function getPool() {
+  if (!_pool && process.env.DATABASE_URL) {
+    try {
+      _pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        connectionLimit: 10,        // Max 10 concurrent connections
+        connectTimeout: 10000,      // 10s to establish connection
+        waitForConnections: true,   // Queue requests if pool full
+        queueLimit: 0,              // Unlimited queue (prevents errors)
+        idleTimeout: 60000,         // Close idle connections after 60s
+        enableKeepAlive: true,      // Prevent idle timeouts
+        keepAliveInitialDelay: 0,   // Start keepalive immediately
+      });
+      console.log('[Database] Connection pool created with 10 connections');
+    } catch (error) {
+      console.warn("[Database] Failed to create pool:", error);
+      _pool = null;
+    }
+  }
+  return _pool;
+}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const pool = getPool();
+      if (pool) {
+        _db = drizzle(pool);
+      }
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -28,8 +56,9 @@ export async function createJob(job: InsertJob) {
   console.log('[DB] createJob called with:', JSON.stringify(job, null, 2));
   
   // Use raw MySQL query to bypass Drizzle's "default" bug
-  const mysql = await import('mysql2/promise');
-  const connection = await mysql.createConnection(process.env.DATABASE_URL!);
+  const pool = getPool();
+  if (!pool) throw new Error("Database pool not available");
+  const connection = await pool.getConnection();
   
   try {
     // Build the INSERT query dynamically based on provided fields

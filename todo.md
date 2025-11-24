@@ -2334,6 +2334,9 @@ ns
 
 ## CRITICAL DEPLOYMENT FIXES
 - [x] Remove destructive database commands from scripts/start.sh (drops all tables on every deploy!)
-- [ ] Fix database connection timeout issues (IO-layer timeout errors in logs)
+- [x] Fix database connection timeout issues (IO-layer timeout errors in logs)
 - [x] Update deployment to use safe migrations only
+
+
+- [x] Implement MySQL connection pool configuration to fix IO-layer timeout errors
 
