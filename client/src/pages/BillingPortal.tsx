@@ -271,6 +271,20 @@ This action cannot be undone automatically. Do you want to proceed?`;
                   </p>
                 </div>
               </div>
+              
+              <div className="flex items-center gap-3 p-4 border rounded-lg">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Account Created</p>
+                  <p className="text-sm font-medium">
+                    {subscription.createdAt
+                      ? new Date(subscription.createdAt).toLocaleDateString()
+                      : 'N/A'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Action Buttons */}

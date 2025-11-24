@@ -2301,3 +2301,12 @@ ns
 - [ ] Fix banner styling to match size and formatting of other system banners
 - [ ] Test banner display on trial accounts
 
+
+
+
+## UI Formatting Improvements
+- [x] Remove trial countdown banner from top of page
+- [x] Add trial days remaining display next to job count in admin dashboard header
+- [x] Add "Upgrade Now" button next to trial days remaining
+- [x] Add account creation date to billing portal page
+

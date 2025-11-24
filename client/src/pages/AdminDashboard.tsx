@@ -276,11 +276,33 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Manage and track all dispatch requests</p>
           </div>
           {subscription && subscription.monthlyJobLimit !== -1 && (
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Jobs this month</p>
-              <p className="text-2xl font-bold text-foreground">
-                {subscription.currentMonthJobCount} / {subscription.monthlyJobLimit}
-              </p>
+            <div className="flex items-center gap-4">
+              {/* Trial Days Remaining (if on trial) */}
+              {subscription.planTier === 'trial' && subscription.trial?.daysRemaining !== null && (
+                <div className="text-right px-4 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-xs text-orange-700 font-medium">Trial Days Remaining</p>
+                  <p className="text-2xl font-bold text-orange-900">
+                    {subscription.trial.daysRemaining}
+                  </p>
+                </div>
+              )}
+              
+              {/* Job Count */}
+              <div className="text-right px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-700 font-medium">Jobs this month</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {subscription.currentMonthJobCount} / {subscription.monthlyJobLimit}
+                </p>
+              </div>
+              
+              {/* Upgrade Button (if on trial) */}
+              {subscription.planTier === 'trial' && (
+                <Link href="/admin/billing">
+                  <Button size="sm" className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold">
+                    Upgrade Now
+                  </Button>
+                </Link>
+              )}
             </div>
           )}
         </div>

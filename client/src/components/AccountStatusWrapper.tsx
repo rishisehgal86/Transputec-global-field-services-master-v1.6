@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { trpc } from "@/lib/trpc";
 import { DisabledAccountOverlay } from "./DisabledAccountOverlay";
-import { TrialCountdownBanner } from "./TrialCountdownBanner";
+// TrialCountdownBanner import removed - now displayed inline in admin dashboard
 import { Loader2 } from "lucide-react";
 
 interface AccountStatusWrapperProps {
@@ -54,24 +54,7 @@ export function AccountStatusWrapper({ children }: AccountStatusWrapperProps) {
     );
   }
 
-  // Show trial countdown for active trial users (always show from day 1)
-  const showTrialBanner = 
-    status.trial?.isOnTrial && 
-    !status.trial?.isExpired && 
-    status.trial?.daysRemaining !== null; // Show for entire trial period
-
-  return (
-    <>
-      {showTrialBanner && status.trial?.daysRemaining !== null && status.trialEndsAt && (
-        <div className="sticky top-0 z-40">
-          <TrialCountdownBanner 
-            daysRemaining={status.trial.daysRemaining}
-            trialEndsAt={new Date(status.trialEndsAt)}
-          />
-        </div>
-      )}
-      {children}
-    </>
-  );
+  // Trial banner removed - now shown inline in admin dashboard header
+  return <>{children}</>;
 }
 
