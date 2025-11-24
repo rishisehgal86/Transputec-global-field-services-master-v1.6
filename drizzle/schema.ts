@@ -20,7 +20,7 @@ export const organizations = mysqlTable("organizations", {
   planTier: mysqlEnum("planTier", ["trial", "starter", "enterprise", "free_enterprise"]).default("trial"),
   monthlyJobLimit: int("monthlyJobLimit").default(50), // 50 for trial, 100 for starter, NULL for enterprise
   currentMonthJobCount: int("currentMonthJobCount").default(0).notNull(),
-  maxAdminUsers: int("maxAdminUsers").default(999).notNull(), // 3 for starter, 999 for others
+  maxAdminUsers: int("maxAdminUsers").default(1).notNull(), // 1 for trial, 3 for starter, unlimited for enterprise
   billingCycleStart: timestamp("billingCycleStart"),
   billingCycleEnd: timestamp("billingCycleEnd"),
   cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").default(false).notNull(), // Stripe cancel_at_period_end flag

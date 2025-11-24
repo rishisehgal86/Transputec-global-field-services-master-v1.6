@@ -2281,3 +2281,23 @@ ns
 - [ ] Investigate why Railway isn't deploying latest code changes
 - [ ] Test subscription upgrade flow end-to-end after fix
 
+
+
+
+## Harden Trial Usage Limits
+- [ ] Audit current limit enforcement for job creation
+- [ ] Audit current limit enforcement for admin user creation
+- [ ] Implement strict backend checks for monthly job limit
+- [ ] Implement strict backend checks for max admin users limit
+- [ ] Add user-facing warnings when approaching limits (80%, 90%, 100%)
+- [ ] Add upgrade prompts when limits are reached
+- [ ] Test limit enforcement with trial accounts
+
+
+
+
+## Fix Trial Countdown Banner
+- [ ] Update TrialCountdownBanner to show from day 1 (not just ≤7 days)
+- [ ] Fix banner styling to match size and formatting of other system banners
+- [ ] Test banner display on trial accounts
+

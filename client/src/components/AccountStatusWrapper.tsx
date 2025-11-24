@@ -54,23 +54,20 @@ export function AccountStatusWrapper({ children }: AccountStatusWrapperProps) {
     );
   }
 
-  // Show trial countdown for active trial users
+  // Show trial countdown for active trial users (always show from day 1)
   const showTrialBanner = 
     status.trial?.isOnTrial && 
     !status.trial?.isExpired && 
-    status.trial?.daysRemaining !== null &&
-    status.trial?.daysRemaining <= 7; // Show when 7 days or less remaining
+    status.trial?.daysRemaining !== null; // Show for entire trial period
 
   return (
     <>
       {showTrialBanner && status.trial?.daysRemaining !== null && status.trialEndsAt && (
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container py-2">
-            <TrialCountdownBanner 
-              daysRemaining={status.trial.daysRemaining}
-              trialEndsAt={new Date(status.trialEndsAt)}
-            />
-          </div>
+        <div className="sticky top-0 z-40">
+          <TrialCountdownBanner 
+            daysRemaining={status.trial.daysRemaining}
+            trialEndsAt={new Date(status.trialEndsAt)}
+          />
         </div>
       )}
       {children}
