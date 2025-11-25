@@ -317,9 +317,11 @@ ns
 - [x] Update CSS variables for dark theme colors
 
 ### 1.2 Quick Filters on Dashboard
-- [ ] Add filter state management to dashboard
-- [ ] Create filter chip components
-- [ ] Implement backend query filters (today, urgent, overdue, pending, in_progress)
+- [x] Add filter state management to dashboard
+- [x] Create filter chip components
+- [x] Implement backend query filters (today, urgent, overdue, pending, in_progress)
+- [x] Fix Today filter timezone issue (use UTC midnight)
+- [x] Fix Overdue filter false positives (check scheduledDateTime)
 - [ ] Add URL query params for shareable filters
 
 ### 1.3 Job Duplication Feature
@@ -354,7 +356,7 @@ ns
 
 
 
-- [ ] Fix job filter categorization logic - investigate and correct miscategorization issues
+- [x] Fix job filter categorization logic - timezone issues and false positives resolved
 - [x] Fix job duplication to pre-fill form with original job data instead of showing empty form
 
 

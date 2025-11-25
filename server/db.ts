@@ -296,7 +296,8 @@ export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "
   if (!db) throw new Error("Database not available");
   
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Get UTC midnight for today to properly filter jobs created today
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   
   switch (filter) {
     case "today":
@@ -312,13 +313,19 @@ export async function getFilteredJobs(filter: "today" | "urgent" | "overdue" | "
         .orderBy(desc(jobs.createdAt));
     
     case "overdue":
-      // Jobs that are older than 24 hours and not completed/cancelled
+      // Jobs where scheduledDateTime has passed and not completed/cancelled
       const allJobs = await db.select().from(jobs).orderBy(desc(jobs.createdAt));
-      return allJobs.filter(job => 
-        job.status !== "completed" && 
-        job.status !== "cancelled" &&
-        job.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
-      );
+      return allJobs.filter(job => {
+        if (job.status === "completed" || job.status === "cancelled") {
+          return false;
+        }
+        // Only consider overdue if scheduledDateTime exists and has passed
+        if (job.scheduledDateTime) {
+          return new Date(job.scheduledDateTime) < now;
+        }
+        // If no scheduled time, fall back to 24 hours from creation
+        return job.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000);
+      });
     
     case "pending":
       // Jobs with status "pending_approval" or "created"
@@ -347,7 +354,8 @@ export async function getFilteredJobsByOrganization(filter: "today" | "urgent" |
   if (!db) throw new Error("Database not available");
   
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Get UTC midnight for today to properly filter jobs created today
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   
   switch (filter) {
     case "today":
@@ -363,15 +371,21 @@ export async function getFilteredJobsByOrganization(filter: "today" | "urgent" |
         .orderBy(desc(jobs.createdAt));
     
     case "overdue":
-      // Jobs that are older than 24 hours and not completed/cancelled for this organization
+      // Jobs where scheduledDateTime has passed and not completed/cancelled for this organization
       const allJobs = await db.select().from(jobs)
         .where(eq(jobs.organizationId, organizationId))
         .orderBy(desc(jobs.createdAt));
-      return allJobs.filter(job => 
-        job.status !== "completed" && 
-        job.status !== "cancelled" &&
-        job.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
-      );
+      return allJobs.filter(job => {
+        if (job.status === "completed" || job.status === "cancelled") {
+          return false;
+        }
+        // Only consider overdue if scheduledDateTime exists and has passed
+        if (job.scheduledDateTime) {
+          return new Date(job.scheduledDateTime) < now;
+        }
+        // If no scheduled time, fall back to 24 hours from creation
+        return job.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000);
+      });
     
     case "pending":
       // Jobs with status "pending_approval" or "created" for this organization
@@ -404,7 +418,8 @@ export async function getJobFilterCounts() {
   if (!db) throw new Error("Database not available");
   
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Get UTC midnight for today to properly filter jobs created today
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
   // Get all jobs and filter in memory
@@ -413,11 +428,17 @@ export async function getJobFilterCounts() {
   return {
     today: allJobs.filter(job => job.createdAt >= todayStart).length,
     urgent: allJobs.filter(job => job.downTime === true).length,
-    overdue: allJobs.filter(job => 
-      job.status !== "completed" && 
-      job.status !== "cancelled" &&
-      job.createdAt < oneDayAgo
-    ).length,
+    overdue: allJobs.filter(job => {
+      if (job.status === "completed" || job.status === "cancelled") {
+        return false;
+      }
+      // Only consider overdue if scheduledDateTime exists and has passed
+      if (job.scheduledDateTime) {
+        return new Date(job.scheduledDateTime) < now;
+      }
+      // If no scheduled time, fall back to 24 hours from creation
+      return job.createdAt < oneDayAgo;
+    }).length,
     pending: allJobs.filter(job => 
       job.status === "pending_approval" || job.status === "created"
     ).length,
@@ -435,7 +456,8 @@ export async function getJobFilterCountsByOrganization(organizationId: number) {
   if (!db) throw new Error("Database not available");
   
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Get UTC midnight for today to properly filter jobs created today
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
   // Get all jobs for this organization and filter in memory
@@ -445,11 +467,17 @@ export async function getJobFilterCountsByOrganization(organizationId: number) {
   return {
     today: allJobs.filter(job => job.createdAt >= todayStart).length,
     urgent: allJobs.filter(job => job.downTime === true).length,
-    overdue: allJobs.filter(job => 
-      job.status !== "completed" && 
-      job.status !== "cancelled" &&
-      job.createdAt < oneDayAgo
-    ).length,
+    overdue: allJobs.filter(job => {
+      if (job.status === "completed" || job.status === "cancelled") {
+        return false;
+      }
+      // Only consider overdue if scheduledDateTime exists and has passed
+      if (job.scheduledDateTime) {
+        return new Date(job.scheduledDateTime) < now;
+      }
+      // If no scheduled time, fall back to 24 hours from creation
+      return job.createdAt < oneDayAgo;
+    }).length,
     pending: allJobs.filter(job => 
       job.status === "pending_approval" || job.status === "created"
     ).length,
