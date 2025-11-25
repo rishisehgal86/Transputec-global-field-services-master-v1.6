@@ -1,0 +1,15 @@
+# Robots.txt for FieldPulse Field Service Platform
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /request/
+Disallow: /project-request/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://field-pulse.io/sitemap.xml
+
+# Crawl delay (optional, in seconds)
+Crawl-delay: 1
+

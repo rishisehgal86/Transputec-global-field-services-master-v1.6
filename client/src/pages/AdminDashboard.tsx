@@ -14,6 +14,8 @@ import { ExportJobsDialog } from "@/components/ExportJobsDialog";
 import { UsageWarningBanner } from "@/components/UsageWarningBanner";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -94,7 +96,15 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title="Admin Dashboard"
+        description="Manage field service jobs, dispatch engineers, and track service delivery in real-time."
+        noindex={true} // Admin pages should not be indexed
+      />
+      <StructuredData type="organization" />
+      
+      <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-background sticky top-0 z-10 shadow-sm overflow-x-hidden">
         <div className="container mx-auto px-4 py-4 max-w-full overflow-x-hidden">
@@ -568,6 +578,7 @@ export default function AdminDashboard() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 

@@ -11,9 +11,19 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { estimateTimezoneFromLongitude, getTimezoneAbbreviation, getTimezoneOffset, formatInUTC, convertLocalTimeToUTC, getUTCPreviewText } from "@/lib/timezone";
 
 export default function RequestService({ projectId, project, organizationId }: { projectId?: string; project?: any; organizationId?: number }) {
+  // SEO metadata
+  const pageTitle = project?.name 
+    ? `Request Service - ${project.name}` 
+    : "Request Field Service";
+  const pageDescription = project?.description 
+    ? `Submit a service request for ${project.name}. ${project.description}` 
+    : "Submit a field service request. Our team will dispatch a qualified engineer to your location.";
+
   const [searching, setSearching] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
@@ -273,7 +283,22 @@ export default function RequestService({ projectId, project, organizationId }: {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title={pageTitle}
+        description={pageDescription}
+        keywords={[
+          "field service request",
+          "engineer dispatch",
+          "service booking",
+          "maintenance request",
+          "technical support"
+        ]}
+        noindex={true} // Request forms should not be indexed
+      />
+      <StructuredData type="service" />
+      
+      <div className="min-h-screen bg-background">
       <header className="border-b bg-background shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
@@ -951,6 +976,7 @@ export default function RequestService({ projectId, project, organizationId }: {
         </Card>
       </main>
     </div>
+    </>
   );
 }
 
