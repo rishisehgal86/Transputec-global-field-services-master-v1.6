@@ -2382,3 +2382,12 @@ ns
 - [x] Test on tablet devices (768px - 1024px) - smooth transitions
 - [x] Test on desktop (> 1024px) - original layout preserved
 
+
+
+
+## Tenant Management - Subscription Display (Nov 25, 2025)
+- [x] Update backend tenant list query to include subscription plan data
+- [x] Update TenantManagement page to display subscription tier column
+- [x] Show Trial/Scale/Professional badges with appropriate styling
+- [x] Test subscription display with different plan tiers
+

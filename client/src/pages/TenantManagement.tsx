@@ -257,7 +257,19 @@ export default function TenantManagement() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{org.subscriptionStatus || "trial"}</Badge>
+                    {org.planTier === 'enterprise' ? (
+                      <Badge className="bg-purple-100 text-purple-800 border-purple-300">
+                        Professional
+                      </Badge>
+                    ) : org.planTier === 'starter' ? (
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                        Scale
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-300">
+                        Trial
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span className="text-sm font-medium">{org.projectCount || 0}</span>
