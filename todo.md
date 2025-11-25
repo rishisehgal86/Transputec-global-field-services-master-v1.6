@@ -2414,3 +2414,12 @@ ns
 
 - [x] Add SEO components to AdminDashboard, RequestService, UserManagement, TenantManagement, and Projects pages
 
+
+
+
+## RequestService Form - Conditional Project Code (Nov 25, 2025)
+- [x] Add "Do you have a project code?" question to RequestService form
+- [x] Show project code input field only when user selects "Yes"
+- [x] Update form validation to handle conditional project code
+- [x] Test form submission with and without project code
+

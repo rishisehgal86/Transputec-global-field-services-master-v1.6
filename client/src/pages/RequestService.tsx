@@ -44,6 +44,7 @@ export default function RequestService({ projectId, project, organizationId }: {
   const [estimatedDays, setEstimatedDays] = useState<string>("");
   const [requestedStartTime, setRequestedStartTime] = useState<string>("");
   const [isTimeFlexible, setIsTimeFlexible] = useState<boolean>(false);
+  const [hasProjectCode, setHasProjectCode] = useState<boolean | null>(null);
   
   // Fetch project sites after verification or if provided via URL
   const effectiveProjectId = manualProjectId && projectValid ? manualProjectId : projectId;
@@ -857,46 +858,81 @@ export default function RequestService({ projectId, project, organizationId }: {
                   <Input id="projectName" name="projectName" placeholder="Network Upgrade Project" />
                 </div>
 
-                {/* Project ID Field (only show if not already provided via URL) */}
+                {/* Project Code Question (only show if not already provided via URL) */}
                 {!projectId && (
-                  <div>
-                    <Label htmlFor="manualProjectId">Project ID (Optional)</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        id="manualProjectId" 
-                        value={manualProjectId}
-                        onChange={(e) => {
-                          setManualProjectId(e.target.value.toUpperCase());
-                          setProjectValid(null);
-                        }}
-                        placeholder="e.g., PROJ-001" 
-                        className={projectValid === false ? "border-red-500" : projectValid === true ? "border-green-500" : ""}
-                      />
-                      {manualProjectId && (
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Do you have a specific project code?</Label>
+                      <div className="flex gap-4 mt-2">
                         <Button
                           type="button"
-                          variant="outline"
+                          variant={hasProjectCode === true ? "default" : "outline"}
                           onClick={() => {
-                            setVerifyingProject(true);
-                            verifyProjectMutation.mutate({ projectId: manualProjectId });
+                            setHasProjectCode(true);
+                            setManualProjectId("");
+                            setProjectValid(null);
                           }}
-                          disabled={verifyingProject}
+                          className="flex-1"
                         >
-                          {verifyingProject ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : projectValid ? (
-                            <Check className="h-4 w-4 text-green-600" />
-                          ) : (
-                            "Verify"
-                          )}
+                          Yes
                         </Button>
-                      )}
+                        <Button
+                          type="button"
+                          variant={hasProjectCode === false ? "default" : "outline"}
+                          onClick={() => {
+                            setHasProjectCode(false);
+                            setManualProjectId("");
+                            setProjectValid(null);
+                          }}
+                          className="flex-1"
+                        >
+                          No
+                        </Button>
+                      </div>
                     </div>
-                    {projectValid === false && (
-                      <p className="text-xs text-red-600 mt-1">Invalid project ID</p>
-                    )}
-                    {projectValid === true && (
-                      <p className="text-xs text-green-600 mt-1">Project ID verified</p>
+
+                    {/* Show Project ID input only if user selected Yes */}
+                    {hasProjectCode === true && (
+                      <div>
+                        <Label htmlFor="manualProjectId">Project Code</Label>
+                        <div className="flex gap-2">
+                          <Input 
+                            id="manualProjectId" 
+                            value={manualProjectId}
+                            onChange={(e) => {
+                              setManualProjectId(e.target.value.toUpperCase());
+                              setProjectValid(null);
+                            }}
+                            placeholder="e.g., BRAMBLES" 
+                            className={projectValid === false ? "border-red-500" : projectValid === true ? "border-green-500" : ""}
+                          />
+                          {manualProjectId && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => {
+                                setVerifyingProject(true);
+                                verifyProjectMutation.mutate({ projectId: manualProjectId });
+                              }}
+                              disabled={verifyingProject}
+                            >
+                              {verifyingProject ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : projectValid ? (
+                                <Check className="h-4 w-4 text-green-600" />
+                              ) : (
+                                "Verify"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        {projectValid === false && (
+                          <p className="text-xs text-red-600 mt-1">Invalid project code. Please check and try again.</p>
+                        )}
+                        {projectValid === true && (
+                          <p className="text-xs text-green-600 mt-1">✓ Project code verified</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
