@@ -11,6 +11,8 @@ import { Loader2, UserPlus, Key, Shield, User, Mail, Trash2, CheckCircle2, Send 
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { LogoImage } from "@/components/LogoImage";
 
 export default function UserManagement() {
@@ -135,7 +137,15 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title="User Management"
+        description="Manage admin users and permissions for your organization."
+        noindex={true}
+      />
+      <StructuredData type="organization" />
+      
+      <div className="min-h-screen bg-background">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 overflow-x-hidden">
         <div className="container mx-auto max-w-full overflow-x-hidden">
           <div className="flex items-center justify-between px-4 py-3 gap-3">
@@ -451,6 +461,7 @@ export default function UserManagement() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 

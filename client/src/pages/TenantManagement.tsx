@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Building2, Plus, Users, Trash2, Edit, Ban, CheckCircle } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { Badge } from "@/components/ui/badge";
 import { useLocation, Link } from "wouter";
 
@@ -142,7 +144,15 @@ export default function TenantManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEO 
+        title="Tenant Management"
+        description="Manage all organizations and tenants in the system."
+        noindex={true}
+      />
+      <StructuredData type="organization" />
+      
+      <div className="min-h-screen bg-background">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto">
           <div className="flex items-center justify-between h-16 px-4">
@@ -429,6 +439,7 @@ export default function TenantManagement() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
 

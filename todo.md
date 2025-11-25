@@ -2411,3 +2411,6 @@ ns
 - [ ] Validate structured data with Google Rich Results Test
 - [ ] Review and merge to main after user approval
 
+
+- [x] Add SEO components to AdminDashboard, RequestService, UserManagement, TenantManagement, and Projects pages
+

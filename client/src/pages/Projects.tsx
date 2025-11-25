@@ -20,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ProjectSites from "@/components/ProjectSites";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 export default function Projects() {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -117,7 +119,15 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEO 
+        title="Projects"
+        description="Manage project-based job assignments and client portals."
+        noindex={true}
+      />
+      <StructuredData type="organization" />
+      
+      <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10 overflow-x-hidden">
         <div className="container mx-auto max-w-full overflow-x-hidden">
@@ -630,6 +640,7 @@ export default function Projects() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 
