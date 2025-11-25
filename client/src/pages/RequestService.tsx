@@ -361,8 +361,44 @@ export default function RequestService({ projectId, project, organizationId }: {
                     <h3 className="text-lg font-semibold">Specific Project Assignment (Optional)</h3>
                     <p className="text-sm text-muted-foreground mt-1">Use this to assign your request to a specific pre-existing project</p>
                   </div>
+                  
+                  {/* Question: Do you have a project code? */}
                   <div>
-                    <Label htmlFor="manualProjectId">Project ID</Label>
+                    <Label>Do you have a specific project code?</Label>
+                    <div className="flex gap-4 mt-2">
+                      <Button
+                        type="button"
+                        variant={hasProjectCode === true ? "default" : "outline"}
+                        onClick={() => {
+                          setHasProjectCode(true);
+                          setManualProjectId("");
+                          setProjectValid(null);
+                        }}
+                        className="flex-1"
+                      >
+                        Yes
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={hasProjectCode === false ? "default" : "outline"}
+                        onClick={() => {
+                          setHasProjectCode(false);
+                          setManualProjectId("");
+                          setProjectValid(null);
+                          setSiteSelectionMode(null);
+                          setSelectedProjectSite(null);
+                        }}
+                        className="flex-1"
+                      >
+                        No
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Show Project ID input only if user selected Yes */}
+                  {hasProjectCode === true && (
+                  <div>
+                    <Label htmlFor="manualProjectId">Project Code</Label>
                     <div className="flex gap-2">
                       <Input
                         id="manualProjectId"
@@ -371,7 +407,7 @@ export default function RequestService({ projectId, project, organizationId }: {
                           setManualProjectId(e.target.value.toUpperCase());
                           setProjectValid(null);
                         }}
-                        placeholder="Enter Project Name for Specific Project Tickets"
+                        placeholder="ENTER PROJECT NAME FOR SPECIFIC PROJECT TICKETS"
                         className="uppercase"
                       />
                       <Button
@@ -394,6 +430,10 @@ export default function RequestService({ projectId, project, organizationId }: {
                         )}
                       </Button>
                     </div>
+                    {projectValid === false && (
+                      <p className="text-xs text-red-600 mt-1">Invalid project code. Please check and try again.</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">If you have a project ID, enter it above and click Verify. Leave blank if not applicable.</p>
                     {projectValid === true && (
                       <>
                         <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -491,17 +531,8 @@ export default function RequestService({ projectId, project, organizationId }: {
                         </div>
                       </>
                     )}
-                    {projectValid === false && (
-                      <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm font-medium text-red-900">
-                          Invalid project ID. Please check and try again.
-                        </p>
-                      </div>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      If you have a project ID, enter it above and click Verify. Leave blank if not applicable.
-                    </p>
                   </div>
+                  )}
                 </div>
               )}
 
