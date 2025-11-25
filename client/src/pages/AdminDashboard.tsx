@@ -2,8 +2,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen, Building2, CreditCard } from "lucide-react";
+import { Loader2, Plus, ExternalLink, MapPin, Users, LogOut, FolderOpen, Building2, CreditCard, Menu } from "lucide-react";
 import { LogoImage } from "@/components/LogoImage";
 import { CompactDualTime } from "@/components/DualTimeDisplay";
 import { Link, useLocation } from "wouter";
@@ -95,10 +96,10 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b bg-background sticky top-0 z-10 shadow-sm overflow-x-hidden">
+        <div className="container mx-auto px-4 py-4 max-w-full overflow-x-hidden">
           {/* Top Row: Logo, Title, Organization */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div className="flex items-center gap-4">
               <Link href="/">
                 <LogoImage className="h-12 cursor-pointer hover:opacity-80 transition-opacity" />
@@ -110,12 +111,12 @@ export default function AdminDashboard() {
             </div>
             
             {/* Organization & Admin Display */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap max-w-full">
               {organization && (
                 <div className="flex items-center gap-2">
-                  <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 max-w-full overflow-hidden">
                     <p className="text-[10px] font-medium text-slate-600 uppercase tracking-wide">Organization</p>
-                    <p className="text-sm font-semibold text-slate-900 mt-0.5">{organization.name}</p>
+                    <p className="text-sm font-semibold text-slate-900 mt-0.5 truncate">{organization.name}</p>
                   </div>
                   {subscription && (
                     <Link href="/admin/billing">
@@ -151,10 +152,10 @@ export default function AdminDashboard() {
                 </div>
               )}
               {user && (
-                <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200 max-w-full overflow-hidden">
                   <p className="text-[10px] font-medium text-slate-600 uppercase tracking-wide">Admin</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-sm font-semibold text-slate-900">{user.email}</p>
+                    <span className="text-sm font-semibold text-slate-900 truncate max-w-[150px]">{user.email}</span>
                     {user.isPrimaryAdmin && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600 text-white font-medium">
                         Primary
@@ -177,7 +178,69 @@ export default function AdminDashboard() {
           </div>
           
           {/* Bottom Row: Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Mobile Menu - Dropdown */}
+          <div className="md:hidden flex items-center gap-2">
+            <Link href="/admin/create">
+              <Button size="default" className="bg-orange-600 hover:bg-orange-700">
+                <Plus className="h-4 w-4 mr-2" />
+                New Job
+              </Button>
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href={organization?.slug ? `/request/${organization.slug}` : "#"} className="flex items-center cursor-pointer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Public Job Form
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/projects" className="flex items-center cursor-pointer">
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    Manage Projects
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/billing" className="flex items-center cursor-pointer">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Billing
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/users" className="flex items-center cursor-pointer">
+                    <Users className="h-4 w-4 mr-2" />
+                    User Management
+                  </Link>
+                </DropdownMenuItem>
+                {user?.role === 'super_admin' && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/tenants" className="flex items-center cursor-pointer">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Tenant Management
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
+                  {logoutMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <LogOut className="h-4 w-4 mr-2" />
+                  )}
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Desktop Menu - Full Buttons */}
+          <div className="hidden md:flex flex-wrap items-center gap-2 max-w-full overflow-x-auto">
             {/* Primary Actions Group */}
             <div className="flex items-center gap-2 pr-3 border-r border-border">
               <Link href="/admin/create">
@@ -275,7 +338,8 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="px-4 py-8 w-full">
+        <div className="max-w-7xl mx-auto">
         {/* Usage Warning Banner */}
         {subscription && (
           <UsageWarningBanner
@@ -501,6 +565,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         )}
+        </div>
       </main>
     </div>
   );

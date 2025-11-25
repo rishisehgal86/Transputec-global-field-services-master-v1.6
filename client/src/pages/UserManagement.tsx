@@ -136,23 +136,24 @@ export default function UserManagement() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 overflow-x-hidden">
+        <div className="container mx-auto max-w-full overflow-x-hidden">
+          <div className="flex items-center justify-between px-4 py-3 gap-3">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
               <Link href="/admin">
                 <Button variant="ghost" size="sm">← Back to Dashboard</Button>
               </Link>
-              <div>
+              <div className="hidden sm:block min-w-0">
                 <h1 className="text-xl font-bold">User Management</h1>
-                <p className="text-sm text-gray-600">Manage service delivery team members and change your password</p>
+                <p className="text-sm text-gray-600 truncate">Manage service delivery team members and change your password</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="px-4 py-8 w-full">
+        <div className="max-w-7xl mx-auto">
 
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           {/* Change Password Card */}
@@ -359,14 +360,14 @@ export default function UserManagement() {
                 users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-background transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-background transition-colors max-w-full overflow-hidden gap-3"
                   >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <div className="flex items-center gap-3 flex-1 min-w-0 w-full">
+                      <div className="h-10 w-10 flex-shrink-0 rounded-full bg-blue-100 flex items-center justify-center">
                         <User className="h-5 w-5 text-blue-600" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{user.name}</h3>
                           {user.role === "super_admin" && (
                             <Badge variant="default" className="bg-purple-600">
@@ -394,9 +395,9 @@ export default function UserManagement() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 min-w-0">
                           <Mail className="h-3 w-3" />
-                          {user.email}
+                          <span className="truncate">{user.email}</span>
                         </div>
                         {user.lastLogin && (
                           <p className="text-xs text-gray-500 mt-1">
@@ -405,7 +406,7 @@ export default function UserManagement() {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -447,6 +448,7 @@ export default function UserManagement() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </main>
     </div>
   );

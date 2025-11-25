@@ -119,16 +119,16 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center gap-4">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 overflow-x-hidden">
+        <div className="container mx-auto max-w-full overflow-x-hidden">
+          <div className="flex items-center justify-between px-4 py-3 gap-3">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
               <Link href="/admin">
                 <Button variant="ghost" size="sm">← Back to Dashboard</Button>
               </Link>
-              <div>
+              <div className="hidden sm:block min-w-0">
                 <h1 className="text-xl font-bold">Projects</h1>
-                <p className="text-sm text-gray-600">Manage project-based job assignments</p>
+                <p className="text-sm text-gray-600 truncate">Manage project-based job assignments</p>
               </div>
             </div>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -228,7 +228,8 @@ export default function Projects() {
       </header>
 
       {/* Content */}
-      <main className="container mx-auto p-6">
+      <main className="p-4 md:p-6 w-full">
+        <div className="max-w-7xl mx-auto">
         {/* Permanent Summary Section - Always Visible */}
         <Card className="mb-6 border-primary/20 bg-primary/5">
           <CardHeader>
@@ -491,20 +492,38 @@ export default function Projects() {
               .map((project) => (
               <Card key={project.id}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2">
-                        <FolderOpen className="h-5 w-5" />
-                        {project.name}
-                        <Badge variant="outline">{project.projectId}</Badge>
-                        {!project.isActive && <Badge variant="secondary">Inactive</Badge>}
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 max-w-full overflow-hidden">
+                    <div className="flex-1 min-w-0 w-full">
+                      <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <FolderOpen className="h-5 w-5" />
+                          <span>{project.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline">{project.projectId}</Badge>
+                          {!project.isActive && <Badge variant="secondary">Inactive</Badge>}
+                        </div>
                       </CardTitle>
                       {project.description && (
                         <CardDescription className="mt-2">{project.description}</CardDescription>
                       )}
-                      <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      {/* Mobile: Just copy button with full label */}
+                      <div className="mt-3 md:hidden">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyProjectLink(project.projectId)}
+                          className="w-full text-xs"
+                        >
+                          <Copy className="h-3 w-3 mr-2" />
+                          Project Specific Despatch Request Link
+                        </Button>
+                      </div>
+
+                      {/* Desktop: Full URL display */}
+                      <div className="mt-3 hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                         <span className="font-medium">Project Specific Despatch Request Link:</span>
-                        <code className="px-2 py-1 bg-muted rounded text-xs">
+                        <code className="px-2 py-1 bg-muted rounded text-xs break-all">
                           {window.location.origin}/project-request/{project.projectId}
                         </code>
                         <Button
@@ -518,7 +537,7 @@ export default function Projects() {
                         </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0 w-full md:w-auto justify-end">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -560,7 +579,7 @@ export default function Projects() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     {project.clientName && (
                       <div>
                         <div className="text-gray-500">Client</div>
@@ -608,6 +627,7 @@ export default function Projects() {
             </CardContent>
           </Card>
         )}
+        </div>
       </main>
     </div>
   );
